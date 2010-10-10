@@ -1,6 +1,7 @@
 2010-10-10	Stephan Linz <linz@li-pro.net>
 
 	* common: initial import in git and first light on http://gitorious.org/oselas
+	* git: add more patterns to .gitignore
 
 2010-09-11	Stephan Linz <linz@li-pro.net>
 
