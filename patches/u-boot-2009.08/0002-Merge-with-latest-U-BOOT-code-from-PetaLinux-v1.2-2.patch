@@ -1,0 +1,1302 @@
+From 61d4c7807eb18066199c5526afab19d974464171 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Mon, 21 Jun 2010 22:14:27 +0200
+Subject: [PATCH] Merge with latest U-BOOT code from PetaLinux v1.2 (2009.08-rc2)
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ cpu/microblaze/interrupts.c                        |   34 +--
+ cpu/microblaze/irq.S                               |  182 ++++-------
+ cpu/microblaze/timer.c                             |    3 +-
+ drivers/mtd/spi/Makefile                           |    1 +
+ drivers/mtd/spi/spi_flash.c                        |    5 +
+ drivers/mtd/spi/winbond.c                          |  346 ++++++++++++++++++++
+ drivers/spi/Makefile                               |    1 +
+ drivers/spi/xilinx_spi.c                           |  256 +++++++++++++++
+ .../configs/petalogix-microblaze-auto.h.template   |   75 ++++-
+ lib_microblaze/board.c                             |   23 ++-
+ lib_microblaze/bootm.c                             |   13 +-
+ lib_microblaze/cache.c                             |    2 +-
+ petalinux-uboot-config                             |   25 ++-
+ 13 files changed, 800 insertions(+), 166 deletions(-)
+ create mode 100644 drivers/mtd/spi/winbond.c
+ create mode 100644 drivers/spi/xilinx_spi.c
+
+diff --git a/cpu/microblaze/interrupts.c b/cpu/microblaze/interrupts.c
+index a6021c9..4cf1b8a 100644
+--- a/cpu/microblaze/interrupts.c
++++ b/cpu/microblaze/interrupts.c
+@@ -46,9 +46,6 @@ int disable_interrupts (void)
+ }
+ 
+ #ifdef CONFIG_SYS_INTC_0
+-#ifdef CONFIG_SYS_TIMER_0
+-extern void timer_init (void);
+-#endif
+ #ifdef CONFIG_SYS_FSL_2
+ extern void fsl_init2 (void);
+ #endif
+@@ -142,9 +139,6 @@ int interrupts_init (void)
+ 	}
+ 	/* initialize intc controller */
+ 	intc_init ();
+-#ifdef CONFIG_SYS_TIMER_0
+-	timer_init ();
+-#endif
+ #ifdef CONFIG_SYS_FSL_2
+ 	fsl_init2 ();
+ #endif
+@@ -154,8 +148,8 @@ int interrupts_init (void)
+ 
+ void interrupt_handler (void)
+ {
+-	int irqs = (intc->isr & intc->ier);	/* find active interrupt */
+-	int i = 1;
++	int irqs = intc->ivr;	/* find active interrupt */
++	int mask = 1;
+ #ifdef DEBUG_INT
+ 	int value;
+ 	printf ("INTC isr %x, ier %x, iar %x, mer %x\n", intc->isr, intc->ier,
+@@ -163,23 +157,17 @@ void interrupt_handler (void)
+ 	R14(value);
+ 	printf ("Interrupt handler on %x line, r14 %x\n", irqs, value);
+ #endif
+-	struct irq_action *act = vecs;
+-	while (irqs) {
+-		if (irqs & 1) {
++	struct irq_action *act = vecs + irqs;
++
++	intc->iar = mask << irqs;
++
+ #ifdef DEBUG_INT
+-			printf
+-			    ("Jumping to interrupt handler rutine addr %x,count %x,arg %x\n",
+-			     act->handler, act->count, act->arg);
++	printf
++	    ("Jumping to interrupt handler rutine addr %x,count %x,arg %x\n",
++	     act->handler, act->count, act->arg);
+ #endif
+-			act->handler (act->arg);
+-			act->count++;
+-			intc->iar = i;
+-			return;
+-		}
+-		irqs >>= 1;
+-		act++;
+-		i <<= 1;
+-	}
++	act->handler (act->arg);
++	act->count++;
+ 
+ #ifdef DEBUG_INT
+ 	printf ("Dump INTC reg, isr %x, ier %x, iar %x, mer %x\n", intc->isr,
+diff --git a/cpu/microblaze/irq.S b/cpu/microblaze/irq.S
+index e1fc190..47bba36 100644
+--- a/cpu/microblaze/irq.S
++++ b/cpu/microblaze/irq.S
+@@ -27,129 +27,71 @@
+ 	.text
+ 	.global _interrupt_handler
+ _interrupt_handler:
+-	addi	r1, r1, -4
+-	swi	r2, r1, 0
+-	addi	r1, r1, -4
+-	swi	r3, r1, 0
+-	addi	r1, r1, -4
+-	swi	r4, r1, 0
+-	addi	r1, r1, -4
+-	swi	r5, r1, 0
+-	addi	r1, r1, -4
+-	swi	r6, r1, 0
+-	addi	r1, r1, -4
+-	swi	r7, r1, 0
+-	addi	r1, r1, -4
+-	swi	r8, r1, 0
+-	addi	r1, r1, -4
+-	swi	r9, r1, 0
+-	addi	r1, r1, -4
+-	swi	r10, r1, 0
+-	addi	r1, r1, -4
+-	swi	r11, r1, 0
+-	addi	r1, r1, -4
+-	swi	r12, r1, 0
+-	addi	r1, r1, -4
+-	swi	r13, r1, 0
+-	addi	r1, r1, -4
+-	swi	r14, r1, 0
+-	addi	r1, r1, -4
+-	swi	r15, r1, 0
+-	addi	r1, r1, -4
+-	swi	r16, r1, 0
+-	addi	r1, r1, -4
+-	swi	r17, r1, 0
+-	addi	r1, r1, -4
+-	swi	r18, r1, 0
+-	addi	r1, r1, -4
+-	swi	r19, r1, 0
+-	addi	r1, r1, -4
+-	swi	r20, r1, 0
+-	addi	r1, r1, -4
+-	swi	r21, r1, 0
+-	addi	r1, r1, -4
+-	swi	r22, r1, 0
+-	addi	r1, r1, -4
+-	swi	r23, r1, 0
+-	addi	r1, r1, -4
+-	swi	r24, r1, 0
+-	addi	r1, r1, -4
+-	swi	r25, r1, 0
+-	addi	r1, r1, -4
+-	swi	r26, r1, 0
+-	addi	r1, r1, -4
+-	swi	r27, r1, 0
+-	addi	r1, r1, -4
+-	swi	r28, r1, 0
+-	addi	r1, r1, -4
+-	swi	r29, r1, 0
+-	addi	r1, r1, -4
+-	swi	r30, r1, 0
+-	addi	r1, r1, -4
+-	swi	r31, r1, 0
++	swi	r2, r1, -4
++	swi	r3, r1, -8
++	swi	r4, r1, -12
++	swi	r5, r1, -16
++	swi	r6, r1, -20
++	swi	r7, r1, -24
++	swi	r8, r1, -28
++	swi	r9, r1, -32
++	swi	r10, r1, -36
++	swi	r11, r1, -40
++	swi	r12, r1, -44
++	swi	r13, r1, -48
++	swi	r14, r1, -52
++	swi	r15, r1, -56
++	swi	r16, r1, -60
++	swi	r17, r1, -64
++	swi	r18, r1, -68
++	swi	r19, r1, -72
++	swi	r20, r1, -76
++	swi	r21, r1, -80
++	swi	r22, r1, -84
++	swi	r23, r1, -88
++	swi	r24, r1, -92
++	swi	r25, r1, -96
++	swi	r26, r1, -100
++	swi	r27, r1, -104
++	swi	r28, r1, -108
++	swi	r29, r1, -112
++	swi	r30, r1, -116
++	swi	r31, r1, -120
++	addik	r1, r1, -124
+ 	brlid	r15, interrupt_handler
+ 	nop
+ 	nop
+-	lwi	r31, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r30, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r29, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r28, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r27, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r26, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r25, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r24, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r23, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r22, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r21, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r20, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r19, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r18, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r17, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r16, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r15, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r14, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r13, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r12, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r11, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r10, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r9, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r8, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r7, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r6, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r5, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r4, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r3, r1, 0
+-	addi	r1, r1, 4
+-	lwi	r2, r1, 0
+-	addi	r1, r1, 4
++	addik	r1, r1, 124
++	lwi	r31, r1, -120
++	lwi	r30, r1, -116
++	lwi	r29, r1, -112
++	lwi	r28, r1, -108
++	lwi	r27, r1, -104
++	lwi	r26, r1, -100
++	lwi	r25, r1, -96
++	lwi	r24, r1, -92
++	lwi	r23, r1, -88
++	lwi	r22, r1, -84
++	lwi	r21, r1, -80
++	lwi	r20, r1, -76
++	lwi	r19, r1, -72
++	lwi	r18, r1, -68
++	lwi	r17, r1, -64
++	lwi	r16, r1, -60
++	lwi	r15, r1, -56
++	lwi	r14, r1, -52
++	lwi	r13, r1, -48
++	lwi	r12, r1, -44
++	lwi	r11, r1, -40
++	lwi	r10, r1, -36
++	lwi	r9, r1, -32
++	lwi	r8, r1, -28
++	lwi	r7, r1, -24
++	lwi	r6, r1, -20
++	lwi	r5, r1, -16
++	lwi	r4, r1, -12
++	lwi	r3, r1, -8
++	lwi	r2, r1, -4
+ 
+ 	/* enable_interrupt */
+ #ifdef XILINX_USE_MSR_INSTR
+diff --git a/cpu/microblaze/timer.c b/cpu/microblaze/timer.c
+index a91eabc..4936c62 100644
+--- a/cpu/microblaze/timer.c
++++ b/cpu/microblaze/timer.c
+@@ -60,7 +60,7 @@ void timer_isr (void *arg)
+ 	tmr->control = tmr->control | TIMER_INTERRUPT;
+ }
+ 
+-void timer_init (void)
++int timer_init (void)
+ {
+ 	tmr->loadreg = CONFIG_SYS_TIMER_0_PRELOAD;
+ 	tmr->control = TIMER_INTERRUPT | TIMER_RESET;
+@@ -68,6 +68,7 @@ void timer_init (void)
+ 	    TIMER_ENABLE | TIMER_ENABLE_INTR | TIMER_RELOAD | TIMER_DOWN_COUNT;
+ 	reset_timer ();
+ 	install_interrupt_handler (CONFIG_SYS_TIMER_0_IRQ, timer_isr, (void *)tmr);
++	return 0;
+ }
+ #endif
+ #endif
+diff --git a/drivers/mtd/spi/Makefile b/drivers/mtd/spi/Makefile
+index e3e0292..268f7f0 100644
+--- a/drivers/mtd/spi/Makefile
++++ b/drivers/mtd/spi/Makefile
+@@ -32,6 +32,7 @@ COBJS-$(CONFIG_SPI_FLASH_SPANSION)	+= spansion.o
+ COBJS-$(CONFIG_SPI_FLASH_SST)	+= sst.o
+ COBJS-$(CONFIG_SPI_FLASH_STMICRO)	+= stmicro.o
+ COBJS-$(CONFIG_SPI_M95XXX) += eeprom_m95xxx.o
++COBJS-$(CONFIG_SPI_FLASH_WINBOND) += winbond.o
+ 
+ COBJS	:= $(COBJS-y)
+ SRCS	:= $(COBJS:.o=.c)
+diff --git a/drivers/mtd/spi/spi_flash.c b/drivers/mtd/spi/spi_flash.c
+index 0c83231..0b14eb3 100644
+--- a/drivers/mtd/spi/spi_flash.c
++++ b/drivers/mtd/spi/spi_flash.c
+@@ -149,6 +149,11 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,
+ 		flash = spi_flash_probe_sst(spi, idcode);
+ 		break;
+ #endif
++#ifdef CONFIG_SPI_FLASH_WINBOND
++	case 0xEF:
++		flash = spi_flash_probe_winbond(spi, idcode);
++		break;
++#endif
+ 	default:
+ 		debug("SF: Unsupported manufacturer %02X\n", idcode[0]);
+ 		flash = NULL;
+diff --git a/drivers/mtd/spi/winbond.c b/drivers/mtd/spi/winbond.c
+new file mode 100644
+index 0000000..c616247
+--- /dev/null
++++ b/drivers/mtd/spi/winbond.c
+@@ -0,0 +1,346 @@
++/*
++ * Copyright 2008, Network Appliance Inc.
++ * Author: Jason McMullan <mcmullan <at> netapp.com>
++ * Licensed under the GPL-2 or later.
++ */
++
++//#define DEBUG 1
++
++#include <common.h>
++#include <malloc.h>
++#include <spi_flash.h>
++
++#include "spi_flash_internal.h"
++
++/* M25Pxx-specific commands */
++#define CMD_W25_WREN		0x06	/* Write Enable */
++#define CMD_W25_WRDI		0x04	/* Write Disable */
++#define CMD_W25_RDSR		0x05	/* Read Status Register */
++#define CMD_W25_WRSR		0x01	/* Write Status Register */
++#define CMD_W25_READ		0x03	/* Read Data Bytes */
++#define CMD_W25_FAST_READ	0x0b	/* Read Data Bytes at Higher Speed */
++#define CMD_W25_PP		0x02	/* Page Program */
++#define CMD_W25_SE		0x20	/* Sector (4K) Erase */
++#define CMD_W25_BE		0xd8	/* Block (64K) Erase */
++#define CMD_W25_CE		0xc7	/* Chip Erase */
++#define CMD_W25_DP		0xb9	/* Deep Power-down */
++#define CMD_W25_RES		0xab	/* Release from DP, and Read Signature */
++
++#define WINBOND_ID_W25X16		0x3015
++#define WINBOND_ID_W25X32		0x3016
++#define WINBOND_ID_W25X64		0x3017
++#define WINBOND_ID_W25Q64		0x4017
++
++#define WINBOND_SR_WIP		(1 << 0)	/* Write-in-Progress */
++
++struct winbond_spi_flash_params {
++	uint16_t	id;
++	/* Log2 of page size in power-of-two mode */
++	uint8_t		l2_page_size;
++	uint16_t	pages_per_sector;
++	uint16_t	sectors_per_block;
++	uint8_t		nr_blocks;
++	const char	*name;
++};
++
++/* spi_flash needs to be first so upper layers can free() it */
++struct winbond_spi_flash {
++	struct spi_flash flash;
++	const struct winbond_spi_flash_params *params;
++};
++
++static inline struct winbond_spi_flash *
++to_winbond_spi_flash(struct spi_flash *flash)
++{
++	return container_of(flash, struct winbond_spi_flash, flash);
++}
++
++static const struct winbond_spi_flash_params winbond_spi_flash_table[] = {
++	{
++		.id			= WINBOND_ID_W25X16,
++		.l2_page_size		= 8,
++		.pages_per_sector	= 16,
++		.sectors_per_block	= 16,
++		.nr_blocks		= 32,
++		.name			= "W25X16",
++	},
++	{
++		.id			= WINBOND_ID_W25X32,
++		.l2_page_size		= 8,
++		.pages_per_sector	= 16,
++		.sectors_per_block	= 16,
++		.nr_blocks		= 64,
++		.name			= "W25X32",
++	},
++	{
++		.id			= WINBOND_ID_W25X64,
++		.l2_page_size		= 8,
++		.pages_per_sector	= 16,
++		.sectors_per_block	= 16,
++		.nr_blocks		= 128,
++		.name			= "W25X64",
++	},
++	{
++		.id			= WINBOND_ID_W25Q64,
++		.l2_page_size		= 8,
++		.pages_per_sector	= 16,
++		.sectors_per_block	= 16,
++		.nr_blocks		= 128,
++		.name			= "W25Q64",
++	},
++};
++
++static int winbond_wait_ready(struct spi_flash *flash, unsigned long timeout)
++{
++	struct spi_slave *spi = flash->spi;
++	unsigned long timebase;
++	int ret;
++	u8 status;
++	u8 cmd[4] = { CMD_W25_RDSR, 0xff, 0xff, 0xff };
++
++	ret = spi_xfer(spi, 32, &cmd[0], NULL, SPI_XFER_BEGIN);
++	if (ret) {
++		debug("SF: Failed to send command %02x: %d\n", cmd, ret);
++		return ret;
++	}
++
++	timebase = get_timer(0);
++	do {
++		ret = spi_xfer(spi, 8, NULL, &status, 0);
++		if (ret) {
++			debug("SF: Failed to get status for cmd %02x: %d\n", cmd, ret);
++			return -1;
++		}
++
++		if ((status & WINBOND_SR_WIP) == 0)
++			break;
++
++	} while (get_timer(timebase) < timeout);
++
++	spi_xfer(spi, 0, NULL, NULL, SPI_XFER_END);
++
++	if ((status & WINBOND_SR_WIP) == 0)
++		return 0;
++
++	debug("SF: Timed out on command %02x: %d\n", cmd, ret);
++	/* Timed out */
++	return -1;
++}
++
++/*
++ * Assemble the address part of a command for Winbond devices in
++ * non-power-of-two page size mode.
++ */
++static void winbond_build_address(struct winbond_spi_flash *stm, u8 *cmd, u32 offset)
++{
++	unsigned long page_addr;
++	unsigned long byte_addr;
++	unsigned long page_size;
++	unsigned int page_shift;
++
++	/*
++	 * The "extra" space per page is the power-of-two page size
++	 * divided by 32.
++	 */
++	page_shift = stm->params->l2_page_size;
++	page_size = (1 << page_shift);
++	page_addr = offset / page_size;
++	byte_addr = offset % page_size;
++
++	cmd[0] = page_addr >> (16 - page_shift);
++	cmd[1] = page_addr << (page_shift - 8) | (byte_addr >> 8);
++	cmd[2] = byte_addr;
++}
++
++static int winbond_read_fast(struct spi_flash *flash,
++		u32 offset, size_t len, void *buf)
++{
++	struct winbond_spi_flash *stm = to_winbond_spi_flash(flash);
++	u8 cmd[5];
++
++	cmd[0] = CMD_READ_ARRAY_FAST;
++	winbond_build_address(stm, cmd + 1, offset);
++	cmd[4] = 0x00;
++
++	debug("%s, expected len: 0x%x\n", __FUNCTION__, len);
++
++	return spi_flash_read_common(flash, cmd, sizeof(cmd), buf, len);
++}
++
++static int winbond_write(struct spi_flash *flash,
++		u32 offset, size_t len, const void *buf)
++{
++	struct winbond_spi_flash *stm = to_winbond_spi_flash(flash);
++	unsigned long page_addr;
++	unsigned long byte_addr;
++	unsigned long page_size;
++	unsigned int page_shift;
++	size_t chunk_len;
++	size_t actual;
++	int ret;
++	u8 cmd[4];
++
++	page_shift = stm->params->l2_page_size;
++	page_size = (1 << page_shift);
++	page_addr = offset / page_size;
++	byte_addr = offset % page_size;
++
++	ret = spi_claim_bus(flash->spi);
++	if (ret) {
++		debug("SF: Unable to claim SPI bus\n");
++		return ret;
++	}
++
++	for (actual = 0; actual < len; actual += chunk_len) {
++		chunk_len = min(len - actual, page_size - byte_addr);
++
++		cmd[0] = CMD_W25_PP;
++		cmd[1] = page_addr >> (16 - page_shift);
++		cmd[2] = page_addr << (page_shift - 8) | (byte_addr >> 8);
++		cmd[3] = byte_addr;
++		debug("PP: 0x%p => cmd = { 0x%02x 0x%02x%02x%02x } chunk_len = %d\n",
++			buf + actual,
++			cmd[0], cmd[1], cmd[2], cmd[3], chunk_len);
++
++		ret = spi_flash_cmd(flash->spi, CMD_W25_WREN, NULL, 0);
++		if (ret < 0) {
++			debug("SF: Enabling Write failed\n");
++			goto out;
++		}
++
++		ret = spi_flash_cmd_write(flash->spi, cmd, 4,
++				buf + actual, chunk_len);
++		if (ret < 0) {
++			debug("SF: Winbond Page Program failed\n");
++			goto out;
++		}
++
++		ret = winbond_wait_ready(flash, SPI_FLASH_PROG_TIMEOUT);
++		if (ret < 0) {
++			debug("SF: Winbond page programming timed out\n");
++			goto out;
++		}
++
++		page_addr++;
++		byte_addr = 0;
++	}
++
++	debug("SF: Winbond: Successfully programmed %u bytes @ 0x%x\n",
++			len, offset);
++	ret = 0;
++
++out:
++	spi_release_bus(flash->spi);
++	return ret;
++}
++
++int winbond_erase(struct spi_flash *flash, u32 offset, size_t len)
++{
++	struct winbond_spi_flash *stm = to_winbond_spi_flash(flash);
++	unsigned long sector_size;
++	unsigned int page_shift;
++	size_t actual;
++	int ret;
++	u8 cmd[4];
++
++	/*
++	 * This function currently uses sector erase only.
++	 * probably speed things up by using bulk erase
++	 * when possible.
++	 */
++
++	page_shift = stm->params->l2_page_size;
++	sector_size = (1 << page_shift) * stm->params->pages_per_sector;
++
++	if (offset % sector_size || len % sector_size) {
++		debug("SF: Erase offset/length not multiple of sector size\n");
++		return -1;
++	}
++
++	len /= sector_size;
++	cmd[0] = CMD_W25_SE;
++
++	ret = spi_claim_bus(flash->spi);
++	if (ret) {
++		debug("SF: Unable to claim SPI bus\n");
++		return ret;
++	}
++
++	for (actual = 0; actual < len; actual++) {
++		winbond_build_address(stm, &cmd[1], offset + actual * sector_size);
++		debug("Erase: %02x %02x %02x %02x\n",
++				cmd[0], cmd[1], cmd[2], cmd[3]);
++
++		ret = spi_flash_cmd(flash->spi, CMD_W25_WREN, NULL, 0);
++		if (ret < 0) {
++			debug("SF: Enabling Write failed\n");
++			goto out;
++		}
++
++		ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0);
++		if (ret < 0) {
++			debug("SF: Winbond sector erase failed\n");
++			goto out;
++		}
++
++		ret = winbond_wait_ready(flash, SPI_FLASH_PAGE_ERASE_TIMEOUT);
++		if (ret < 0) {
++			debug("SF: Winbond sector erase timed out\n");
++			goto out;
++		}
++	}
++
++	debug("SF: Winbond: Successfully erased %u bytes @ 0x%x\n",
++			len * sector_size, offset);
++	ret = 0;
++
++out:
++	spi_release_bus(flash->spi);
++	return ret;
++}
++
++struct spi_flash *spi_flash_probe_winbond(struct spi_slave *spi, u8 *idcode)
++{
++	const struct winbond_spi_flash_params *params;
++	unsigned long page_size;
++	struct winbond_spi_flash *stm;
++	unsigned int i;
++
++	for (i = 0; i < ARRAY_SIZE(winbond_spi_flash_table); i++) {
++		params = &winbond_spi_flash_table[i];
++		if (params->id == ((idcode[1] << 8) | idcode[2]))
++			break;
++	}
++
++	if (i == ARRAY_SIZE(winbond_spi_flash_table)) {
++		debug("SF: Unsupported Winbond ID %02x%02x\n",
++				idcode[1], idcode[2]);
++		return NULL;
++	}
++
++	stm = malloc(sizeof(struct winbond_spi_flash));
++	if (!stm) {
++		debug("SF: Failed to allocate memory\n");
++		return NULL;
++	}
++
++	stm->params = params;
++	stm->flash.spi = spi;
++	stm->flash.name = params->name;
++
++	/* Assuming power-of-two page size initially. */
++	page_size = 1 << params->l2_page_size;
++
++	stm->flash.write = winbond_write;
++	stm->flash.erase = winbond_erase;
++	stm->flash.read = winbond_read_fast;
++	stm->flash.size = page_size * params->pages_per_sector
++				* params->sectors_per_block
++				* params->nr_blocks;
++
++	debug("SF: Detected %s with page size %u, total %u bytes\n",
++			params->name, page_size, stm->flash.size);
++
++	return &stm->flash;
++}
++
+diff --git a/drivers/spi/Makefile b/drivers/spi/Makefile
+index 824d8e7..ff03cc4 100644
+--- a/drivers/spi/Makefile
++++ b/drivers/spi/Makefile
+@@ -34,6 +34,7 @@ COBJS-$(CONFIG_MPC52XX_SPI) += mpc52xx_spi.o
+ COBJS-$(CONFIG_MPC8XXX_SPI) += mpc8xxx_spi.o
+ COBJS-$(CONFIG_MXC_SPI) += mxc_spi.o
+ COBJS-$(CONFIG_SOFT_SPI) += soft_spi.o
++COBJS-$(CONFIG_XILINX_SPI) += xilinx_spi.o
+ 
+ COBJS	:= $(COBJS-y)
+ SRCS	:= $(COBJS:.o=.c)
+diff --git a/drivers/spi/xilinx_spi.c b/drivers/spi/xilinx_spi.c
+new file mode 100644
+index 0000000..7c7501a
+--- /dev/null
++++ b/drivers/spi/xilinx_spi.c
+@@ -0,0 +1,256 @@
++/*
++ * Copyright (C) 2007 Atmel Corporation
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++#include <common.h>
++#include <spi.h>
++#include <malloc.h>
++#include <asm/io.h>
++
++//#define DEBUG_ENV
++#ifdef DEBUG_ENV
++#define DEBUGF(fmt,args...)	printf(fmt,##args)
++#else
++#define DEBUGF(fmt,atgs...)
++#endif
++
++#define XSPI_CR_OFFSET		0x62	/* 16-bit Control Register */
++
++#define XSPI_CR_ENABLE		0x02
++#define XSPI_CR_MASTER_MODE	0x04
++#define XSPI_CR_CPOL		0x08
++#define XSPI_CR_CPHA		0x10
++#define XSPI_CR_MODE_MASK	(XSPI_CR_CPHA | XSPI_CR_CPOL)
++#define XSPI_CR_TXFIFO_RESET	0x20
++#define XSPI_CR_RXFIFO_RESET	0x40
++#define XSPI_CR_MANUAL_SSELECT	0x80
++#define XSPI_CR_TRANS_INHIBIT	0x100
++
++#define XSPI_SR_OFFSET		0x67	/* 8-bit Status Register */
++
++#define XSPI_SR_RX_EMPTY_MASK	0x01	/* Receive FIFO is empty */
++#define XSPI_SR_RX_FULL_MASK	0x02	/* Receive FIFO is full */
++#define XSPI_SR_TX_EMPTY_MASK	0x04	/* Transmit FIFO is empty */
++#define XSPI_SR_TX_FULL_MASK	0x08	/* Transmit FIFO is full */
++#define XSPI_SR_MODE_FAULT_MASK	0x10	/* Mode fault error */
++
++#define XSPI_TXD_OFFSET		0x6b	/* 8-bit Data Transmit Register */
++#define XSPI_RXD_OFFSET		0x6f	/* 8-bit Data Receive Register */
++
++#define XSPI_SSR_OFFSET		0x70	/* 32-bit Slave Select Register */
++
++/* Register definitions as per "OPB IPIF (v3.01c) Product Specification", DS414
++ * IPIF registers are 32 bit
++ */
++#define XIPIF_V123B_DGIER_OFFSET	0x1c	/* IPIF global int enable reg */
++#define XIPIF_V123B_GINTR_ENABLE	0x80000000
++
++#define XIPIF_V123B_IISR_OFFSET		0x20	/* IPIF interrupt status reg */
++#define XIPIF_V123B_IIER_OFFSET		0x28	/* IPIF interrupt enable reg */
++
++#define XSPI_INTR_MODE_FAULT		0x01	/* Mode fault error */
++#define XSPI_INTR_SLAVE_MODE_FAULT	0x02	/* Selected as slave while
++						 * disabled */
++#define XSPI_INTR_TX_EMPTY		0x04	/* TxFIFO is empty */
++#define XSPI_INTR_TX_UNDERRUN		0x08	/* TxFIFO was underrun */
++#define XSPI_INTR_RX_FULL		0x10	/* RxFIFO is full */
++#define XSPI_INTR_RX_OVERRUN		0x20	/* RxFIFO was overrun */
++
++#define XIPIF_V123B_RESETR_OFFSET	0x40	/* IPIF reset register */
++#define XIPIF_V123B_RESET_MASK		0x0a	/* the value to write */
++
++
++u32 BaseAddr = CONFIG_XILINX_SPI_BASEADDR;
++
++void spi_init()
++{
++
++}
++
++struct spi_slave *spi_setup_slave(unsigned int bus, unsigned int cs,
++			unsigned int max_hz, unsigned int mode)
++{
++	struct spi_slave *xspi;
++	u16 sr;
++	xspi = malloc(sizeof(struct spi_slave));
++	DEBUGF("%s[%d] spi BaseAddr: 0x%x \n",__FUNCTION__,__LINE__,BaseAddr);
++	if (!xspi){
++		DEBUGF("%s[%d] spi not allocated \n",__FUNCTION__,__LINE__);
++		return NULL;
++	}
++	xspi->bus = bus;
++	xspi->cs = cs;
++	/* Reset the SPI device */
++	out_8(BaseAddr + XIPIF_V123B_RESETR_OFFSET,
++		 XIPIF_V123B_RESET_MASK);
++	DEBUGF("%s[%d] SPI Reset \n",__FUNCTION__,__LINE__);
++
++	sr = in_8(BaseAddr + XSPI_SR_OFFSET);
++	DEBUGF("%s[%d] transfer status reg %x \n",__FUNCTION__,__LINE__,sr);
++
++	/* Disable all the interrupts just in case */
++	out_8(BaseAddr + XIPIF_V123B_IIER_OFFSET, 0);
++	sr = in_8(BaseAddr + XSPI_SR_OFFSET);
++	DEBUGF("%s[%d] transfer status reg %x \n",__FUNCTION__,__LINE__,sr);
++
++	/* Disable the transmitter, enable Manual Slave Select Assertion,
++	 * put SPI controller into master mode, and enable it */
++	out_be16(BaseAddr + XSPI_CR_OFFSET,
++		 XSPI_CR_TRANS_INHIBIT | XSPI_CR_MANUAL_SSELECT
++		 | XSPI_CR_MASTER_MODE | XSPI_CR_ENABLE);
++	sr = in_be16(BaseAddr + XSPI_CR_OFFSET);
++	DEBUGF("%s[%d] transfer control reg %x \n",__FUNCTION__,__LINE__,sr);
++
++	return xspi;
++}
++
++void spi_free_slave(struct spi_slave *slave)
++{
++	free(slave);
++	DEBUGF("SPI slave freed\n");
++}
++
++int spi_claim_bus(struct spi_slave *slave)
++{
++		// Toggle CS
++		u8 sr;
++
++		out_8(BaseAddr + XSPI_SSR_OFFSET, 0xfffe);
++		//sr = in_8(BaseAddr + XSPI_SR_OFFSET);
++		//DEBUGF("%s[%d] transfer status reg %x \n",__FUNCTION__,__LINE__,sr);
++
++		return 0;
++}
++
++void spi_release_bus(struct spi_slave *slave)
++{
++	// Release Bus
++	out_8(BaseAddr + XSPI_SSR_OFFSET, 0xffff);
++	// Disable Device
++	out_be16(BaseAddr + XSPI_CR_OFFSET,
++		 XSPI_CR_TRANS_INHIBIT | XSPI_CR_MANUAL_SSELECT
++		 | XSPI_CR_MASTER_MODE);
++	DEBUGF("SPI bus released\n");
++}
++
++int spi_xfer(struct spi_slave *slave, unsigned int bitlen,
++		const void *dout, void *din, unsigned long flags)
++{
++	unsigned int	len_tx;
++	unsigned int	len_rx;
++	unsigned int	len;
++	int inhibited = 1;
++	u8		sr,value;
++	u16		cr;
++	const u8	* txp = dout;
++	u8		* rxp = din;
++
++	if (bitlen == 0)
++		/* Finish any previously submitted transfers */
++		goto out;
++
++	/*
++	 * TODO: The controller can do non-multiple-of-8 bit
++	 * transfers, but this driver currently doesn't support it.
++	 *
++	 * It's also not clear how such transfers are supposed to be
++	 * represented as a stream of bytes...this is a limitation of
++	 * the current SPI interface.
++	 */
++	if (bitlen % 8) {
++		/* Errors always terminate an ongoing transfer */
++		flags |= SPI_XFER_END;
++		goto out;
++	}
++
++	len = bitlen / 8;
++
++	/*
++	 * The controller can do automatic CS control, but it is
++	 * somewhat quirky, and it doesn't really buy us much anyway
++	 * in the context of U-Boot.
++	 */
++	DEBUGF("%s[%d] going to claim cs\n",__FUNCTION__,__LINE__);
++	if (flags & SPI_XFER_BEGIN)
++		out_8(BaseAddr + XSPI_SSR_OFFSET, 0xfffe);
++	sr = in_8(BaseAddr + XSPI_SR_OFFSET);
++	DEBUGF("%s[%d] transfer status reg %x \n",__FUNCTION__,__LINE__,sr);
++
++	for (len_tx = 0, len_rx = 0; len_tx < len; ) {
++		while (!(sr & XSPI_SR_TX_FULL_MASK) & (len_tx<len))
++		{
++			// Write bytes
++			if (len_tx < len) {
++				if (txp)
++					out_8(BaseAddr + XSPI_TXD_OFFSET, *txp++);
++				else
++					out_8(BaseAddr + XSPI_TXD_OFFSET, 0);
++				len_tx++;
++			}
++			sr = in_8(BaseAddr + XSPI_SR_OFFSET);
++		}
++		//Activate
++
++		out_be16(BaseAddr + XSPI_CR_OFFSET,
++			 XSPI_CR_MANUAL_SSELECT
++			 | XSPI_CR_MASTER_MODE | XSPI_CR_ENABLE);
++
++		// Wait for transmitter to get empty and
++		do {
++			sr = in_8(BaseAddr + XSPI_SR_OFFSET);
++			DEBUGF("%s[%d] transfer status reg %x \n",__FUNCTION__,__LINE__,sr);
++		} while (!(sr & XSPI_SR_TX_EMPTY_MASK));
++
++		out_be16(BaseAddr + XSPI_CR_OFFSET,
++			XSPI_CR_MANUAL_SSELECT  | XSPI_CR_MASTER_MODE |
++			XSPI_CR_ENABLE |  XSPI_CR_TRANS_INHIBIT);
++
++		while (!(sr & XSPI_SR_RX_EMPTY_MASK)) {
++			value = in_8(BaseAddr + XSPI_RXD_OFFSET);
++			DEBUGF("%s[%d] received byte 0x%x\n ",__FUNCTION__,__LINE__,value);
++			if (rxp)
++				*rxp++ = value;
++			len_rx++;
++			sr = in_8(BaseAddr + XSPI_SR_OFFSET);
++		}
++
++	}
++
++out:
++	do {
++		sr = in_8(BaseAddr + XSPI_SR_OFFSET);
++		DEBUGF("%s[%d] transfer status reg %x \n",__FUNCTION__,__LINE__,sr);
++	} while (!(sr & XSPI_SR_TX_EMPTY_MASK));
++
++
++	out_be16(BaseAddr + XSPI_CR_OFFSET,
++			 XSPI_CR_MANUAL_SSELECT	 | XSPI_CR_MASTER_MODE |
++			 XSPI_CR_ENABLE |  XSPI_CR_TRANS_INHIBIT);
++
++	DEBUGF("%s[%d] transfer inhibited \n",__FUNCTION__,__LINE__);
++	if (flags & SPI_XFER_END) {
++		/*
++		 * Wait until the transfer is completely done before
++		 * we deactivate CS and inhibit transmission.
++		 */
++		out_8(BaseAddr + XSPI_SSR_OFFSET, 0xffff);
++	}
++	return 0;
++}
+diff --git a/include/configs/petalogix-microblaze-auto.h.template b/include/configs/petalogix-microblaze-auto.h.template
+index 0d30663..2817ce8 100644
+--- a/include/configs/petalogix-microblaze-auto.h.template
++++ b/include/configs/petalogix-microblaze-auto.h.template
+@@ -149,11 +149,11 @@
+ #define	CONFIG_SYS_MALLOC_BASE		(CONFIG_SYS_MONITOR_BASE - CONFIG_SYS_MALLOC_LEN)
+ 
+ /* stack */
+-#define	CONFIG_SYS_INIT_SP_OFFSET	CONFIG_SYS_MONITOR_BASE
++#define	CONFIG_SYS_INIT_SP_OFFSET	CONFIG_SYS_MALLOC_BASE
+ 
+ /*#define	RAMENV */
+ 
+-#ifdef XILINX_FLASH_START
++#ifdef XILINX_FLASH_START /* Parallel Flash */
+ 	#define	FLASH
+ 	#define	CONFIG_SYS_FLASH_BASE		XILINX_FLASH_START
+ 	#define	CONFIG_SYS_FLASH_SIZE		XILINX_FLASH_SIZE
+@@ -175,6 +175,25 @@
+ 		#define	CONFIG_ENV_ADDR		@bestart@
+ 		#define	CONFIG_ENV_SIZE		@besize@
+ 	#endif /* !RAMBOOT */
++#elif defined(XILINX_SPI_FLASH_BASEADDR) /* SPI Flash */
++	#define CONFIG_XILINX_SPI_BASEADDR	XILINX_SPI_FLASH_BASEADDR
++	#define CONFIG_XILINX_SPI	1
++	#define CONFIG_SPI_FLASH	1
++	#define CONFIG_CMD_SF
++	#define CONFIG_ENV_SPI_MAX_HZ	XILINX_SPI_FLASH_MAX_FREQ
++	#define CONFIG_ENV_SPI_MODE	@spiflashmode@
++	#define CONFIG_ENV_SPI_CS	XILINX_SPI_FLASH_CS
++	#define CONFIG_SYS_NO_FLASH
++	#undef CONFIG_CMD_FLASH
++	#define CONFIG_ENV_IS_IN_SPI_FLASH
++	#define CONFIG_ENV_OFFSET	@bestart@
++	#define CONFIG_ENV_SIZE	@besize@
++	#define CONFIG_ENV_SECT_SIZE	0x20000 /* 128K(one sector) for env */
++
++	#ifndef CONFIG_SPI_FLASH_DEV_USERDEFINED
++		#define CONFIG_SPI_FLASH_@spiflashdev@
++	#endif
++
+ #else /* !FLASH */
+ 	/* ENV in RAM */
+ 	#define	CONFIG_SYS_NO_FLASH		1
+@@ -226,11 +245,12 @@
+ 
+ #define CONFIG_CMD_ROMFS
+ 
+-#if defined(CONFIG_DCACHE) || defined(CONFIG_ICACHE)
++/*#if defined(CONFIG_DCACHE) || defined(CONFIG_ICACHE)
+ 	#define CONFIG_CMD_CACHE
+ #else
+ 	#undef CONFIG_CMD_CACHE
+ #endif
++*/
+ 
+ #ifndef CONFIG_SYS_ENET
+ 	#undef CONFIG_CMD_NET
+@@ -247,7 +267,6 @@
+ #endif
+ 
+ #if defined(FLASH)
+-	#define CONFIG_CMD_ECHO
+ 	#define CONFIG_CMD_FLASH
+ 	#define CONFIG_CMD_IMLS
+ 	#define CONFIG_CMD_JFFS2
+@@ -284,8 +303,13 @@
+ #define	CONFIG_BOOTDELAY	4
+ #define	CONFIG_BOOTARGS		""
+ #define	CONFIG_HOSTNAME		XILINX_BOARD_NAME
++#ifdef FLASH
+ #define	CONFIG_BOOTCOMMAND	"run make_cmdline; bootm ${kernstart}" \
+ 
++#elif defined(CONFIG_SPI_FLASH)
++#define CONFIG_BOOTCOMMAND	"run sfboot" \
++
++#endif
+ #define	CONFIG_IPADDR		@ipaddr@
+ #define	CONFIG_SERVERIP		@serverip@
+ #define	CONFIG_ETHADDR		@ethaddr@
+@@ -296,8 +320,8 @@
+ 
+ #define	CONFIG_PREBOOT		"echo U-BOOT for ${hostname};setenv preboot;echo;@dhcp@"
+ 
+-#if defined(FLASH)
+-#define	CONFIG_EXTRA_ENV_SETTINGS \
++#if defined(FLASH) || defined(CONFIG_SPI_FLASH)
++#define CONFIG_EXTRA_ENV_SETTINGS_COMMON \
+ 	"autoload=no\0" \
+ 	"bootfile=image.ub\0" \
+ 	"mtdids=nor0=@mtdpartsname@\0" \
+@@ -305,39 +329,60 @@
+ 	CONSOLE_ARG \
+ 	"clobstart=@cstart@\0" \
+ 	"netstart=@nstart@\0" \
++	"loadaddr=@nstart@\0" \
+ 	"bootsize=@bsize@\0" \
+ 	"bootstart=@bstart@\0" \
+ 	"bootenvsize=@besize@\0" \
+ 	"bootenvstart=@bestart@\0" \
+ 	"jffs2size=@jffs2size@\0" \
+ 	"jffs2start=@jffs2start@\0" \
+-	"eraseenv=protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}\0" \
+ 	"kernsize=@ksize@\0" \
+ 	"kernstart=@kstart@\0" \
+ 	"make_cmdline=setenv netkargs macaddr=${ethaddr};setenv bootargs mtdparts=${mtdparts} ${netkargs} ${console}\0" \
+ 	"load_kernel=tftp ${clobstart} image.ub\0" \
+-	"install_kernel=protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};" \
+-		"cp.b ${fileaddr} ${kernstart} ${filesize}\0" \
+ 	"update_kernel=run load_kernel install_kernel\0" \
+ 	"load_uboot=tftp ${clobstart} u-boot-s.bin\0" \
+-	"install_uboot=protect off ${bootstart} +${bootsize};erase ${bootstart} +${bootsize};" \
+-		"cp.b ${clobstart} ${bootstart} ${filesize}\0" \
+ 	"update_uboot=run load_uboot install_uboot\0" \
+ 	"load_jffs2=tftp ${clobstart} rootfs.jffs2\0" \
++	"update_jffs2=run load_jffs2 install_jffs2\0" \
++	"netboot=run make_cmdline;tftp ${netstart} image.ub; bootm\0"
++#endif
++
++#if defined(FLASH) /* Parallel Flash */
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	CONFIG_EXTRA_ENV_SETTINGS_COMMON \
++	"eraseenv=protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}\0" \
++	"install_kernel=protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};" \
++		"cp.b ${fileaddr} ${kernstart} ${filesize}\0" \
++	"install_uboot=protect off ${bootstart} +${bootsize};erase ${bootstart} +${bootsize};" \
++		"cp.b ${clobstart} ${bootstart} ${filesize}\0" \
+ 	"install_jffs2=protect off ${jffs2start} +${jffs2size};erase ${jffs2start} +${jffs2size};" \
+ 		"cp.b ${clobstart} ${jffs2start} ${filesize}\0" \
+-	"update_jffs2=run load_jffs2 install_jffs2\0" \
+-	"netboot=run make_cmdline;tftp ${netstart} image.ub; bootm\0" \
+ 	""
+-#else
++#elif defined(CONFIG_SPI_FLASH) /* SPI Flash */
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	CONFIG_EXTRA_ENV_SETTINGS_COMMON \
++	"eraseenv=sf probe 0; sf erase ${bootenvstart} ${bootenvsize}\0" \
++	"install_kernel=sf probe 0; sf erase ${kernstart} ${kernsize};" \
++		"sf write ${fileaddr} ${kernstart} 0x${filesize}\0" \
++	"install_uboot=sf probe 0; sf erase ${bootstart} ${bootsize};" \
++		"sf write ${clobstart} ${bootstart} 0x${filesize}\0" \
++	"install_jffs2=sf probe 0; sf erase ${jffs2start} ${jffs2size};" \
++		"sf write ${clobstart} ${jffs2start} 0x${filesize}\0" \
++	"sfboot=sf probe 0; sf read ${netstart} ${kernstart} ${kernsize}; bootm ${netstart}\0" \
++	""
++#else /* No Flash */
+ #define	CONFIG_EXTRA_ENV_SETTINGS \
+ 	CONSOLE_ARG \
++	"autoload=no\0" \
++	"bootfile=image.ub\0" \
+ 	"netstart=@nstart@\0" \
++	"loadaddr=@nstart@\0" \
+ 	"make_cmdline=setenv netkargs macaddr=${ethaddr};setenv bootargs ${netkargs} ${console}\0" \
+ 	"bootcmd=run netboot\0" \
+ 	"netboot=run make_cmdline;tftp ${netstart} image.ub; bootm\0" \
+ 	""
+-#endif
++#endif /* Flash */
+ 
+ #define CONFIG_CMDLINE_EDITING
+ 
+diff --git a/lib_microblaze/board.c b/lib_microblaze/board.c
+index 8d17b03..800af50 100644
+--- a/lib_microblaze/board.c
++++ b/lib_microblaze/board.c
+@@ -31,6 +31,7 @@
+ #include <version.h>
+ #include <watchdog.h>
+ #include <net.h>
++#include <stdio_dev.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+@@ -42,6 +43,9 @@ extern int gpio_init (void);
+ #ifdef CONFIG_SYS_INTC_0
+ extern int interrupts_init (void);
+ #endif
++#ifdef CONFIG_SYS_TIMER_0
++extern int timer_init (void);
++#endif
+ 
+ /*
+  * Begin and End of memory area for malloc(), and current "brk"
+@@ -98,6 +102,9 @@ init_fnc_t *init_sequence[] = {
+ #ifdef CONFIG_SYS_INTC_0
+ 	interrupts_init,
+ #endif
++#ifdef CONFIG_SYS_TIMER_0
++	timer_init,
++#endif
+ 	NULL,
+ };
+ 
+@@ -106,6 +113,7 @@ void board_init (void)
+ 	bd_t *bd;
+ 	init_fnc_t **init_fnc_ptr;
+ 	gd = (gd_t *) CONFIG_SYS_GBL_DATA_OFFSET;
++	char *s;
+ #if defined(CONFIG_CMD_FLASH)
+ 	ulong flash_size = 0;
+ #endif
+@@ -130,8 +138,8 @@ void board_init (void)
+ 	}
+ 
+ 	puts ("SDRAM :\n");
+-	printf ("\t\tIcache:%s\n", icache_status() ? "OK" : "FAIL");
+-	printf ("\t\tDcache:%s\n", dcache_status() ? "OK" : "FAIL");
++	printf ("\t\tIcache:%s\n", icache_status() ? "ON" : "OFF");
++	printf ("\t\tDcache:%s\n", dcache_status() ? "ON" : "OFF");
+ 	printf ("\tU-Boot Start:0x%08x\n", TEXT_BASE);
+ 
+ #if defined(CONFIG_CMD_FLASH)
+@@ -168,6 +176,13 @@ void board_init (void)
+ 	/* relocate environment function pointers etc. */
+ 	env_relocate ();
+ 
++	/* Initialize stdio devices */
++	stdio_init ();
++
++	if ((s = getenv ("loadaddr")) != NULL) {
++		load_addr = simple_strtoul (s, NULL, 16);
++	}
++
+ #if defined(CONFIG_CMD_NET)
+ 	/* IP Address */
+ 	bd->bi_ip_addr = getenv_IPaddr("ipaddr");
+@@ -178,6 +193,10 @@ void board_init (void)
+ 	uchar enetaddr[6];
+ 	eth_getenv_enetaddr("ethaddr", enetaddr);
+ 	printf("MAC:   %pM\n", enetaddr);
++
++	if ((s = getenv ("bootfile")) != NULL) {
++		copy_filename (BootFile, s, sizeof (BootFile));
++	}
+ #endif
+ 
+ 	/* main_loop */
+diff --git a/lib_microblaze/bootm.c b/lib_microblaze/bootm.c
+index 24c1dd7..49c9487 100644
+--- a/lib_microblaze/bootm.c
++++ b/lib_microblaze/bootm.c
+@@ -111,13 +111,22 @@ void do_bootm_linux (int flag, int argc, char *argv[],
+ 	 */
+ 
+ //#ifdef DEBUG
+-	printf ("## Transferring control to Linux (at address %08lx), 0x%08x " \
+-				"ramdisk 0x%08x, FDT 0x%08x...\n",
++	printf ("## Transferring control to Linux (at address %08lx), 0x%08lx"\
++				" ramdisk 0x%08lx, FDT 0x%08lx...\n",
+ 		(ulong) theKernel, ep, rd_data_start, (ulong) of_flat_tree);
+ //#endif
+ 	//if (!images->autostart)
+ 	//	return ;
+ 
++#ifdef XILINX_USE_DCACHE
++#ifdef XILINX_DCACHE_BYTE_SIZE
++	flush_cache(0, XILINX_DCACHE_BYTE_SIZE);
++#else
++#warning please rebuild BSPs and update configuration
++	flush_cache(0, 32768);
++#endif
++#endif
++
+ 	theKernel (commandline, rd_data_start, (ulong) of_flat_tree);
+ 
+ 	/* does not return */
+diff --git a/lib_microblaze/cache.c b/lib_microblaze/cache.c
+index 4b2e8e3..9b6b60f 100644
+--- a/lib_microblaze/cache.c
++++ b/lib_microblaze/cache.c
+@@ -34,7 +34,7 @@ void flush_cache (ulong addr, ulong size)
+ #endif
+ 				"nop;"
+ #ifdef CONFIG_DCACHE
+-				"wdc	%0, r0;"
++				"wdc.flush	%0, r0;"
+ #endif
+ 				"nop;"
+ 				:
+diff --git a/petalinux-uboot-config b/petalinux-uboot-config
+index 479f533..d44862d 100644
+--- a/petalinux-uboot-config
++++ b/petalinux-uboot-config
+@@ -77,6 +77,11 @@ IMAGE_PAR=0
+ # JFFS2 (root) image partition index
+ JFFS2_PAR=0
+ 
++# SPI Flash device
++SPI_FLASH_DEV=
++# SPI Flash SPI mode
++SPI_FLASH_MODE=
++
+ #
+ # Partition table arrays
+ #
+@@ -99,6 +104,19 @@ MAX_NUM_PARTITIONS=20
+ #
+ function read_config_file ()
+ {
++	# Get SPI Flash device if it is configured
++	spi_flash_dev_config=$(grep "^[:blank:]*CONFIG_SYSTEM_SPI_FLASH_DEV_.*=[:blank:]*y" $CONFIG_CONFIG | sed "s/[:blank:]*CONFIG_SYSTEM_SPI_FLASH_DEV_\(.*\)=[:blank:]*y/\1/g" | tr -d "[:blank:]")
++	case "${spi_flash_dev_config}" in
++		"WINBOND_W25")
++			SPI_FLASH_DEV="WINBOND"; ;;
++		*)
++			;;
++	esac
++
++	# Get SPI Flash SPI mode
++	SPI_FLASH_MODE=$(grep "^[:blank:]*CONFIG_SYSTEM_SPI_FLASH_SPI_MODE.*=[:blank:]*y" $CONFIG_CONFIG | sed "s/[:blank:]*CONFIG_SYSTEM_SPI_FLASH_SPI_MODE\(.*\)=[:blank:]*y/\1/g" | tr -d "[:blank:]")
++
++
+ 	last=0
+ 	# No idea how many partitions are there, loop through all
+ 	# start from 1st to last to normalised data.
+@@ -152,7 +170,8 @@ function read_config_file ()
+ 				# Calculate start address of partition
+ 				if [ $CNT = 1 ]; then
+ 					# First partition
+-					PAR_ADDR[$CNT]=$FLASH_START
++					# If the FLASH_START is empty, the First Partition address is 0x0
++					PAR_ADDR[$CNT]=$(($FLASH_START))
+ 				else
+ 					# Subsequent partition
+ 					PAR_ADDR[$CNT]=$(( ${PAR_ADDR[$CNT -1]} + \
+@@ -317,7 +336,9 @@ function sub_config_file ()
+ 			 s/\@besize\@/${PAR_SIZE[$BOOTENV_PAR]}/g
+ 			 s/\@bestart\@/${PAR_ADDR[$BOOTENV_PAR]}/g
+ 			 s/\@cstart\@/$ERAM_START/g
+-			 s/\@nstart\@/$NET_START/g \
++			 s/\@nstart\@/$NET_START/g
++			 s/\@spiflashdev\@/${SPI_FLASH_DEV}/g
++			 s/\@spiflashmode\@/${SPI_FLASH_MODE}/g \
+ 			}" < $UBOOT_SCRIPT_BOARD_TEMPLATE > $UBOOT_SCRIPT_BOARD
+ 
+ 	# Add substitution code - here
+-- 
+1.6.0.4
+

@@ -1,0 +1,29 @@
+From 871e47450417b639aae70477ae8699ecf44c3291 Mon Sep 17 00:00:00 2001
+Message-Id: <871e47450417b639aae70477ae8699ecf44c3291.1278011872.git.linz@li-pro.net>
+In-Reply-To: <9d4cc05068d17f1a7f60716b13a5ea99c6345981.1278011872.git.linz@li-pro.net>
+References: <9d4cc05068d17f1a7f60716b13a5ea99c6345981.1278011872.git.linz@li-pro.net>
+From: Stephan Linz <linz@li-pro.net>
+Date: Fri, 25 Jun 2010 16:23:46 +0200
+Subject: [PATCH 3/3] microblaze: generic: enable FDT support
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 28cee47..41208e1 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -305,4 +305,8 @@
+ #define CONFIG_SYS_PROMPT_HUSH_PS2 "> "
+ #endif
+ 
++/* pass open firmware flat tree */
++#define CONFIG_FIT		1
++#define CONFIG_OF_LIBFDT	1
++
+ #endif	/* __CONFIG_H */
+-- 
+1.6.0.4
+

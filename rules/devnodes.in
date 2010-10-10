@@ -1,0 +1,114 @@
+## SECTION=project_specific
+
+if !UDEV
+
+menuconfig DEVNODES
+	tristate
+	prompt "create device nodes"
+	help
+	  FIXME
+
+if DEVNODES
+
+config DEVNODES_POOR_ENTROPY
+	tristate
+	prompt "enable poor entropy"
+	help
+	  /dev/urandom equal to /dev/random
+
+config DEVNODES_UNIX98_PTYS
+	tristate
+	prompt "Unix98 pseudo terminal"
+
+config DEVNODES_LEGACY_PTYS
+	tristate
+	prompt "Legacy (BSD) pseudo terminal"
+
+choice
+	prompt "Maximum number of legacy PTY in use"
+	depends on DEVNODES_LEGACY_PTYS
+	default DEVNODES_LEGACY_PTYS_64
+
+	config DEVNODES_LEGACY_PTYS_16
+		bool
+		prompt "16"
+
+	config DEVNODES_LEGACY_PTYS_32
+		bool
+		prompt "32"
+
+	config DEVNODES_LEGACY_PTYS_64
+		bool
+		prompt "64"
+
+endchoice
+
+config DEVNODES_SERIAL
+	tristate
+	prompt "Serial interfaces (RS-232)"
+
+config DEVNODES_SERIAL_XILINX_UARTLITE
+	depends on DEVNODES_SERIAL
+	tristate
+	prompt "Xilinx uartlite interfaces"
+
+config DEVNODES_I2C
+	tristate
+	prompt "I2C interfaces (i2c-dev)"
+
+menuconfig DEVNODES_USB
+	tristate
+	prompt "USB interfaces (serial, parallel, ...)"
+
+if DEVNODES_USB
+
+config DEVNODES_USB_ACM
+	tristate
+	prompt "USB CDC/ACM (modems)"
+
+config DEVNODES_USB_SERIAL
+	tristate
+	prompt "USB serial class (USB to RS-232)"
+
+config DEVNODES_USB_PRINTER
+	tristate
+	prompt "USB printer class"
+
+endif # DEVNODES_USB
+
+config DEVNODES_MTD
+	tristate
+	prompt "Memory Technology Devices (MTD)"
+
+if DEVNODES_MTD
+
+config DEVNODES_MTD_CHAR
+	tristate
+	prompt "MTD character devices"
+
+config DEVNODES_MTD_BLK
+	tristate
+	prompt "MTD block devices"
+
+endif # DEVNODES_MTD
+
+
+config DEVNODES_BLK
+	tristate
+	prompt "Common block devices"
+
+if DEVNODES_BLK
+
+config DEVNODES_BLK_IDE
+	tristate
+	prompt "IDE (obsolete)"
+
+config DEVNODES_BLK_SD
+	tristate
+	prompt "SCSI disks"
+
+endif # DEVNODES_BLK
+
+endif # DEVNODES
+
+endif # !UDEV

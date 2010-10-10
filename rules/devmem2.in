@@ -1,0 +1,7 @@
+## SECTION=project_specific
+
+config DEVMEM2
+	tristate
+	prompt "devmem2"
+	help
+	  FIXME

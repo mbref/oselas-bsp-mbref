@@ -1,0 +1,25 @@
+From d9518d87d1f83b12935383d572a1f2b1624e95bb Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Wed, 16 Jun 2010 14:20:45 +0200
+Subject: [PATCH] microblaze: generic: adding DHCP support
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 9a30525..ca6572b 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -238,6 +238,7 @@
+ #else
+ 	#define CONFIG_CMD_PING
+ 	#define CONFIG_NET_MULTI
++	#define CONFIG_CMD_DHCP
+ #endif
+ 
+ #if defined(CONFIG_SYSTEMACE)
+-- 
+1.6.0.4
+

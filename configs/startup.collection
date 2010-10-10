@@ -1,0 +1,10 @@
+#
+# Automatically generated make config: don't edit
+# ptxdist version: 2010.08.0
+#
+PTXCONF__collectionconfig_MAGIC__=y
+PTXCONF_COLLECTION=y
+# PTXCONF_DEVMEM2 is not set
+PTXCONF_IPKG=y
+PTXCONF_UDEV=y
+# PTXCONF_COLLECTION_ALL is not set

@@ -1,0 +1,672 @@
+
+
+		OSELAS.BSP-Xilinx-Microblaze-Reference
+
+				V0.00
+			     (pre-alpha)
+
+
+
+
+
+
+BSP State
+=========
+
+	pre-alpha: nothing to talk
+
+
+
+Use the Xilinx Microblaze Reference (mbref)
+===========================================
+
+References
+----------
+http://gitorious.org/mbref
+http://www.li-pro.de/xilinx_mb:mbref:start
+
+Xilinx Microblaze Boot Sequence and the Boot Rom
+------------------------------------------------
+The Xilinx Microblaze processor follows a 2 stage boot process. The first
+stage will started from internal Block RAM (BRAM) connected on the Local
+Memory Bus (LMB). Because the internal BRAM is very small (at least 8k),
+the first stage loader is needed to initialize memory and enough of the
+peripheral devices (if needed) to access and load the second stage loader
+into main memory. It is the job of the second stage loader to initialize
+the remaining hardware and prepare the system for kernel boot.
+
+
+______________________________________________________________________________
+Runtime system
+==============
+
+References
+----------
+t.b.d.
+
+Image recompilation for Xilinx-SP3ADSP1800-MMU-full-12.2:
+---------------------------------------------------------
+ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-12.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.2:
+---------------------------------------------------------
+ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Xilinx-SP3ADSP1800-MMU-full-11.4:
+---------------------------------------------------------
+ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-11.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-11.4:
+---------------------------------------------------------
+ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-11.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+alternative toolchain for PTXdist:
+----------------------------------
+PTXCONF_CROSSCHAIN_VENDOR="Xilinx MicroBlaze Tools v1.0 (20090928.125627)"
+ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
+
+Shortcut: boot with external FDT-Support:
+-----------------------------------------
+dhcp 0x20880000 /sp3adsp1800/oftree
+fdt addr 0x20880000
+fdt list /
+fdt print /
+dhcp 0x20900000 /sp3adsp1800/linuximage.ub
+bootm 0x20900000 - 0x20880000
+
+bootm AF0A0000 - AF080000
+
+Shortcut: boot without external FDT-Support:
+--------------------------------------------
+dhcp 0x20900000 /sp3adsp1800/linuximage.ub
+bootm 0x20900000
+
+Shortcut: write U-Boot XLBLOB into Flash:
+-----------------------------------------
+dhcp 0x20900000 /sp3adsp1800/u-boot-fs.bin
+era AFF80000 AFFDFFFF
+
+cp.b 0x20900000 AFF80000 $filesize
+
+Shortcut: write FDT-BLOB into Flash:
+------------------------------------
+dhcp 0x20880000 /sp3adsp1800/oftree
+FIXME: era <fdt_start> <fdt_end>
+
+FIXME: cp.b 0x20880000 <fdt_start> $filesize
+FIXME: fdt addr <fdt_start>
+fdt list /
+
+Shortcut: write Linux kernel into Flash:
+----------------------------------------
+dhcp 0x20900000 /sp3adsp1800/linuximage.ub
+era AF000000 AF1FFFFF
+
+cp.b 0x20900000 AF000000 $filesize
+imi AF000000
+
+
+______________________________________________________________________________
+Specification of Xilinx Microblaze Reference
+============================================
+
+References
+----------
+ [1] http://www.xilinx.com/tools/microblaze.htm
+ [2] http://www.xilinx.com/products/ipcenter/opb_mdm.htm
+ [3] http://www.xilinx.com/products/ipcenter/LMB_BRAM_Interface_Controller.htm
+ [4] http://www.xilinx.com/products/ipcenter/xps_intc.htm
+ [5] http://www.xilinx.com/products/ipcenter/xps_timer.htm
+ [6] http://www.xilinx.com/products/ipcenter/mpmc.htm
+ [7] http://www.xilinx.com/products/ipcenter/xps_mch_emc.htm
+ [8] http://www.xilinx.com/products/ipcenter/xps_uartlite.htm
+ [9] http://www.xilinx.com/products/ipcenter/xps_uart16550.htm
+[10] http://www.xilinx.com/products/ipcenter/xps_ethernetlite.htm
+[11] http://www.xilinx.com/products/ipcenter/xps_ll_temac.htm
+[12] http://www.xilinx.com/products/ipcenter/xps_gpio.htm
+
+"Full" Platform Specification:
+------------------------------
+  * Microblaze:
+	- 16kB Instruction Cache (line length 8)
+	- 16kB Data Cache (line length 4)
+	- MMU: virtual, full register access, 2 protection zones
+	- Exception Handling
+	- Barrel Shifter
+	- Pattern Comparator
+	- MSR Instruction
+	- MUL32 Multiplicator
+	- Integer Divider
+	- Basic FPU: no FLOAT <--> INT, no SQRT
+	- Debug: 1 PC breakpoint, without read/write watchpoints
+	- PVR: full USER1 and USER2
+
+  * OS related and debug:
+	- 1 JTAG UART, only primary instance: mdm_0
+	- 1 Interrupt Controller, only primary instance: xps_intc_0
+	- 1 Timer (system tick), only primary instance: xps_timer_0
+
+  * UART lines:
+	- only primary instance: xps_uart_0
+	- XPS 16550 UART
+	- interrupt source
+
+  * Network lines:
+	- only primary instance: xps_ether_0
+	- XPS LL TEMAC
+	- Duplex Mode
+	- MDIO support
+	- SDMA access
+	- interrupt source
+
+"Lite" Platform Specification:
+------------------------------
+  * Microblaze:
+	- 2kB Instruction Cache (line length 4)
+	- 2kB Data Cache (line length 4)
+	- MMU: virtual, full register access, 2 protection zones
+	- Exception Handling
+	- Barrel Shifter
+	- Pattern Comparator
+	- MSR Instruction
+	- MUL32 Multiplicator
+	- without Divider
+	- without FPU
+	- Debug: 1 PC breakpoint, without read/write watchpoints
+	- PVR: full USER1 and USER2
+
+  * OS related and debug:
+	- 1 JTAG UART, only primary instance: mdm_0
+	- 1 Interrupt Controller, only primary instance: xps_intc_0
+	- 1 Timer (system tick), only primary instance: xps_timer_0
+
+  * UART lines:
+	- only primary instance: xps_uart_0
+	- XPS UART Lite
+	- 115200 Baud (8N1)
+	- interrupt source
+
+  * Network lines:
+	- only primary instance: xps_ether_0
+	- XPS Ethernet Lite
+	- Duplex Mode
+	- MDIO support
+	- without second Rx/TX buffer
+	- interrupt source
+
+Interrupt priorities:
+---------------------
+[highest]	xps_timer_0
+    |		mpmc_0:sdma_0_rx
+    |		mpmc_0:sdma_0_tx
+    |
+    |		xps_ether_0
+    |		xps_uart_0
+    |
+    v
+ [lowest]
+
+General Purpose I/O enumeration:
+--------------------------------
+[xps_gpio_0]	primary		Reset (software)
+[xps_gpio_1]	secondary	Push Buttons
+[xps_gpio_2]	tertiary	DIP Switches
+[xps_gpio_3]	quatary		LED Lamps
+[xps_gpio_4]	...		first user related gpio port
+
+Linear ROM Mapping (top-down):
+------------------------------
+
+		       16MB	       32MB	       64MB
+  0xB000.0000 --+---------------+---------------+---------------+
+		|		:		:		|
+		|	    U-Boot environment store		| 128kB
+		|		:		:		|
+  0xAFFE.0000 ---- 0x00FE.0000 --- 0x01FE.0000 --- 0x03FE.0000 --
+		|		:		:		|
+		|	       U-Boot image store		| 384kB
+		|		:		:		|
+  0xAFF8.0000 ---- 0x00F8.0000 --- 0x01F8.0000 --- 0x03F8.0000 --
+		|		:		:		|
+		|  13,5MB	:  15,5MB	:  39,5MB	|
+		|		:		:		|
+		|	  OS Kernel/Runtime image store		|
+		|		:		:		|
+		|		:		:		|
+		|		|		:		|
+  0xAF20.0000 ---- 0x0020.0000 -|		:		|
+		|		|		:		|
+		|  2MB		|		:		|
+		|  BPI Bitfile	|		:		|
+		|  (Spartan-3)	|		:		|
+		|		|		|		|
+  0xAF00.0000 --+----------------- 0x0100.0000 -|		|
+				|		|		|
+				|  16MB		|		|
+				|  BPI Bitfile	|		|
+				|  (Virtex-4/5)	|		|
+				|		|		|
+  0xAE00.0000 ----      -      -+---------------|		|
+						|		|
+						|		|
+						|		|
+  0xAD80.0000 ----      -      ---      -      --- 0x0180.0000 --
+						|		|
+						|  24MB		|
+						|  BPI Bitfile	|
+						|  (Virtex-6)	|
+						|		|
+  0xAC00.0000 ----      -      ---      -      -+---------------+
+
+
+Memory Mapping (general for all platforms)
+------------------------------------------
+
+  0xFFFF.FFFF ---31-----------16|15------------0-
+		|				|
+		:				:			   ^
+		:	       gap		:			   |
+		:				:			   |
+		|				|			   |
+  0xB000.0000 ---31-----------16|15------------0----	- -   extensions   - -
+		|				| \ \
+  xps_mch_emc_0	|				| | |  NOR Flash (min.)
+   top aligned	|	Linear ROM Mapping	| |  > 16MB
+  [7]		|				| | |
+  		|				| | /
+		|- - - - - - - - - - - - - - - -|-|-
+		|				| |
+		:				: |  NOR Flash (max.)	   ^
+		:	     reserved		:  > 512MB		   |
+		:				: |			   |
+		|				| /			   |
+  0x9000.0000 ---31-----------16|15------------0--	- -   linear rom   - -
+		|				| \
+  mdm_0		:				: |
+  [2]		:	     reserved		:  > 64kB
+		:				: |
+		|				| |
+	+ 0x10	|- - - - - - - - - - - - - - - -|-|
+		|  Ctrl_reg (8 bit)	   (wo)	| | \
+	+ 0x0C	|- - - - - - - - - - - - - - - -| | |
+  		|  Status_reg (8 Bit)	   (ro)	| | |
+  	+ 0x08	|- - - - - - - - - - - - - - - -| |  > 16B
+  		|  Tx_FIFO (8 bit)	   (wo)	| | |
+	+ 0x04	|- - - - - - - - - - - - - - - -| | |
+		|  Rx_FIFO (8 bit)	   (ro)	| / /
+  0x8FFF.0000 ---31-----------16|15------------0----			   ^
+		|				|			   |
+		:	       gap		:			   |
+		|				|			   |
+  0x8F00.0000 ---31-----------16|15------------0-	- -  onchip debug  - -
+		|				|
+		:	       gap		:
+		|				|
+  0x8B00.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_intc_0	:				: |  System INT-Ctrl.
+   primary	:	     reserved		:  > 64kB
+  [4]		:				: |
+		|				| |
+	+ 0x20	|- - - - - - - - - - - - - - - -|-|-
+		|  MER (2 bit)		   (rw)	| | \
+	+ 0x1C	|- - - - - - - - - - - - - - - -| | |
+  		|  IVR (32 bit)		   (ro)	| | |
+	+ 0x18	|- - - - - - - - - - - - - - - -| | |
+  		|  CIE (2..32 bit)	   (wo)	| | |
+	+ 0x14	|- - - - - - - - - - - - - - - -| | |
+  		|  SIE (2..32 bit)	   (wo)	| | |
+  	+ 0x10	|- - - - - - - - - - - - - - - -| |  > 32B
+  		|  IAR (2..32 bit)	   (wo)	| | |
+	+ 0x0C	|- - - - - - - - - - - - - - - -| | |
+  		|  IER (2..32 bit)	   (rw)	| | |
+	+ 0x08	|- - - - - - - - - - - - - - - -| | |
+  		|  IPR (2..32 bit)	   (ro)	| | |
+	+ 0x04	|- - - - - - - - - - - - - - - -| | |
+		|  ISR (2..32 bit)	   (rw)	| / /
+  0x8AFF.0000 ---31-----------16|15------------0----
+		|				| \
+  xps_intc_1	:				: |
+   secondary	:	  see xps_intc_0	:  > 64kB
+  [4]		:	   (optionally)		: |
+		|				| /
+  0x8AFE.0000 ---31-----------16|15------------0--
+		|				|
+		:	 gap / more intc	:
+		|				|
+  0x8AF0.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_timer_0	:				: |  System Tick Timer
+   primary	:	     reserved		:  > 64kB
+  [5]		:				: |
+		|				| |
+	+ 0x20	|- - - - - - - - - - - - - - - -|-|-
+		|		     (reserved)	| | \
+	+ 0x1C	|- - - - - - - - - - - - - - - -| | |
+  		|  TCR1 (32 bit)	   (ro)	| | |
+	+ 0x18	|- - - - - - - - - - - - - - - -| | |
+  		|  TLR1 (32 bit)	   (rw)	| | |
+	+ 0x14	|- - - - - - - - - - - - - - - -| | |
+  		|  TCSR1 (32 bit)	   (rw)	| | |
+  	+ 0x10	|- - - - - - - - - - - - - - - -| |  > 32B
+  		|		     (reserved)	| | |
+	+ 0x0C	|- - - - - - - - - - - - - - - -| | |
+  		|  TCR0 (32 bit)	   (ro)	| | |
+	+ 0x08	|- - - - - - - - - - - - - - - -| | |
+  		|  TLR0 (32 bit)	   (rw)	| | |
+	+ 0x04	|- - - - - - - - - - - - - - - -| | |
+		|  TCSR0 (32 bit)	   (rw)	| / /
+  0x8AEF.0000 ---31-----------16|15------------0----
+		|				| \
+  xps_timer_1	:				: |
+   secondary	:	  see xps_timer_0	:  > 64kB
+  [5]		:	   (optionally)		: |
+		|				| /
+  0x8AEE.0000 ---31-----------16|15------------0--
+		|				|
+		:	 gap / more timer	:
+		|				|
+  0x8AE0.0000 ---31-----------16|15------------0--
+		|				| \
+  :sdma_ctrl_0	:				: |  System SDMA
+   primary	:	     reserved		:  > 64kB
+  [6]		:				: |
+		|				| |
+       + 0x400	|- - - - - - - - - - - - - - - -| |
+		|  Port 7	(if configured)	| |
+       + 0x380	|- - - - - - - - - - - - - - - -| |
+		|  Port 6	(if configured)	| |
+       + 0x300	|- - - - - - - - - - - - - - - -| |
+		|  Port 5	(if configured)	| |
+       + 0x280	|- - - - - - - - - - - - - - - -| |
+		|  Port 4	(if configured)	| |
+       + 0x200	|- - - - - - - - - - - - - - - -| |
+		|  Port 3	(if configured)	| |
+       + 0x180	|- - - - - - - - - - - - - - - -| |
+		|  Port 2	(if configured)	| |
+       + 0x100	|- - - - - - - - - - - - - - - -| |
+		|  Port 1	(if configured)	| |
+       + 0x080	|- - - - - - - - - - - - - - - -| |
+		|				| |
+		:	     reserved		: |
+		|				| |
+	+ 0x44	|- - - - - - - - - - - - - - - -|-|-
+		|  DMA Ctrl Reg (32 bit)   (rw)	| | \
+	+ 0x40	|- - - - - - - - - - - - - - - -| | |
+  		|  RX_CHNL_STS (32 bit)	   (ro)	| | |
+	+ 0x3C	|- - - - - - - - - - - - - - - -| | |
+  		|  RX_IRQ_REG (32 bit)	   (rw)	| | |
+	+ 0x38	|- - - - - - - - - - - - - - - -| | |
+  		|  RX_CHNL_CTRL (32 bit)   (rw)	| | |
+	+ 0x34	|- - - - - - - - - - - - - - - -| | |
+  		|  RX_TAILDESC_PTR (32 bit)(rw)	| | |
+	+ 0x30	|- - - - - - - - - - - - - - - -| | |
+  		|  RX_CURDESC_PTR (32 bit) (rw)	| | |
+	+ 0x2C	|- - - - - - - - - - - - - - - -| | |
+  		|  RX_CURBUF_LENG (32 bit) (ro)	| | |
+	+ 0x28	|- - - - - - - - - - - - - - - -| | |
+  		|  RX_CURBUF_ADDR (32 bit) (ro)	| | |
+	+ 0x24	|- - - - - - - - - - - - - - - -| | |  Port 0
+  		|  RX_NXTDESC_PTR (32 bit) (ro)	| |  > 68B
+  	+ 0x20	|- - - - - - - - - - - - - - - -| | |
+  		|  TX_CHNL_STS (32 bit)    (ro)	| | |
+	+ 0x1C	|- - - - - - - - - - - - - - - -| | |
+  		|  TX_IRQ_REG (32 bit)     (rw)	| | |
+	+ 0x18	|- - - - - - - - - - - - - - - -| | |
+  		|  TX_CHNL_CTRL (32 bit)   (rw)	| | |
+	+ 0x14	|- - - - - - - - - - - - - - - -| | |
+  		|  TX_TAILDESC_PTR (32 bit)(rw)	| | |
+	+ 0x10	|- - - - - - - - - - - - - - - -| | |
+  		|  TX_CURDESC_PTR (32 bit) (rw)	| | |
+	+ 0x0C	|- - - - - - - - - - - - - - - -| | |
+  		|  TX_CURBUF_LENG (32 bit) (ro)	| | |
+	+ 0x08	|- - - - - - - - - - - - - - - -| | |
+  		|  TX_CURBUF_ADDR (32 bit) (ro)	| | |
+	+ 0x04	|- - - - - - - - - - - - - - - -| | |
+		|  TX_NXTDESC_PTR (32 bit) (ro)	| / /
+  0x8ADF.0000 ---31-----------16|15------------0----
+		|				| \
+  :sdma_ctrl_1	:				: |
+   secondary	:	  see :sdma_ctrl_0	:  > 64kB
+  [6]		:	   (optionally)		: |
+		|				| /
+  0x8ADE.0000 ---31-----------16|15------------0--
+		|				|
+		:	 gap / more sdma	:
+		|				|
+  0x8AD0.0000 ---31-----------16|15------------0--			   ^
+		|				|			   |
+		:	       gap		:			   |
+		|				|			   |
+  0x8A00.0000 ---31-----------16|15------------0--	- -   OS related   - -
+		|				| \
+  xps_uart_0	:				: |  System Console
+   primary	:	     reserved		:  > 64kB
+  [8],[9]	:				: |
+		|				| |
+		| +----.----.			| |
+		| |  0 \   1 \	<-- LCR(7)	| |
+      + 0x1020	|- - - - - - - - - - - - - - - -|-|-
+		| |    SCR    | (8 bit)    (rw)	| | \
+      + 0x101C	|- - - - - - - - - - - - - - - -| | |
+		| |    MSR    | (8 bit)    (rw)	| | |
+      + 0x1018	|- - - - - - - - - - - - - - - -| | |
+		| |    LSR    | (8 bit)    (rw)	| | |
+      + 0x1014	|- - - - - - - - - - - - - - - -| | |
+		| |    MCR    | (8 bit)    (rw)	| | |  XPS 16550 UART
+      + 0x1010	|- - - - - - - - - - - - - - - -| |  > 32B
+		| |    LCR    | (8 bit)    (rw)	| | |
+      + 0x100C	|- - - - - - - - - - - - - - - -| | |
+		| | IIR | FCR | (8 bit) (ro|rw)	| | |
+      + 0x1008	|- - - - - - - - - - - - - - - -| | |
+		| | IER | DLM | (8 bit) (rw|rw)	| | |
+      + 0x1004	|- - - - - - - - - - - - - - - -| | |
+		| | RTR | DLL | (8 bit) (rw|rw)	| | /  (RTR=RBR/THR)
+      + 0x1000	|- - - - - - - - - - - - - - - -|-|-
+		|				| |
+		:	     reserved		: |
+		|				| |
+	+ 0x10	|- - - - - - - - - - - - - - - -|-|-
+		|  CTRL_REG (8 bit)	   (wo)	| | \
+	+ 0x0C	|- - - - - - - - - - - - - - - -| | |
+  		|  STAT_REG (8 Bit)	   (ro)	| | |  XPS UART Lite
+  	+ 0x08	|- - - - - - - - - - - - - - - -| |  > 16B
+  		|  Tx_FIFO (8 bit)	   (wo)	| | |
+	+ 0x04	|- - - - - - - - - - - - - - - -| | |
+		|  Rx_FIFO (8 bit)	   (ro)	| / /
+  0x89FF.0000 ---31-----------16|15------------0----
+		|				| \
+  xps_uart_1	:				: |
+   secondary	:	  see xps_uart_0	:  > 64kB
+  [8],[9]	:	   (optionally)		: |
+		|				| /
+  0x89FE.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_uart_2	:				: |
+   tertiary	:	  see xps_uart_0	:  > 64kB
+  [8],[9]	:	   (optionally)		: |
+		|				| /
+  0x89FD.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_uart_3	:				: |
+   quatary	:	  see xps_uart_0	:  > 64kB
+  [8],[9]	:	   (optionally)		: |
+		|				| /
+  0x89FC.0000 ---31-----------16|15------------0--			   ^
+		|				|			   |
+		:	gap / more serial	:			   |
+		|				|			   |
+  0x8900.0000 ---31-----------16|15------------0--	- -   UART lines   - -
+		|				| \
+  xps_ether_0	:				: |  System Network I/F
+   primary	:	     reserved		:  > 1MB
+  [10],[11]	:				: |
+		|				| |
+    + 0x8.0000	|- - - - - - - -|-      -      -|-|-
+		|  TEMAC1 MCAT	|		| | \
+    + 0x6.0000	|- - - - - - - -|		| | |
+		|  (reserved)	|		| | |
+    + 0x5.0000	|- - - - - - - -|		| | |
+		|  TEMAC1 RxVDT	|		| | |
+    + 0x4.8000	|- - - - - - - -|		| | |
+		|  TEMAC1 TxVDT	|		| | |
+    + 0x4.4000	|- - - - - - - -|		| | |
+		|  TEMAC1 Stat.	|		| | |  XPS LL TEMAC
+    + 0x4.0200	|- - - - - - - -|		| |  > 512kB
+		|  TEMAC0 MCAT	|		| | |
+    + 0x2.0000	|- - - - - - - -|		| | |
+		|  (reserved)	|		| | |
+    + 0x1.0000	|- - - - - - - -|		| | |
+		|  TEMAC0 RxVDT	|		| | |
+    + 0x0.8000	|- - - - - - - -|		| | |
+		|  TEMAC0 TxVDT	|		| | |
+    + 0x0.4000	|- - - - - - - -|		| | |
+		|		|		| | |
+      + 0x2000	|-      -      -|- - - - - - - -|-|-|-
+		|		|  Rx PONG Buf.	| | | \
+      + 0x1800	|-      -      -|- - - - - - - -| | | |
+		|		|  Rx PING Buf.	| | | |
+      + 0x1000	|-      -      -|- - - - - - - -| | | |
+		|  (reserved)	|  Tx PONG Buf.	| | | |
+      + 0x0800	|-      -      -|- - - - - - - -| | | |
+		|		|  Tx Reg.	| | | |
+      + 0x07F4	|-      -      -|- - - - - - - -| | | |
+		|		|  MDIO Reg.	| | | |  XPS Ethernet Lite
+      + 0x07E4	|-      -      -|- - - - - - - -| | |  > 8kB
+		|		|		| | | |
+      + 0x0400	|- - - - - - - -|		| | | |
+		|  TEMAC0 Stat.	|		| | | |
+      + 0x0200	|- - - - - - - -|		| | | |
+		|  (reserved)	|  Tx PING Buf.	| | | |
+      + 0x0080	|- - - - - - - -|		| | | |
+		|  TEMAC1 Reg.	|		| | | |
+      + 0x0040	|- - - - - - - -|		| | | |
+		|  TEMAC0 Reg.	|		| / / /
+  0x88F0.0000 ---31-----------16|15------------0------
+		|				| \
+  xps_ether_1	:				: |
+   secondary	:	  see xps_ether_0	:  > 1MB
+  [10],[11]	:	   (optionally)		: |
+		|				| /
+  0x88E0.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_ether_2	:				: |
+   tertiary	:	  see xps_ether_0	:  > 1MB
+  [10],[11]	:	   (optionally)		: |
+		|				| /
+  0x88D0.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_ether_3	:				: |
+   quatary	:	  see xps_ether_0	:  > 1MB
+  [10],[11]	:	   (optionally)		: |
+		|				| /
+  0x88C0.0000 ---31-----------16|15------------0--			   ^
+		|				|			   |
+		:	gap / more serial	:			   |
+		|				|			   |
+  0x8800.0000 ---31-----------16|15------------0--	- -  network lines - -
+		|				|
+		:	       gap		:
+		|				|
+  0x8100.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_gpio_0	:				: |  Reset (software)
+   primary	:	     reserved		:  > 64kB
+  [12]		:				: |
+		|				| |
+	+ 0x10	|- - - - - - - - - - - - - - - -|-|-
+		|  GPIO2_TRI (8 bit)	   (wo)	| | \
+	+ 0x0C	|- - - - - - - - - - - - - - - -| | |
+  		|  GPIO2_DATA (8 Bit)	   (ro)	| | |
+  	+ 0x08	|- - - - - - - - - - - - - - - -| |  > 16B
+  		|  GPIO_TRI (8 bit)	   (wo)	| | |
+	+ 0x04	|- - - - - - - - - - - - - - - -| | |
+		|  GPIO_DATA (8 bit)	   (ro)	| / /
+  0x80FF.0000 ---31-----------16|15------------0----
+		|				| \
+  xps_gpio_1	:				: |  Push Buttons
+   secondary	:	  see xps_gpio_0	:  > 64kB
+  [12]		:	   (optionally)		: |
+		|				| /
+  0x80FE.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_gpio_2	:				: |  DIP Switches
+   tertiary	:	  see xps_gpio_0	:  > 64kB
+  [12]		:	   (optionally)		: |
+		|				| /
+  0x80FD.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_gpio_3	:				: |  LED Lamps
+   quatary	:	  see xps_gpio_0	:  > 64kB
+  [12]		:	   (optionally)		: |
+		|				| /
+  0x80FC.0000 ---31-----------16|15------------0--			   ^
+		|				|			   |
+		:	  gap / more gpio	:			   |
+		|				|			   |
+  0x8000.0000 ---31-----------16|15------------0--	- -      gpio      - -
+		|				|
+		:	       gap		:
+		|				|
+  0x6000.0000 ---31-----------16|15------------0--
+		|				| \  SDRAM/DDR/LPDDR
+  mpmc_0	|				| |  DDR2/DDR3		   ^
+   bottom alig.	|				|  > 1GB		   |
+  [6]		|				| |			   |
+		|				| /			   |
+  0x2000.0000 ---31-----------16|15------------0--	- -   linear ram   - -
+		|				|
+		:	       gap		:
+		|				|
+  0x0001.0000 ---31-----------16|15------------0--
+		|				| \
+  dlmb_cntrl	:				: |
+  ilmb_cntrl	:	     reserved		:  > 64kB
+  [3]		:				: |
+		|				| |
+      + 0x8000	|- - - - - - - - - - - - - - - -|-|-
+		|				| | \
+		|				| | |  maximal
+		|				| |  > 32kB
+		|				| | |
+		|				| | |
+      + 0x4000	|- - - - - - - - - - - - - - - -|-|-|-
+		|				| | | \
+		|				| | | |  medium
+		|				| | |  > 16kB
+		|				| | | |
+		|				| | | |
+      + 0x2000	|- - - - - - - - - - - - - - - -|-|-|-|-
+		|				| | | | \
+		|	 First Stage Boot	| | | | |  minimal	   ^
+		|				| | | |  > 8kB		   |
+	+ 0x50	|--> reset vector		| | | | |		   |
+		|				| / / / /		   |
+  0x0000.0000 ---31-----------16|15------------0--	- -    block ram   - -
+
+
+
+
+
+
+
+
+
+
+
