@@ -1,3 +1,7 @@
+2010-11-08	Stephan Linz <linz@li-pro.net>
+
+	* git: add *.swp patterns to .gitignore
+
 2010-10-10	Stephan Linz <linz@li-pro.net>
 
 	* common: initial import in git and first light on http://gitorious.org/oselas
