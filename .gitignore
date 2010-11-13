@@ -1,4 +1,7 @@
 # Template .gitignore file for project
+selected_*
+platform-*
+logfile
 *.swp
 *.bak
 *.log
