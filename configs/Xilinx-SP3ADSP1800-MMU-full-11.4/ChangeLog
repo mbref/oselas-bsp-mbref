@@ -1,3 +1,7 @@
+2010-11-13	Stephan Linz <linz@li-pro.net>
+
+	* platform: adapt fsblob to real flash partition, fsblob at 0xaff80000
+
 2010-10-10	Stephan Linz <linz@li-pro.net>
 
 	* common: initial import in git and first light on http://gitorious.org/oselas
