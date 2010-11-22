@@ -1,0 +1,12 @@
+# @20101117 from http://git.denx.de/?p=u-boot/u-boot-microblaze.git;a=summary
+tip20101116/v2010.12-rc1-tip20101116.patch
+microblaze-tip20101117/0001-net-Add-LL-TEMAC-driver-to-u-boot.patch
+microblaze-tip20101117/0002-romfs-Add-ROMFS-implementation.patch
+microblaze-tip20101117/0003-microblaze-Remove-bad-eth-board-description-C-P-f.patch
+microblaze-tip20101117/0004-microblaze-Enable-several-network-drivers.patch
+
+# MB-Ref changes, maybe coming up in parts into mainstream
+0001-microblaze-generic-enable-FDT-support.patch
+0002-net-fix-some-bugs-in-LL-TEMAC-driver.patch
+0003-net-Add-National-DP83865-PHY-to-LL-TEMAC-driver.patch
+0004-microblaze-generic-move-ENV-onto-top-of-flash.patch
