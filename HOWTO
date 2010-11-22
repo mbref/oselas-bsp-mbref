@@ -103,6 +103,7 @@ dhcp 0x20880000 /sp3adsp1800/oftree
 fdt addr 0x20880000
 fdt list /
 fdt print /
+dcache off
 dhcp 0x20900000 /sp3adsp1800/linuximage.ub
 bootm 0x20900000 - 0x20880000
 
