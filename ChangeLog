@@ -3,6 +3,7 @@
 	* common: HOWTO: recommending ethernet download without data cache
 	* common: upgarde patch sets to u-boot-2010.12-rc1
 	* common: upgarde patch sets to linux-2.6.31.13 based on petalinux-tip20101112
+	* common: introduce private udev init script to avoid settle timeout errors
 
 2010-11-13	Stephan Linz <linz@li-pro.net>
 
