@@ -4,6 +4,7 @@
 	* ptxconfig: enable busybox hexdump
 	* common: HOWTO: makes the non-udev configuration as default
 	* common: add a FIXME hint to the private udev init script
+	* common: adapt I2C patch sets to linux-2.6.31.13
 
 2010-11-22	Stephan Linz <linz@li-pro.net>
 

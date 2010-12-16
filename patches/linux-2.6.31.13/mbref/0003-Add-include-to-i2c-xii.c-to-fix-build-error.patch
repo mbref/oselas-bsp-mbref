@@ -1,0 +1,39 @@
+From 6922e527cb8e106ce5b705ef62c6de2a5e19febf Mon Sep 17 00:00:00 2001
+Message-Id: <6922e527cb8e106ce5b705ef62c6de2a5e19febf.1292516159.git.linz@li-pro.net>
+In-Reply-To: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1292516159.git.linz@li-pro.net>
+References: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1292516159.git.linz@li-pro.net>
+From: Randy Dunlap <randy.dunlap@oracle.com>
+Date: Thu, 4 Feb 2010 12:11:09 -0800
+Subject: [PATCH 3/5] Add include to i2c-xii.c to fix build error
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+drivers/i2c/busses/i2c-xiic.c:493: error: implicit declaration of function 'mdelay'
+
+Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
+Cc: "Richard Röjfors" <richard.rojfors@pelagicore.com>
+Cc: "Ben Dooks (embedded platforms)" <ben-linux@fluff.org>
+Cc: linux-i2c@vger.kernel.org
+Signed-off-by: Stephen Rothwell <sfr@canb.auug.org.au>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/i2c/busses/i2c-xiic.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/i2c/busses/i2c-xiic.c b/drivers/i2c/busses/i2c-xiic.c
+index eece39a..f0ef8da 100644
+--- a/drivers/i2c/busses/i2c-xiic.c
++++ b/drivers/i2c/busses/i2c-xiic.c
+@@ -32,6 +32,7 @@
+ #include <linux/module.h>
+ #include <linux/init.h>
+ #include <linux/errno.h>
++#include <linux/delay.h>
+ #include <linux/platform_device.h>
+ #include <linux/i2c.h>
+ #include <linux/interrupt.h>
+-- 
+1.6.0.4
+

@@ -1,0 +1,76 @@
+From c56b6ee9a44cdc3c7911ce07e36369c640c56310 Mon Sep 17 00:00:00 2001
+Message-Id: <c56b6ee9a44cdc3c7911ce07e36369c640c56310.1292516159.git.linz@li-pro.net>
+In-Reply-To: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1292516159.git.linz@li-pro.net>
+References: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1292516159.git.linz@li-pro.net>
+From: =?utf-8?q?Richard=20R=C3=B6jfors?= <richard.rojfors@pelagicore.com>
+Date: Tue, 9 Mar 2010 09:17:36 +0100
+Subject: [PATCH 2/5] Add the platform data include for the Xilinx XPS IIC Bus Interface
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+This file was missed in the original patch that went into Linus' tree.
+
+Cc: "Ben Dooks (embedded platforms)" <ben-linux@fluff.org>
+Cc: linux-i2c@vger.kernel.org
+Signed-off-by: Richard Röjfors <richard.rojfors@pelagicore.com>
+Signed-off-by: Stephen Rothwell <sfr@canb.auug.org.au>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/linux/i2c-xiic.h |   43 +++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 43 insertions(+), 0 deletions(-)
+ create mode 100644 include/linux/i2c-xiic.h
+
+diff --git a/include/linux/i2c-xiic.h b/include/linux/i2c-xiic.h
+new file mode 100644
+index 0000000..4f9f225
+--- /dev/null
++++ b/include/linux/i2c-xiic.h
+@@ -0,0 +1,43 @@
++/*
++ * i2c-xiic.h
++ * Copyright (c) 2009 Intel Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++ */
++
++/* Supports:
++ * Xilinx IIC
++ */
++
++#ifndef _LINUX_I2C_XIIC_H
++#define _LINUX_I2C_XIIC_H
++
++/**
++ * struct xiic_i2c_platform_data - Platform data of the Xilinx I2C driver
++ * @num_devices:	Number of devices that shall be added when the driver
++ *			is probed.
++ * @devices:		The actuall devices to add.
++ *
++ * This purpose of this platform data struct is to be able to provide a number
++ * of devices that should be added to the I2C bus. The reason is that sometimes
++ * the I2C board info is not enough, a new PCI board can for instance be
++ * plugged into a standard PC, and the bus number might be unknown at
++ * early init time.
++ */
++struct xiic_i2c_platform_data {
++	u8				num_devices;
++	struct i2c_board_info const	*devices;
++};
++
++#endif /* _LINUX_I2C_XIIC_H */
+-- 
+1.6.0.4
+

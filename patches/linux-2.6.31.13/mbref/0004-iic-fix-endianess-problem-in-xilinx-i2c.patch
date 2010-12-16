@@ -1,0 +1,83 @@
+From 261bdccf88df9b86e83a881e31b87557c5d3beb5 Mon Sep 17 00:00:00 2001
+Message-Id: <261bdccf88df9b86e83a881e31b87557c5d3beb5.1292516159.git.linz@li-pro.net>
+In-Reply-To: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1292516159.git.linz@li-pro.net>
+References: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1292516159.git.linz@li-pro.net>
+From: Stephan Linz <linz@li-pro.net>
+Date: Mon, 13 Dec 2010 15:32:05 +0100
+Subject: [PATCH 4/5] iic: fix endianess problem in xilinx i2c
+
+Fast fix to get mailine i2c driver to work on BE systems.
+The problem is the mailine i2c driver was written for a
+big endian controller connected to a little endian cpu
+(Intel Atom) without focus of different endianess. Every
+8 and 16 bit access have to use a address calculation
+depending on the cpu endianess.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/i2c/busses/i2c-xiic.c |   29 +++++++++++++++++++++++++++++
+ 1 files changed, 29 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/i2c/busses/i2c-xiic.c b/drivers/i2c/busses/i2c-xiic.c
+index f0ef8da..582e851 100644
+--- a/drivers/i2c/busses/i2c-xiic.c
++++ b/drivers/i2c/busses/i2c-xiic.c
+@@ -40,6 +40,8 @@
+ #include <linux/i2c-xiic.h>
+ #include <linux/io.h>
+ 
++#include <asm/byteorder.h>
++
+ #define DRIVER_NAME "xiic-i2c"
+ 
+ enum xilinx_i2c_state {
+@@ -172,19 +174,46 @@ struct xiic_i2c {
+ static void xiic_start_xfer(struct xiic_i2c *i2c);
+ static void __xiic_start_xfer(struct xiic_i2c *i2c);
+ 
++/* set highes byte of given iic ctrl register */
+ static inline void xiic_setreg8(struct xiic_i2c *i2c, int reg, u8 value)
+ {
++#ifdef __LITTLE_ENDIAN
++	/* little endian cpu --> highest byte is on base address */
+ 	iowrite8(value, i2c->base + reg);
++#elif __BIG_ENDIAN
++	/* big endian cpu --> highest byte is on offset 3 */
++	iowrite8(value, i2c->base + reg + 3);
++#else
++#error wrong endianess
++#endif
+ }
+ 
++/* get highes byte of given iic ctrl register */
+ static inline u8 xiic_getreg8(struct xiic_i2c *i2c, int reg)
+ {
++#ifdef __LITTLE_ENDIAN
++	/* little endian cpu --> highest byte is on base address */
+ 	return ioread8(i2c->base + reg);
++#elif __BIG_ENDIAN
++	/* big endian cpu --> highest byte is on offset 3 */
++	return ioread8(i2c->base + reg + 3);
++#else
++#error wrong endianess
++#endif
+ }
+ 
++/* set highes word of given iic ctrl register */
+ static inline void xiic_setreg16(struct xiic_i2c *i2c, int reg, u16 value)
+ {
++#ifdef __LITTLE_ENDIAN
++	/* little endian cpu --> highest word is on base address */
+ 	iowrite16(value, i2c->base + reg);
++#elif __BIG_ENDIAN
++	/* big endian cpu --> highest byte is on offset 2 */
++	iowrite16(value, i2c->base + reg + 2);
++#else
++#error wrong endianess
++#endif
+ }
+ 
+ static inline void xiic_setreg32(struct xiic_i2c *i2c, int reg, int value)
+-- 
+1.6.0.4
+
