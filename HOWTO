@@ -107,7 +107,7 @@ ptxdist select configs/ptxconfig
 
 alternative toolchain for PTXdist:
 ----------------------------------
-PTXCONF_CROSSCHAIN_VENDOR="PetaLogix MicroBlaze Tools v1.0 (20100604.030053)"
+PTXCONF_CROSSCHAIN_VENDOR="PetaLogix MicroBlaze Tools v1.0 (20101201.011750)"
 ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 
 Shortcut: boot with external FDT-Support:
@@ -124,14 +124,17 @@ bootm AF0A0000 - AF080000
 
 Shortcut: boot without external FDT-Support:
 --------------------------------------------
+dhcp 0x20900000 /ml605/linuximage.ub
 dhcp 0x20900000 /sp3adsp1800/linuximage.ub
+
 bootm 0x20900000
 
 Shortcut: write U-Boot XLBLOB into Flash:
 -----------------------------------------
+dhcp 0x20900000 /ml605/u-boot-fs.bin
 dhcp 0x20900000 /sp3adsp1800/u-boot-fs.bin
-era AFF80000 AFFDFFFF
 
+era AFF80000 AFFDFFFF
 cp.b 0x20900000 AFF80000 $filesize
 
 Shortcut: write FDT-BLOB into Flash:
@@ -170,6 +173,7 @@ References
 [10] http://www.xilinx.com/products/ipcenter/xps_ethernetlite.htm
 [11] http://www.xilinx.com/products/ipcenter/xps_ll_temac.htm
 [12] http://www.xilinx.com/products/ipcenter/xps_gpio.htm
+[13] http://www.xilinx.com/products/ipcenter/xps_iic.htm
 
 "Full" Platform Specification:
 ------------------------------
@@ -249,8 +253,17 @@ Interrupt priorities:
     |		xps_ether_0
     |		xps_uart_0
     |
+    |		xps_iic_0
+    |
     v
  [lowest]
+
+I2C enumeration:
+----------------
+[xps_iic_0]	primary		System, on-board (RTC, EEPROM, DIMM)
+[xps_iic_1]	secondary	Communication, on-board (SFP)
+[xps_iic_2]	tertiary	Periphery, external (DVI)
+[xps_iic_3]	...		first user related i2c port
 
 General Purpose I/O enumeration:
 --------------------------------
@@ -650,7 +663,67 @@ Memory Mapping (general for all platforms)
 		|				|			   |
 		:	  gap / more gpio	:			   |
 		|				|			   |
-  0x8000.0000 ---31-----------16|15------------0--	- -      gpio      - -
+  0x80F0.0000 ---31-----------16|15------------0--	- -      gpio      - -
+		|				| \
+  xps_iic_0	:				: |  System, on-board
+   primary	:	     reserved		:  > 64kB
+  [13]		:				: |
+		|				| |
+	+ 0x120	|- - - - - - - - - - - - - - - -|-|-
+		|  TEN_ADR (8 bit)	   (rw)	| | \
+	+ 0x11C	|- - - - - - - - - - - - - - - -| | |
+  		|  Rc_FIFO_OCY (8 bit)	   (ro)	| | |
+	+ 0x118	|- - - - - - - - - - - - - - - -| | |
+  		|  Tx_FIFO_OCY (8 bit)	   (ro)	| | |
+	+ 0x114	|- - - - - - - - - - - - - - - -| | |
+  		|  ADR (8 bit)		   (rw)	| | |
+	+ 0x110	|- - - - - - - - - - - - - - - -| | |
+  		|  Rc_FIFO (8 bit)	   (ro)	| | |
+	+ 0x10C	|- - - - - - - - - - - - - - - -| | |
+  		|  Tx_FIFO (16 bit)	   (rw)	| | |
+	+ 0x108	|- - - - - - - - - - - - - - - -| | |
+  		|  SR (8 bit)		   (ro)	| | |
+	+ 0x104	|- - - - - - - - - - - - - - - -| | |
+  		|  CR (8 bit)		   (rw)	| | |
+	+ 0x100	|- - - - - - - - - - - - - - - -| | |
+		|				| | |
+		|		     (reserved)	| | |
+		|				| |  > 288B
+	+ 0x044	|- - - - - - - - - - - - - - - -| | |
+  		|  SOFTR (8 bit)	   (wo)	| | |
+	+ 0x040	|- - - - - - - - - - - - - - - -| | |
+		|				| | |
+		|		     (reserved)	| | |
+		|				| | |
+	+ 0x02C	|- - - - - - - - - - - - - - - -| | |
+  		|  IER (8 Bit)		   (rw)	| | |
+  	+ 0x028	|- - - - - - - - - - - - - - - -| | |
+  		|		     (reserved)	| | |
+	+ 0x024	|- - - - - - - - - - - - - - - -| | |
+  		|  ISR (8 bit)		   (rw)	| | |
+	+ 0x020	|- - - - - - - - - - - - - - - -| | |
+		|  GIE (32 bit)		   (rw)	| | |
+	+ 0x01C	|- - - - - - - - - - - - - - - -| | |
+		|				| | |
+		|		     (reserved)	| | |
+		|				| / /
+  0x80EF.0000 ---31-----------16|15------------0----
+		|				| \
+  xps_iic_1	:				: |  Communication, on-board
+   secondary	:	  see xps_iic_0		:  > 64kB
+  [13]		:	   (optionally)		: |
+		|				| /
+  0x80EE.0000 ---31-----------16|15------------0--
+		|				| \
+  xps_iic_2	:				: |  Periphery, external
+   tertiary	:	  see xps_iic_0		:  > 64kB
+  [13]		:	   (optionally)		: |
+		|				| /
+  0x80ED.0000 ---31-----------16|15------------0--			   ^
+		|				|			   |
+		:	  gap / more iic	:			   |
+		|				|			   |
+  0x80E0.0000 ---31-----------16|15------------0--	- -      iic       - -
 		|				|
 		:	       gap		:
 		|				|

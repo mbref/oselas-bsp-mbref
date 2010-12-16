@@ -3,6 +3,7 @@
 	* ptxconfig: enable i2ctools and introduce a non-udev configuration
 	* ptxconfig: enable busybox hexdump
 	* common: HOWTO: makes the non-udev configuration as default
+	* common: HOWTO: more documentation for xps_iic
 	* common: add a FIXME hint to the private udev init script
 	* common: adapt I2C patch sets to linux-2.6.31.13
 
