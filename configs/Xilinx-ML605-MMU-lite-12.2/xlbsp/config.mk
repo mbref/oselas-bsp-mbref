@@ -35,7 +35,5 @@ PLATFORM_CPPFLAGS += -mno-xl-soft-mul
 PLATFORM_CPPFLAGS += -mcpu=v7.30.b
 
 # Automatic U-Boot position at 0x2ff00000
-TEXT_BASE = 0x2ff00000
-
-# I2C controller not defined
+CONFIG_SYS_TEXT_BASE = 0x2ff00000
 

@@ -1,3 +1,10 @@
+2010-12-16	Stephan Linz <linz@li-pro.net>
+
+	* platform: change version to 2010.12
+	* platform: upgarde to u-boot-2010.12-rc1
+	* platform: upgrade to kernel 2.6.31.13 and enable I2C/SPI support
+	* xlbsp: new I2C support
+
 2010-10-31	Stephan Linz <linz@li-pro.net>
 
 	* common: initial version Xilinx-ML605-MMU-lite-12.2
