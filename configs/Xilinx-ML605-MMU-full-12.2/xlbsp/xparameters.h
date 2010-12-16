@@ -44,7 +44,8 @@
 
 /* Interrupt controller is xps_intc_0 */
 #define XILINX_INTC_BASEADDR                     0x8AFF0000
-#define XILINX_INTC_NUM_INTR_INPUTS              8
+#define XILINX_INTC_NUM_INTR_INPUTS              9
+/* xps_iic_0_IIC2INTC_Irpt */
 /* PCIe_Bridge_IP2INTC_Irpt */
 /* xps_sysace_0_SysACE_IRQ */
 /* xps_ether_0_TemacIntc0_Irpt */
@@ -71,7 +72,10 @@
 #define XILINX_UART16550_BASEADDR                0x89FF0000
 #define XILINX_UART16550_CLOCK_HZ                100000000
 
-/* I2C controller not defined */
+/* I2C controller is xps_iic_0 */
+#define XILINX_IIC_0_FREQ                        100000
+#define XILINX_IIC_0_BIT                         0
+#define XILINX_IIC_0_BASEADDR                    0x80EF0000
 
 /* GPIO controller is xps_gpio_3 */
 #define XILINX_GPIO_BASEADDR                     0x80FC0000

@@ -1,3 +1,8 @@
+2010-12-16	Stephan Linz <linz@li-pro.net>
+
+	* platform: enable I2C/SPI support in linux-2.6.31.13
+	* xlbsp: new I2C support
+
 2010-11-22	Stephan Linz <linz@li-pro.net>
 
 	* platform: change version to 2010.12

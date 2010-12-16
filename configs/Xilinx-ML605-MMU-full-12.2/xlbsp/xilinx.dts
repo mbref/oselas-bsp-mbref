@@ -480,13 +480,26 @@
 			xlnx,tri-default = <0xffffffff>;
 			xlnx,tri-default-2 = <0xffffffff>;
 		} ;
+		xps_iic_0: i2c@80ef0000 {
+			compatible = "xlnx,xps-iic-2.03.a", "xlnx,xps-iic-2.00.a";
+			interrupt-parent = <&xps_intc_0>;
+			interrupts = < 8 2 >;
+			reg = < 0x80ef0000 0x10000 >;
+			xlnx,clk-freq = <0x5f5e100>;
+			xlnx,family = "virtex6";
+			xlnx,gpo-width = <0x1>;
+			xlnx,iic-freq = <0x186a0>;
+			xlnx,scl-inertial-delay = <0x5>;
+			xlnx,sda-inertial-delay = <0x5>;
+			xlnx,ten-bit-adr = <0x0>;
+		} ;
 		xps_intc_0: interrupt-controller@8aff0000 {
 			#interrupt-cells = <0x2>;
 			compatible = "xlnx,xps-intc-2.01.a", "xlnx,xps-intc-1.00.a";
 			interrupt-controller ;
 			reg = < 0x8aff0000 0x10000 >;
 			xlnx,kind-of-intr = <0x10>;
-			xlnx,num-intr-inputs = <0x8>;
+			xlnx,num-intr-inputs = <0x9>;
 		} ;
 		xps_sysace_0: sysace@83600000 {
 			compatible = "xlnx,xps-sysace-1.01.a", "xlnx,xps-sysace-1.00.a";
