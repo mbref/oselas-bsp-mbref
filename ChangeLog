@@ -1,6 +1,7 @@
 2010-12-16	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: enable i2ctools and introduce a non-udev configuration
+	* ptxconfig: enable busybox hexdump
 	* common: HOWTO: makes the non-udev configuration as default
 	* common: add a FIXME hint to the private udev init script
 
