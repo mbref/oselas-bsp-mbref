@@ -57,18 +57,25 @@ start)
 		echo "failed"
 	fi
 
+	# Log things that trigger does
+	#/sbin/udevadm monitor -e >/dev/.udev.log &
+	#UDEV_MONITOR_PID=$!
+
 	# Now traverse sys/ in order to "coldplug"
 	# devices that have already been discovered
 	/sbin/udevadm trigger
 	# Now wait for udevd to process
 	# the uevents we triggered
-#FIXME:	echo -n "waiting for devices..."
-#FIXME:	/sbin/udevadm settle --timeout=10
-#FIXME:	if [ "$?" = "0" ]; then
-#FIXME:		echo "done"
-#FIXME:	else
-#FIXME:		echo "failed"
-#FIXME:	fi
+	echo -n "waiting for devices..."
+	/sbin/udevadm settle --timeout=10
+	if [ "$?" = "0" ]; then
+		echo "done"
+	else
+		echo "failed --------> FIXME: known bug, need a modern toolchain."
+	fi
+
+	# Kill the udev monitor again
+	#kill $UDEV_MONITOR_PID
 
 	# We can only mount /dev/pts after initialising udev
 	if [ -d "/dev/pts" ]; then
