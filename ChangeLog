@@ -1,6 +1,7 @@
 2010-12-16	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: enable i2ctools and introduce a non-udev configuration
+	* common: HOWTO: makes the non-udev configuration as default
 	* common: add a FIXME hint to the private udev init script
 
 2010-11-22	Stephan Linz <linz@li-pro.net>

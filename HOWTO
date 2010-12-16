@@ -45,18 +45,26 @@ References
 t.b.d.
 
 Image recompilation for Xilinx-ML605-MMU-full-12.2:
----------------------------------------------------------
+---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-12.2/platformconfig
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig
+ptxdist select configs/ptxconfig-noudev
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-ML605-MMU-lite-12.2:
----------------------------------------------------------
+---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-12.2/platformconfig
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig
+ptxdist select configs/ptxconfig-noudev
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Xilinx-ML605-MMU-play-12.2:
+---------------------------------------------------
+ptxdist platform configs/Xilinx-ML605-MMU-play-12.2/platformconfig
+ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig-noudev
 ptxdist collection configs/startup.collection
 ptxdist images
 
@@ -64,7 +72,7 @@ Image recompilation for Xilinx-SP3ADSP1800-MMU-full-12.2:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-12.2/platformconfig
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig
+ptxdist select configs/ptxconfig-noudev
 ptxdist collection configs/startup.collection
 ptxdist images
 
@@ -72,7 +80,7 @@ Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.2:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.2/platformconfig
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig
+ptxdist select configs/ptxconfig-noudev
 ptxdist collection configs/startup.collection
 ptxdist images
 
@@ -80,7 +88,7 @@ Image recompilation for Xilinx-SP3ADSP1800-MMU-full-11.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-11.4/platformconfig
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig
+ptxdist select configs/ptxconfig-noudev
 ptxdist collection configs/startup.collection
 ptxdist images
 
@@ -88,9 +96,14 @@ Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-11.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-11.4/platformconfig
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig
+ptxdist select configs/ptxconfig-noudev
 ptxdist collection configs/startup.collection
 ptxdist images
+
+alternative configuration for PTXdist:
+--------------------------------------
+For experimental udev support use:
+ptxdist select configs/ptxconfig
 
 alternative toolchain for PTXdist:
 ----------------------------------
