@@ -68,6 +68,14 @@ ptxdist select configs/ptxconfig-noudev
 ptxdist collection configs/startup.collection
 ptxdist images
 
+Image recompilation for Xilinx-ML605-MMU-lite-12.4:
+---------------------------------------------------
+ptxdist platform configs/Xilinx-ML605-MMU-lite-12.4/platformconfig
+ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig-noudev
+ptxdist collection configs/startup.collection
+ptxdist images
+
 Image recompilation for Xilinx-ML605-MMU-lite-12.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-12.3/platformconfig
