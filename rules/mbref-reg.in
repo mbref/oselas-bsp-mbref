@@ -1,0 +1,8 @@
+## SECTION=project_specific
+
+config MBREF_REG
+	tristate
+	select KERNEL
+	prompt "mbref-reg"
+	help
+	  FIXME
