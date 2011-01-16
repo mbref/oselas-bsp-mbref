@@ -1,3 +1,7 @@
+2011-01-16	Stephan Linz <linz@li-pro.net>
+
+	* xlbsp: use kernel boot parameter mtdparts for MTD physical map
+
 2011-01-09	Stephan Linz <linz@li-pro.net>
 
 	* common: initial version Xilinx-ML605-MMU-full-12.4
