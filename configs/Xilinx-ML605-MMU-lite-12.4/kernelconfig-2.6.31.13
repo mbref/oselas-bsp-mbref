@@ -172,7 +172,7 @@ CONFIG_MMU=y
 #
 # CONFIG_CMDLINE_BOOL is not set
 CONFIG_OF=y
-# CONFIG_PROC_DEVICETREE is not set
+CONFIG_PROC_DEVICETREE=y
 
 #
 # Advanced setup

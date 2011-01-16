@@ -255,6 +255,14 @@
 				linux,default-trigger = "heartbeat";
 			} ;
 		} ;
+		mbref_reg_0: uio@80800000 {
+			compatible = "xlnx,plbv46-mbref-reg-1.00.a", "generic-uio";
+			interrupt-parent = <&xps_intc_0>;
+			interrupts = < 8 2 >;
+			reg = < 0x80800000 0x10000 >;
+			xlnx,family = "virtex6";
+			xlnx,include-dphase-timer = <0x1>;
+		} ;
 		mdm_0: debug@8fff0000 {
 			compatible = "xlnx,mdm-2.00.a";
 			reg = < 0x8fff0000 0x10000 >;
@@ -490,7 +498,7 @@
 			interrupt-controller ;
 			reg = < 0x8aff0000 0x10000 >;
 			xlnx,kind-of-intr = <0x54>;
-			xlnx,num-intr-inputs = <0x8>;
+			xlnx,num-intr-inputs = <0x9>;
 		} ;
 		xps_sysace_0: sysace@83600000 {
 			8-bit ;

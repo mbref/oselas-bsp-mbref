@@ -1,5 +1,7 @@
 2011-01-16	Stephan Linz <linz@li-pro.net>
 
+	* platform: show device tree under /proc/device-tree
+	* xlbsp: new simple register bank (plbv46_mbref_reg)
 	* xlbsp: use kernel boot parameter mtdparts for MTD physical map
 
 2011-01-09	Stephan Linz <linz@li-pro.net>
