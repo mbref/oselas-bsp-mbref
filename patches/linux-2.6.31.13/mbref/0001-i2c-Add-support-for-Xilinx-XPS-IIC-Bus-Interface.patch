@@ -1,8 +1,8 @@
 From b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f Mon Sep 17 00:00:00 2001
-Message-Id: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1292516159.git.linz@li-pro.net>
+Message-Id: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
 From: =?utf-8?q?Richard=20R=C3=B6jfors?= <richard.rojfors@pelagicore.com>
 Date: Thu, 11 Feb 2010 10:42:00 +0100
-Subject: [PATCH 1/5] i2c: Add support for Xilinx XPS IIC Bus Interface
+Subject: [PATCH 1/7] i2c: Add support for Xilinx XPS IIC Bus Interface
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit

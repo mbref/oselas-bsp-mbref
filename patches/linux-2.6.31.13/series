@@ -4,3 +4,5 @@ mbref/0002-Add-the-platform-data-include-for-the-Xilinx-XPS-IIC.patch
 mbref/0003-Add-include-to-i2c-xii.c-to-fix-build-error.patch
 mbref/0004-iic-fix-endianess-problem-in-xilinx-i2c.patch
 mbref/0005-iic-OF-Support-for-xilinx-i2c.patch
+mbref/0006-uio_of_genirq-fix-incompatible-pointer-type.patch
+mbref/0007-microblaze-Add-PVR-for-Microblaze-v8.00.b.patch

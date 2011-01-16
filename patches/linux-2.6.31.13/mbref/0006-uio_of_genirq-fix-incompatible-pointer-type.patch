@@ -1,0 +1,31 @@
+From 27e66d7da858bc012ea390685ab3be2373dc347a Mon Sep 17 00:00:00 2001
+Message-Id: <27e66d7da858bc012ea390685ab3be2373dc347a.1295168975.git.linz@li-pro.net>
+In-Reply-To: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
+References: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
+From: Stephan Linz <linz@li-pro.net>
+Date: Sun, 16 Jan 2011 08:51:33 +0100
+Subject: [PATCH 6/7] uio_of_genirq: fix incompatible pointer type
+
+drivers/uio/uio_of_genirq.c:41: warning: passing argument 3 of '__uio_pdrv_genirq_probe' from incompatible pointer type
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/uio/uio_of_genirq.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/uio/uio_of_genirq.c b/drivers/uio/uio_of_genirq.c
+index 254ec5b..b6ce382 100644
+--- a/drivers/uio/uio_of_genirq.c
++++ b/drivers/uio/uio_of_genirq.c
+@@ -38,7 +38,7 @@ static __devinit int uio_of_genirq_probe(struct of_device *op,
+ 		if (of_address_to_resource(op->node, i, &resources[i]))
+ 			break;
+ 
+-	ret = __uio_pdrv_genirq_probe(&op->dev, uioinfo, &resources, i);
++	ret = __uio_pdrv_genirq_probe(&op->dev, uioinfo, resources, i);
+ 	if (ret)
+ 		goto err_cleanup;
+ 
+-- 
+1.6.0.4
+

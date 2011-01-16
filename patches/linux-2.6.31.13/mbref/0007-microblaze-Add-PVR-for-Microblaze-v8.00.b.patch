@@ -1,0 +1,30 @@
+From 0de8d5a5c00c3208860a52c83352bb4d43691ea4 Mon Sep 17 00:00:00 2001
+Message-Id: <0de8d5a5c00c3208860a52c83352bb4d43691ea4.1295168975.git.linz@li-pro.net>
+In-Reply-To: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
+References: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 28 Dec 2010 14:44:51 +0100
+Subject: [PATCH 7/7] microblaze: Add PVR for Microblaze v8.00.b
+
+Microblaze v8.00.b have 0x13 version string.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/kernel/cpu/cpuinfo.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/microblaze/kernel/cpu/cpuinfo.c b/arch/microblaze/kernel/cpu/cpuinfo.c
+index 3d0a708..4720ac7 100644
+--- a/arch/microblaze/kernel/cpu/cpuinfo.c
++++ b/arch/microblaze/kernel/cpu/cpuinfo.c
+@@ -33,6 +33,7 @@ const struct cpu_ver_key cpu_ver_lookup[] = {
+ 	{"7.30.a", 0x10},
+ 	{"7.30.b", 0x11},
+ 	{"8.00.a", 0x12},
++	{"8.00.b", 0x13},
+ 	{NULL, 0},
+ };
+ 
+-- 
+1.6.0.4
+

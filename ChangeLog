@@ -1,5 +1,6 @@
 2011-01-16	Stephan Linz <linz@li-pro.net>
 
+	* common: adapt uio_of_genirq fixes, PVR for Microblaze v8.00.b
 	* common: configure license of devmem2, set to GPL
 
 2010-12-16	Stephan Linz <linz@li-pro.net>
