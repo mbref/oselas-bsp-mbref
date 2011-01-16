@@ -158,7 +158,7 @@ endif
 endif
 
 ifneq ($(PTXCONF_DEVNODES_I2C),)
-DEVNODES_DEVICES	+= $(DEVNODES_PRIVATE)					\
+DEVNODES_DEVICES	+= $(DEVNODES_SYSTEM)					\
 	c,89,0,/dev/i2c-0	c,89,1,/dev/i2c-1	c,89,2,/dev/i2c-2	\
 	c,89,3,/dev/i2c-3	c,89,4,/dev/i2c-4	c,89,5,/dev/i2c-5	\
 	c,89,6,/dev/i2c-6	c,89,7,/dev/i2c-7
@@ -191,7 +191,7 @@ DEVNODES_DEVICES	+= $(DEVNODES_PRINTER)					\
 endif
 
 ifneq ($(PTXCONF_DEVNODES_MTD_CHAR),)
-DEVNODES_DEVICES	+= $(DEVNODES_KMEM)					\
+DEVNODES_DEVICES	+= $(DEVNODES_SYSTEM)					\
 	c,90,0,/dev/mtd0	c,90,2,/dev/mtd1	c,90,4,/dev/mtd2	\
 	c,90,6,/dev/mtd3	c,90,8,/dev/mtd4	c,90,10,/dev/mtd5	\
 	c,90,12,/dev/mtd6	c,90,14,/dev/mtd7	c,90,16,/dev/mtd8	\
@@ -203,11 +203,23 @@ DEVNODES_DEVICES	+= $(DEVNODES_KMEM)					\
 endif
 
 ifneq ($(PTXCONF_DEVNODES_MTD_BLK),)
-DEVNODES_DEVICES	+= $(DEVNODES_KMEM)					\
+DEVNODES_DEVICES	+= $(DEVNODES_SYSTEM)					\
 	b,31,0,/dev/mtdblock0	b,31,1,/dev/mtdblock1	b,31,2,/dev/mtdblock2	\
 	b,31,3,/dev/mtdblock3	b,31,4,/dev/mtdblock4	b,31,5,/dev/mtdblock5	\
 	b,31,6,/dev/mtdblock6	b,31,7,/dev/mtdblock7	b,31,8,/dev/mtdblock8	\
 	b,31,9,/dev/mtdblock9
+endif
+
+ifneq ($(PTXCONF_DEVNODES_UIO),)
+DEVNODES_DEVICES	+= $(DEVNODES_SYSTEM)					\
+	c,$(PTXCONF_DEVNODES_UIO_MAJOR),0,/dev/uio0				\
+	c,$(PTXCONF_DEVNODES_UIO_MAJOR),1,/dev/uio1				\
+	c,$(PTXCONF_DEVNODES_UIO_MAJOR),2,/dev/uio2				\
+	c,$(PTXCONF_DEVNODES_UIO_MAJOR),3,/dev/uio3				\
+	c,$(PTXCONF_DEVNODES_UIO_MAJOR),4,/dev/uio4				\
+	c,$(PTXCONF_DEVNODES_UIO_MAJOR),5,/dev/uio5				\
+	c,$(PTXCONF_DEVNODES_UIO_MAJOR),6,/dev/uio6				\
+	c,$(PTXCONF_DEVNODES_UIO_MAJOR),7,/dev/uio7
 endif
 
 ifneq ($(PTXCONF_DEVNODES_BLK_IDE),)

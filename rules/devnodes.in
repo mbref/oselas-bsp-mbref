@@ -6,7 +6,9 @@ menuconfig DEVNODES
 	tristate
 	prompt "create device nodes"
 	help
-	  FIXME
+	  If your system use no udev daemon, what is an unusual manner,
+	  you have to create all your device nodes separately in an
+	  antiquated way as static device nodes.
 
 if DEVNODES
 
@@ -92,6 +94,28 @@ config DEVNODES_MTD_BLK
 
 endif # DEVNODES_MTD
 
+config DEVNODES_UIO
+	tristate
+	prompt "UIO character devices"
+
+if DEVNODES_UIO
+
+config DEVNODES_UIO_MAJOR
+	int
+	default 254
+	range 240 254
+	prompt "UIO device file major number"
+	help
+	  You have to predefine the major number as it will be used later
+	  in the target. The UIO frame work will be used dynamically one of
+	  the reserved major numbers for misc character devices.
+
+	  The counting is from 254 down to 240 beginning with 254. Have a
+	  lock to your specific system integration on runtime to determine
+	  the right major number, example if you have load succesful your
+	  customized uio kernel module.
+
+endif # DEVNODES_UIO
 
 config DEVNODES_BLK
 	tristate
