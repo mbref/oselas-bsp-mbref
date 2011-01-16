@@ -23,7 +23,7 @@ DEVMEM2_SRCDIR	:= $(PTXDIST_WORKSPACE)/local_src/$(DEVMEM2)
 #DEVMEM2_SRCDIR	:= $(BUILDDIR)/$(DEVMEM2)
 #DEVMEM2_URL	:= file://$(PTXDIST_WORKSPACE)/local_src/$(DEVMEM2).$(DEVMEM2_SUFFIX)
 DEVMEM2_DIR	:= $(BUILDDIR)/$(DEVMEM2)
-DEVMEM2_LICENSE	:= unknown
+DEVMEM2_LICENSE	:= GPL
 
 # ----------------------------------------------------------------------------
 # Get

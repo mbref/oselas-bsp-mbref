@@ -1,3 +1,7 @@
+2011-01-16	Stephan Linz <linz@li-pro.net>
+
+	* common: configure license of devmem2, set to GPL
+
 2010-12-16	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: enable i2ctools and introduce a non-udev configuration
