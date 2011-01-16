@@ -1,0 +1,38 @@
+From 7fec5319020ec7f48a11ce9dac2a729fcdcda452 Mon Sep 17 00:00:00 2001
+Message-Id: <7fec5319020ec7f48a11ce9dac2a729fcdcda452.1295199889.git.linz@li-pro.net>
+In-Reply-To: <ba3543ea8934ee9de2da91c6620f746854387896.1295199889.git.linz@li-pro.net>
+References: <ba3543ea8934ee9de2da91c6620f746854387896.1295199889.git.linz@li-pro.net>
+From: Stephan Linz <linz@li-pro.net>
+Date: Fri, 19 Nov 2010 19:21:37 +0100
+Subject: [PATCH 7/9] net: Add National DP83865 PHY to LL TEMAC driver
+
+Adding the missing phy-id for the National 10/100/1000 MBit
+PHY DP83865 used on the Xilinx Spartan-3A DSP evaluation board
+SP3ADSP1800.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/net/xilinx_ll_temac.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/xilinx_ll_temac.c b/drivers/net/xilinx_ll_temac.c
+index ff93c1f..dad2e38 100644
+--- a/drivers/net/xilinx_ll_temac.c
++++ b/drivers/net/xilinx_ll_temac.c
+@@ -287,8 +287,11 @@ static int xps_ll_temac_phy_ctrl(struct eth_device *dev)
+ 		return 1;
+ 	}
+ 
+-	/* Marwell 88e1111 id - ml50x */
+-	if (i == 0x1410cc2) {
++	/*
++	 * Marwell 88e1111 id - ml50x, ml605
++	 * National DP83865 id - sp3adsp1800
++	 */
++	if (i == 0x1410cc2 || i == 0x20005c7a) {
+ 		result = xps_ll_temac_hostif_get(dev, 0, phy_addr, 5);
+ 		if ((result & 0x8000) == 0x8000) {
+ 			xps_ll_temac_indirect_set(dev, 0, EMMC, 0x80000000);
+-- 
+1.6.0.4
+

@@ -65,7 +65,7 @@
 
 /* Uart controller UART16550 is xps_uart_0 */
 #define XILINX_UART16550                        
-#define XILINX_UART16550_BASEADDR                0x89FF0000
+#define XILINX_UART16550_BASEADDR                0x89ff0000
 #define XILINX_UART16550_CLOCK_HZ                62500000
 
 /* I2C controller not defined */

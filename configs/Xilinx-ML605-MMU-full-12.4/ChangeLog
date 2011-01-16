@@ -1,5 +1,6 @@
 2011-01-16	Stephan Linz <linz@li-pro.net>
 
+	* platform: upgrade to u-boot-2010.12
 	* platform: show device tree under /proc/device-tree
 	* xlbsp: new simple register bank (plbv46_mbref_reg)
 	* xlbsp: use kernel boot parameter mtdparts for MTD physical map

@@ -1,0 +1,29 @@
+From aad188e01b481c7dbd8e5d90306b54550917e10c Mon Sep 17 00:00:00 2001
+Message-Id: <aad188e01b481c7dbd8e5d90306b54550917e10c.1295199889.git.linz@li-pro.net>
+In-Reply-To: <ba3543ea8934ee9de2da91c6620f746854387896.1295199889.git.linz@li-pro.net>
+References: <ba3543ea8934ee9de2da91c6620f746854387896.1295199889.git.linz@li-pro.net>
+From: Stephan Linz <linz@li-pro.net>
+Date: Sun, 16 Jan 2011 18:42:59 +0100
+Subject: [PATCH 9/9] Prepare v2010.12-mbref
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index c5e5a9c..6ce7a3f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -24,7 +24,7 @@
+ VERSION = 2010
+ PATCHLEVEL = 12
+ SUBLEVEL =
+-EXTRAVERSION =
++EXTRAVERSION = -mbref
+ ifneq "$(SUBLEVEL)" ""
+ U_BOOT_VERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
+ else
+-- 
+1.6.0.4
+

@@ -37,7 +37,7 @@ PLATFORM_CPPFLAGS += -mhard-float
 PLATFORM_CPPFLAGS += -mcpu=v7.20.d
 
 # Automatic U-Boot position at 0x27f00000
-TEXT_BASE = 0x27f00000
+CONFIG_SYS_TEXT_BASE = 0x27f00000
 
 # I2C controller not defined
 

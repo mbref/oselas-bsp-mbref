@@ -1,3 +1,8 @@
+2011-01-16	Stephan Linz <linz@li-pro.net>
+
+	* platform: upgrade to u-boot-2010.12
+	* platform: delete kernel configuration of linux-2.6.31.12
+
 2010-12-16	Stephan Linz <linz@li-pro.net>
 
 	* platform: enable I2C/SPI support in linux-2.6.31.13

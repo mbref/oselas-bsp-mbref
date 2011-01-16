@@ -1,0 +1,32 @@
+From d8b85dd53557228a501394946d9097dd996440f3 Mon Sep 17 00:00:00 2001
+Message-Id: <d8b85dd53557228a501394946d9097dd996440f3.1295199889.git.linz@li-pro.net>
+In-Reply-To: <ba3543ea8934ee9de2da91c6620f746854387896.1295199889.git.linz@li-pro.net>
+References: <ba3543ea8934ee9de2da91c6620f746854387896.1295199889.git.linz@li-pro.net>
+From: Michal Simek <monstr@monstr.eu>
+Date: Fri, 21 Aug 2009 10:15:19 +0200
+Subject: [PATCH 3/9] microblaze: Remove bad eth board description - C&P fault
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ .../xilinx/microblaze-generic/microblaze-generic.c |    5 -----
+ 1 files changed, 0 insertions(+), 5 deletions(-)
+
+diff --git a/board/xilinx/microblaze-generic/microblaze-generic.c b/board/xilinx/microblaze-generic/microblaze-generic.c
+index cfaa688..defc1f2 100644
+--- a/board/xilinx/microblaze-generic/microblaze-generic.c
++++ b/board/xilinx/microblaze-generic/microblaze-generic.c
+@@ -70,11 +70,6 @@ int fsl_init2 (void) {
+ 
+ int board_eth_init(bd_t *bis)
+ {
+-	/*
+-	 * This board either has PCI NICs or uses the CPU's TSECs
+-	 * pci_eth_init() will return 0 if no NICs found, so in that case
+-	 * returning -1 will force cpu_eth_init() to be called.
+-	 */
+ #ifdef CONFIG_XILINX_EMACLITE
+ 	return xilinx_emaclite_initialize(bis, XILINX_EMACLITE_BASEADDR);
+ #endif
+-- 
+1.6.0.4
+

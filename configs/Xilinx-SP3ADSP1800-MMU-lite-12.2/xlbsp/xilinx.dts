@@ -4,10 +4,10 @@
  * (C) Copyright 2007-2008 Xilinx, Inc.
  *
  * Based on original code:
- * (C) Copyright 2007-2009 Michal Simek
+ * (C) Copyright 2007-2010 Michal Simek
  * Michal SIMEK <monstr@monstr.eu>
  *
- * (C) Copyright 2010 Li-Pro.Net
+ * (C) Copyright 2010-2011 Li-Pro.Net
  * Stephan Linz <linz@li-pro.net>
  *
  * This program is free software; you can redistribute it and/or
@@ -37,7 +37,7 @@
 	#size-cells = <1>;
 	compatible = "xlnx,microblaze";
 	hard-reset-gpios = < &xps_gpio_0 0 1 >;
-	model = "testing";
+	model = "Xilinx-SP3ADSP1800-MMU-lite-12.2";
 	aliases {
 		ethernet0 = &xps_ether_0;
 		serial0 = &xps_uart_0;
@@ -134,6 +134,10 @@
 			xlnx,use-msr-instr = <0x1>;
 			xlnx,use-pcmp-instr = <0x1>;
 		} ;
+	} ;
+	mpmc_0: memory@20000000 {
+		device_type = "memory";
+		reg = < 0x20000000 0x8000000 >;
 	} ;
 	mb_plb: plb@0 {
 		#address-cells = <1>;
@@ -366,7 +370,7 @@
 			xlnx,kind-of-intr = <0x7>;
 			xlnx,num-intr-inputs = <0x3>;
 		} ;
-		xps_timer_0: timer@8aef0000 {
+		xps_timer_0: system-timer@8aef0000 {
 			compatible = "xlnx,xps-timer-1.02.a", "xlnx,xps-timer-1.00.a";
 			interrupt-parent = <&xps_intc_0>;
 			interrupts = < 0 0 >;
@@ -395,8 +399,4 @@
 			xlnx,use-parity = <0x0>;
 		} ;
 	} ;
-	mpmc_0: memory@20000000 {
-		device_type = "memory";
-		reg = < 0x20000000 0x8000000 >;
-	} ;
-}  ;
+} ;
