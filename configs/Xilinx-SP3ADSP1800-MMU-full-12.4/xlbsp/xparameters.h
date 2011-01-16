@@ -44,7 +44,8 @@
 
 /* Interrupt controller is xps_intc_0 */
 #define XILINX_INTC_BASEADDR                     0x8AFF0000
-#define XILINX_INTC_NUM_INTR_INPUTS              5
+#define XILINX_INTC_NUM_INTR_INPUTS              6
+/* mbref_reg_0_IP2INTC_Irpt */
 /* xps_uart_0_IP2INTC_Irpt */
 /* xps_ether_0_TemacIntc0_Irpt */
 /* mpmc_0_SDMA1_Tx_IntOut */
