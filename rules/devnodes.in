@@ -133,6 +133,10 @@ config DEVNODES_BLK_SD
 
 endif # DEVNODES_BLK
 
+config DEVNODES_ICAP
+	tristate
+	prompt "FPGA configuration interfaces (HWICAP)"
+
 endif # DEVNODES
 
 endif # !UDEV

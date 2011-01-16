@@ -250,6 +250,11 @@ DEVNODES_DEVICES	+= $(DEVNODES_DISK)					\
 	b,8,83,/dev/sdf3	b,8,84,/dev/sdf4	b,8,85,/dev/sdf5
 endif
 
+ifneq ($(PTXCONF_DEVNODES_ICAP),)
+DEVNODES_DEVICES	+= $(DEVNODES_PRIVATE)					\
+	c,259,0,/dev/icap0	c,259,1,/dev/icap1	c,259,2,/dev/icap2
+endif
+
 # ----------------------------------------------------------------------------
 # Get
 # ----------------------------------------------------------------------------
