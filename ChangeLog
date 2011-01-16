@@ -1,5 +1,6 @@
 2011-01-16	Stephan Linz <linz@li-pro.net>
 
+	* ptxconfig: include and enable new package libuio-0.2.0-rc1
 	* ptxconfig: expand devnodes for Xilinx hwicap device files
 	* ptxconfig: expand devnodes for uio device files
 	* common: adapt uio_of_genirq fixes, PVR for Microblaze v8.00.b

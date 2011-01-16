@@ -1,0 +1,7 @@
+## SECTION=project_specific
+
+config LIBUIO
+	tristate
+	prompt "libuio"
+	help
+	  FIXME
