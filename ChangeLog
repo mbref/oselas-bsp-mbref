@@ -1,5 +1,6 @@
 2011-01-25	Stephan Linz <linz@li-pro.net>
 
+	* ptxconfig: enable iperf
 	* ptxconfig: rename local source mbref-reg-trunk to mbref-uio-trunk
 	* common: upgarde patch sets to u-boot-2010.12 with s2imac support
 	* common: upgarde patch sets to linux-2.6.31.13 with s2imac support

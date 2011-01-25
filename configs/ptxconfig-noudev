@@ -1399,7 +1399,7 @@ PTXCONF_IPKG_IPKG_CONF_URL="src ptxdist http://${PTXCONF_IPKG_IPKG_CONF_HOST}/pt
 # PTXCONF_HACKBENCH is not set
 # PTXCONF_HOST_PELTS is not set
 # PTXCONF_IOZONE is not set
-# PTXCONF_IPERF is not set
+PTXCONF_IPERF=m
 # PTXCONF_LMBENCH is not set
 # PTXCONF_LTP is not set
 # PTXCONF_MBW is not set
