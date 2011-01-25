@@ -39,3 +39,5 @@ PLATFORM_CPPFLAGS += -mcpu=v8.00.b
 # Automatic U-Boot position at 0x2ff00000
 CONFIG_SYS_TEXT_BASE = 0x2ff00000
 
+# S2I GigE Vision Ethernet MAC not defined
+

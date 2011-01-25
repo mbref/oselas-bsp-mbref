@@ -41,3 +41,5 @@ CONFIG_SYS_TEXT_BASE = 0x27f00000
 
 # Sysace CF controller not defined
 
+# S2I GigE Vision Ethernet MAC not defined
+

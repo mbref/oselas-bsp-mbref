@@ -44,7 +44,8 @@
 
 /* Interrupt controller is xps_intc_0 */
 #define XILINX_INTC_BASEADDR                     0x8AFF0000
-#define XILINX_INTC_NUM_INTR_INPUTS              9
+#define XILINX_INTC_NUM_INTR_INPUTS              10
+/* mbref_mio_0_IP2INTC_Irpt */
 /* mbref_reg_0_IP2INTC_Irpt */
 /* xps_iic_0_IIC2INTC_Irpt */
 /* xps_uart_0_Interrupt */
@@ -87,4 +88,6 @@
 /* Ethernet MAC controller EMACLITE is xps_ether_0 */
 #define XILINX_EMACLITE                         
 #define XILINX_EMACLITE_BASEADDR                 0x88F00000
+
+/* S2I GigE Vision Ethernet MAC not defined */
 

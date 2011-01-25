@@ -190,6 +190,14 @@
 				linux,default-trigger = "heartbeat";
 			} ;
 		} ;
+		mbref_mio_0: uio@80400000 {
+			compatible = "xlnx,plbv46-mbref-mio-1.00.a", "generic-uio";
+			interrupt-parent = <&xps_intc_0>;
+			interrupts = < 4 2 >;
+			reg = < 0x80400000 0x10000 0x80410000 0x200 0x80411000 0x200 0x80412000 0x200 0x80413000 0x200 >;
+			xlnx,family = "spartan3adsp";
+			xlnx,include-dphase-timer = <0x1>;
+		} ;
 		mbref_reg_0: uio@80800000 {
 			compatible = "xlnx,plbv46-mbref-reg-1.00.a", "generic-uio";
 			interrupt-parent = <&xps_intc_0>;
@@ -384,7 +392,7 @@
 			interrupt-controller ;
 			reg = < 0x8aff0000 0x10000 >;
 			xlnx,kind-of-intr = <0x7>;
-			xlnx,num-intr-inputs = <0x4>;
+			xlnx,num-intr-inputs = <0x5>;
 		} ;
 		xps_timer_0: system-timer@8aef0000 {
 			compatible = "xlnx,xps-timer-1.02.a", "xlnx,xps-timer-1.00.a";

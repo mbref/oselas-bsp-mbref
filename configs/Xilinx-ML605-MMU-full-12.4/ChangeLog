@@ -1,3 +1,8 @@
+2011-01-25	Stephan Linz <linz@li-pro.net>
+
+	* platform: upgrade to linux-2.6.31.13 with s2imac support
+	* xlbsp: new simple memory bank (plbv46_mbref_mio)
+
 2011-01-16	Stephan Linz <linz@li-pro.net>
 
 	* platform: upgrade to u-boot-2010.12

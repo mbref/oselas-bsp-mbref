@@ -44,7 +44,8 @@
 
 /* Interrupt controller is xps_intc_0 */
 #define XILINX_INTC_BASEADDR                     0x8AFF0000
-#define XILINX_INTC_NUM_INTR_INPUTS              6
+#define XILINX_INTC_NUM_INTR_INPUTS              7
+/* mbref_mio_0_IP2INTC_Irpt */
 /* mbref_reg_0_IP2INTC_Irpt */
 /* xps_uart_0_IP2INTC_Irpt */
 /* xps_ether_0_TemacIntc0_Irpt */
@@ -80,4 +81,6 @@
 #define XILINX_LLTEMAC                          
 #define XILINX_LLTEMAC_BASEADDR                  0x88F00000
 #define XILINX_LLTEMAC_SDMA_CTRL_BASEADDR        0x8adf0080
+
+/* S2I GigE Vision Ethernet MAC not defined */
 
