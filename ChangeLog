@@ -1,3 +1,8 @@
+2011-01-25	Stephan Linz <linz@li-pro.net>
+
+	* common: upgarde patch sets to u-boot-2010.12 with s2imac support
+	* common: upgarde patch sets to linux-2.6.31.13 with s2imac support
+
 2011-01-16	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: include and enable new local source mbref-reg-trunk

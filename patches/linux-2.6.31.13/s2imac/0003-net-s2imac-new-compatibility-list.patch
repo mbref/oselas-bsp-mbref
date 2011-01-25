@@ -1,0 +1,34 @@
+From 348aa953aa6e8240668d6db2e376aba135af2d43 Mon Sep 17 00:00:00 2001
+Message-Id: <348aa953aa6e8240668d6db2e376aba135af2d43.1295945091.git.linz@li-pro.net>
+In-Reply-To: <c9d83d1df30226266145878ff4433c2a01c87a52.1295945090.git.linz@li-pro.net>
+References: <c9d83d1df30226266145878ff4433c2a01c87a52.1295945090.git.linz@li-pro.net>
+From: Stephan Linz <linz@li-pro.net>
+Date: Sun, 23 Jan 2011 20:56:13 +0100
+Subject: [PATCH 3/5] net: s2imac: new compatibility list
+
+Change vendor token from "xlnx" (Xilinx) to "s2i" (Sensor
+to Image). Add new compatibility for generic XPS External
+Peripheral Controller (EPC) connections: "s2i,s2imac-epc"
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/net/s2imac.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/net/s2imac.c b/drivers/net/s2imac.c
+index 3155d44..7d9e886 100644
+--- a/drivers/net/s2imac.c
++++ b/drivers/net/s2imac.c
+@@ -1057,7 +1057,8 @@ static struct net_device_ops s2imac_netdev_ops = {
+ 
+ /* Match table for OF platform binding */
+ static struct of_device_id s2imac_of_match[] __devinitdata = {
+-	{.compatible = "xlnx,s2imac-1.00.a",},
++	{.compatible = "s2i,s2imac-1.00.a",},
++	{.compatible = "s2i,s2imac-epc",},
+ 	{ /* end of list */ },
+ };
+ 
+-- 
+1.6.0.4
+

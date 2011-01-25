@@ -7,3 +7,9 @@
 0007-net-Add-National-DP83865-PHY-to-LL-TEMAC-driver.patch
 0008-microblaze-generic-move-ENV-onto-top-of-flash.patch
 0009-Prepare-v2010.12-mbref.patch
+s2imac/0001-net-Add-S2I-GigE-Vision-MAC-driver-to-u-boot.patch
+s2imac/0002-net-code-improvements-for-S2IMAC-driver.patch
+s2imac/0003-net-expand-S2IMAC-driver-with-base-addr-in-init.patch
+s2imac/0004-net-Add-CONFIG_S2IMAC_CLOCK_FREQ-to-S2IMAC.patch
+s2imac/0005-net-Use-ETH_HALTING-and-ETH_JUMBO-in-S2IMAC.patch
+s2imac/0006-net-more-self-explanatory-defines-in-S2IMAC.patch

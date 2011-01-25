@@ -1,0 +1,69 @@
+From 5bd5289ebee3cb7b30320df4aea22c08215486b5 Mon Sep 17 00:00:00 2001
+Message-Id: <5bd5289ebee3cb7b30320df4aea22c08215486b5.1295944361.git.linz@li-pro.net>
+In-Reply-To: <c94aa5c224529d2aa532f8c9642819b662161db9.1295944360.git.linz@li-pro.net>
+References: <c94aa5c224529d2aa532f8c9642819b662161db9.1295944360.git.linz@li-pro.net>
+From: Stephan Linz <linz@li-pro.net>
+Date: Mon, 24 Jan 2011 17:52:00 +0100
+Subject: [PATCH 4/6] net: Add CONFIG_S2IMAC_CLOCK_FREQ to S2IMAC
+
+Expand the S2I GigE Vision Ethernet MAC driver to
+understanding the new system clock configuration
+option CONFIG_S2IMAC_CLOCK_FREQ. It will be derived
+either from a special core related design option or
+directly from the Xilinx MicroBlaze system clock
+frequency.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/net/s2imac.c                 |   16 +++++++++++-----
+ include/configs/microblaze-generic.h |    7 +++++++
+ 2 files changed, 18 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/net/s2imac.c b/drivers/net/s2imac.c
+index bcb59ec..73a04df 100644
+--- a/drivers/net/s2imac.c
++++ b/drivers/net/s2imac.c
+@@ -297,11 +297,17 @@ static int s2imac_init (struct eth_device *dev, bd_t * bis)
+ 	 *   - PHY MDC frequency (max 2.5 MHz according to IEEE Std 802.3-2002,
+ 	 *     BCM5461A supports 12.5 MHz)
+ 	 */
+-	out_be32 ((u32 *) CLK_FREQ, 62500000);
+-	out_be32 ((u32 *) TOCNT_DIV, (62500000 / 1000) - 1);
+-	out_be32 ((u32 *) MC, MDIO_ENABLE_MASK | (MDIO_CLOCK_DIV_MASK
+-						  & ((62500000 / (2 * 2500000))
+-						     - 1)));
++#ifdef CONFIG_S2IMAC_CLOCK_FREQ
++#define MDIO_CLOCK	(2500000)	/* 2.5 MHz */
++#define MDIO_CLOCK_DIV	(MDIO_CLOCK_DIV_MASK & \
++			((CONFIG_S2IMAC_CLOCK_FREQ / (2 * MDIO_CLOCK)) - 1))
++
++	out_be32 ((u32 *) CLK_FREQ, CONFIG_S2IMAC_CLOCK_FREQ);
++	out_be32 ((u32 *) TOCNT_DIV, (CONFIG_S2IMAC_CLOCK_FREQ / 1000) - 1);
++	out_be32 ((u32 *) MC, MDIO_ENABLE_MASK | MDIO_CLOCK_DIV);
++#else
++#error MISSING CONFIG_S2IMAC_CLOCK_FREQ
++#endif
+ 
+ 	/* set up MAC address */
+ 	s2imac_addr_setup (dev);
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 517da4c..e632e0f 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -69,6 +69,13 @@
+ #elif S2IMAC_BASEADDR
+ # define CONFIG_S2IMAC			1
+ # define CONFIG_SYS_ENET
++# if S2IMAC_CLOCK_HZ
++#  define CONFIG_S2IMAC_CLOCK_FREQ	S2IMAC_CLOCK_HZ
++# elif XILINX_CLOCK_FREQ
++#  define CONFIG_S2IMAC_CLOCK_FREQ	XILINX_CLOCK_FREQ
++# else
++#  error BAD CLOCK FREQ
++# endif
+ #endif
+ 
+ #undef ET_DEBUG
+-- 
+1.6.0.4
+

@@ -1,0 +1,172 @@
+From d1685b2eeaa0449c9f96db87f832c639186eebc1 Mon Sep 17 00:00:00 2001
+Message-Id: <d1685b2eeaa0449c9f96db87f832c639186eebc1.1295945091.git.linz@li-pro.net>
+In-Reply-To: <c9d83d1df30226266145878ff4433c2a01c87a52.1295945090.git.linz@li-pro.net>
+References: <c9d83d1df30226266145878ff4433c2a01c87a52.1295945090.git.linz@li-pro.net>
+From: Stephan Linz <linz@li-pro.net>
+Date: Tue, 25 Jan 2011 09:44:39 +0100
+Subject: [PATCH 5/5] net: more self-explanatory defines in S2IMAC
+
+Expand the S2I GigE Vision Ethernet MAC driver to use
+more self-explanatory defines for register setups.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/net/s2imac.c |   58 ++++++++++++++++++++++++++++++-------------------
+ 1 files changed, 35 insertions(+), 23 deletions(-)
+
+diff --git a/drivers/net/s2imac.c b/drivers/net/s2imac.c
+index cf75545..ed1f9aa 100644
+--- a/drivers/net/s2imac.c
++++ b/drivers/net/s2imac.c
+@@ -54,8 +54,16 @@
+ #define UAW1			(lp->base_addr + (0x384 << 2))
+ #define AFM			(lp->base_addr + (0x390 << 2))
+ 
+-#define MDIO_ENABLE_MASK	0x40
+-#define MDIO_CLOCK_DIV_MASK	0x3F
++#define MDIO_RXTX_JUMBO		(1 << 30)
++#define MDIO_RXTX_ENABLE	(1 << 28)
++#define MDIO_RXTX_HALFDUPLEX	(1 << 26)
++
++#define MDIO_EMMC_10BASET	(0)
++#define MDIO_EMMC_100BASET	(1 << 30)
++#define MDIO_EMMC_1000BASET	(1 << 31)
++
++#define MDIO_ENABLE_MASK	(1 << 6)
++#define MDIO_CLOCK_DIV_MASK	((1 << 6) - 1)
+ 
+ /* direct registers definition */
+ #define GCSR    		(lp->base_addr + 0xC000)
+@@ -70,8 +78,12 @@
+ #define MAC_RX_HIGH		(lp->base_addr + 0xC090)
+ #define MAC_RX_LOW		(lp->base_addr + 0xC094)
+ 
+-#define GCSR_CONNECTED		0x00000001
+-#define GCSR_RST_PHY		0x00000004
++#define GCSR_CONNECTED		(1)
++#define GCSR_RST_PHY		(1 << 2)
++
++#define MDIO_ACC_ENA_NBLOCK	(1 << 31)
++#define MDIO_ACC_NBLOCK		(1 << 16)
++#define MDIO_ACC_MIIRDY		(1 << 17)
+ 
+ /* max MTU size of an ... */
+ #define XTE_MTU			1500	/* Ethernet frame */
+@@ -135,7 +147,7 @@ static u16 s2imac_phy_read (struct net_local *lp, u8 reg_addr)
+ {
+ 	u32 ret;
+ 
+-	if (in_be32 ((u32 *) MDIO_ACC) & (1 << 16)) {
++	if (in_be32 ((u32 *) MDIO_ACC) & MDIO_ACC_NBLOCK) {
+ 		/*
+ 		 * Non-blocking mode
+ 		 * (only this software thread waits for MDIO access)
+@@ -149,7 +161,7 @@ static u16 s2imac_phy_read (struct net_local *lp, u8 reg_addr)
+ 		 */
+ 		do {
+ 			ret = in_be32 ((u32 *) MDIO_ACC);
+-		} while (!(ret & (1 << 17)));
++		} while (!(ret & MDIO_ACC_MIIRDY));
+ 	} else {
+ 		/*
+ 		 * Blocking mode
+@@ -166,7 +178,7 @@ static void s2imac_phy_write (struct net_local *lp, u8 reg_addr, u16 reg_data)
+ {
+ 	u32 ret;
+ 
+-	if (in_be32 ((u32 *) MDIO_ACC) & (1 << 16)) {
++	if (in_be32 ((u32 *) MDIO_ACC) & MDIO_ACC_NBLOCK) {
+ 		/*
+ 		 * Non-blocking mode
+ 		 * (only this software thread waits for MDIO access)
+@@ -180,7 +192,7 @@ static void s2imac_phy_write (struct net_local *lp, u8 reg_addr, u16 reg_data)
+ 		 */
+ 		do {
+ 			ret = in_be32 ((u32 *) MDIO_ACC);
+-		} while (!(ret & (1 << 17)));
++		} while (!(ret & MDIO_ACC_MIIRDY));
+ 	} else {
+ 		/*
+ 		 * Blocking mode
+@@ -235,46 +247,46 @@ static void set_mac_speed (struct net_local *lp)
+ 	switch ((s2imac_phy_read (lp, 0x11)) & 0xE000) {
+ 	case 0x0000:
+ 		/* 10BASE-T, half-duplex */
+-		cfg = 0x00000000;
+-		rxtx = 0x14000000;
++		cfg = MDIO_EMMC_10BASET;
++		rxtx = (MDIO_RXTX_ENABLE | MDIO_RXTX_HALFDUPLEX);
+ 		lp->cur_speed = 10;
+ 		printk (KERN_INFO "%s: speed set to 10BASE-T/HD\n", ndev->name);
+ 		break;
+ 	case 0x2000:
+ 		/* 10BASE-T, full-duplex */
+-		cfg = 0x00000000;
+-		rxtx = 0x10000000;
++		cfg = MDIO_EMMC_10BASET;
++		rxtx = MDIO_RXTX_ENABLE;
+ 		lp->cur_speed = 10;
+ 		printk (KERN_INFO "%s: speed set to 10BASE-T/FD\n", ndev->name);
+ 		break;
+ 	case 0x4000:
+ 		/* 100BASE-TX, half-duplex */
+-		cfg = 0x40000000;
+-		rxtx = 0x14000000;
++		cfg = MDIO_EMMC_100BASET;
++		rxtx = (MDIO_RXTX_ENABLE | MDIO_RXTX_HALFDUPLEX);
+ 		lp->cur_speed = 100;
+ 		printk (KERN_INFO "%s: speed set to 100BASE-T/HD\n",
+ 			ndev->name);
+ 		break;
+ 	case 0x6000:
+ 		/* 100BASE-TX, full-duplex */
+-		cfg = 0x40000000;
+-		rxtx = 0x10000000;
++		cfg = MDIO_EMMC_100BASET;
++		rxtx = MDIO_RXTX_ENABLE;
+ 		lp->cur_speed = 100;
+ 		printk (KERN_INFO "%s: speed set to 100BASE-T/FD\n",
+ 			ndev->name);
+ 		break;
+ 	case 0x8000:
+ 		/* 1000BASE-T, half-duplex */
+-		cfg = 0x80000000;
+-		rxtx = 0x14000000;
++		cfg = MDIO_EMMC_1000BASET;
++		rxtx = (MDIO_RXTX_ENABLE | MDIO_RXTX_HALFDUPLEX);
+ 		lp->cur_speed = 1000;
+ 		printk (KERN_INFO "%s: speed set to 1000BASE-T/HD\n",
+ 			ndev->name);
+ 		break;
+ 	case 0xA000:
+ 		/* 1000BASE-T, full-duplex */
+-		cfg = 0x80000000;
+-		rxtx = 0x10000000;
++		cfg = MDIO_EMMC_1000BASET;
++		rxtx = MDIO_RXTX_ENABLE;
+ 		lp->cur_speed = 1000;
+ 		printk (KERN_INFO "%s: speed set to 1000BASE-T/FD\n",
+ 			ndev->name);
+@@ -285,8 +297,8 @@ static void set_mac_speed (struct net_local *lp)
+ 
+ 	out_be32 ((u32 *) EMMC, cfg);
+ 	/* Enable jumbo frames for Tx and Rx */
+-	out_be32 ((u32 *) TC, rxtx | 0x40000000);
+-	out_be32 ((u32 *) RCW1, rxtx | 0x40000000);
++	out_be32 ((u32 *) TC, rxtx | MDIO_RXTX_JUMBO);
++	out_be32 ((u32 *) RCW1, rxtx | MDIO_RXTX_JUMBO);
+ }
+ 
+ /*
+@@ -299,7 +311,7 @@ static void phy_setup (struct net_local *lp)
+ 	unsigned retries = 10;
+ 
+ 	/* non-blocking PHY access enabled (if supported) */
+-	out_be32 ((u32 *) MDIO_ACC, 0x80000000);
++	out_be32 ((u32 *) MDIO_ACC, MDIO_ACC_ENA_NBLOCK);
+ 
+ 	/* reset the PHY
+ 	   reg = in_be32 ((u32 *) GCSR);
+-- 
+1.6.0.4
+

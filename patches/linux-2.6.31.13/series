@@ -6,3 +6,8 @@ mbref/0004-iic-fix-endianess-problem-in-xilinx-i2c.patch
 mbref/0005-iic-OF-Support-for-xilinx-i2c.patch
 mbref/0006-uio_of_genirq-fix-incompatible-pointer-type.patch
 mbref/0007-microblaze-Add-PVR-for-Microblaze-v8.00.b.patch
+s2imac/0001-net-Add-S2I-GigE-Vision-MAC-driver-to-Linux.patch
+s2imac/0002-net-code-improvements-for-S2IMAC-driver.patch
+s2imac/0003-net-s2imac-new-compatibility-list.patch
+s2imac/0004-net-Attend-to-clock-frequency-property-in-S2IMAC.patch
+s2imac/0005-net-more-self-explanatory-defines-in-S2IMAC.patch
