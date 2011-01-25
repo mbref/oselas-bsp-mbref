@@ -9,7 +9,7 @@ clean:
 else
 
 PWD	:= $(shell pwd)
-obj-m	:= mbref-reg.o
+obj-m	:= mbref-uio.o
 
 modules modules_install clean:
 	$(MAKE) -C $(PTX_KERNEL_DIR) M=$(PWD) V=$(V) $@

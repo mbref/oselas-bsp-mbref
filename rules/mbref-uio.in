@@ -1,8 +1,8 @@
 ## SECTION=project_specific
 
-config MBREF_REG
+config MBREF_UIO
 	tristate
 	select KERNEL
-	prompt "mbref-reg"
+	prompt "mbref-uio"
 	help
 	  FIXME

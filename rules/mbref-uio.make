@@ -11,26 +11,26 @@
 #
 # We provide this package
 #
-PACKAGES-$(PTXCONF_MBREF_REG) += mbref-reg
+PACKAGES-$(PTXCONF_MBREF_UIO) += mbref-uio
 
 #
 # Paths and names and versions
 #
-MBREF_REG_VERSION	:= trunk
-MBREF_REG		:= mbref-reg-$(MBREF_REG_VERSION)
-MBREF_REG_SRCDIR	:= $(PTXDIST_WORKSPACE)/local_src/$(MBREF_REG)
-MBREF_REG_DIR		:= $(BUILDDIR)/$(MBREF_REG)
-MBREF_REG_LICENSE	:= GPL
+MBREF_UIO_VERSION	:= trunk
+MBREF_UIO		:= mbref-uio-$(MBREF_UIO_VERSION)
+MBREF_UIO_SRCDIR	:= $(PTXDIST_WORKSPACE)/local_src/$(MBREF_UIO)
+MBREF_UIO_DIR		:= $(BUILDDIR)/$(MBREF_UIO)
+MBREF_UIO_LICENSE	:= GPL
 
-ifdef PTXCONF_MBREF_REG
-$(STATEDIR)/kernel.targetinstall.post: $(STATEDIR)/mbref-reg.targetinstall
+ifdef PTXCONF_MBREF_UIO
+$(STATEDIR)/kernel.targetinstall.post: $(STATEDIR)/mbref-uio.targetinstall
 endif
 
 # ----------------------------------------------------------------------------
 # Extract
 # ----------------------------------------------------------------------------
 
-$(STATEDIR)/mbref-reg.extract:
+$(STATEDIR)/mbref-uio.extract:
 	@$(call targetinfo)
 	@$(call touch)
 
@@ -38,7 +38,7 @@ $(STATEDIR)/mbref-reg.extract:
 # Prepare
 # ----------------------------------------------------------------------------
 
-$(STATEDIR)/mbref-reg.prepare:
+$(STATEDIR)/mbref-uio.prepare:
 	@$(call targetinfo)
 	@$(call touch)
 
@@ -46,15 +46,15 @@ $(STATEDIR)/mbref-reg.prepare:
 # Compile
 # ----------------------------------------------------------------------------
 
-$(STATEDIR)/mbref-reg.compile:
+$(STATEDIR)/mbref-uio.compile:
 	@$(call targetinfo)
 #	# The kernel cannot build an out-of-tree driver out-of-tree :-)
 #	# So we make a local copy.
-	rm -fr $(MBREF_REG_DIR)
-	cp -a $(MBREF_REG_SRCDIR) $(MBREF_REG_DIR)
+	rm -fr $(MBREF_UIO_DIR)
+	cp -a $(MBREF_UIO_SRCDIR) $(MBREF_UIO_DIR)
 	$(KERNEL_PATH) $(KERNEL_ENV) $(MAKE) $(KERNEL_MAKEVARS) \
 		-C $(KERNEL_DIR) \
-		M=$(MBREF_REG_DIR) \
+		M=$(MBREF_UIO_DIR) \
 		modules
 	@$(call touch)
 
@@ -62,7 +62,7 @@ $(STATEDIR)/mbref-reg.compile:
 # Install
 # ----------------------------------------------------------------------------
 
-$(STATEDIR)/mbref-reg.install:
+$(STATEDIR)/mbref-uio.install:
 	@$(call targetinfo)
 	@$(call touch)
 
@@ -70,11 +70,11 @@ $(STATEDIR)/mbref-reg.install:
 # Target-Install
 # ----------------------------------------------------------------------------
 
-$(STATEDIR)/mbref-reg.targetinstall:
+$(STATEDIR)/mbref-uio.targetinstall:
 	@$(call targetinfo)
 	$(KERNEL_PATH) $(KERNEL_ENV) $(MAKE) $(KERNEL_MAKEVARS) \
 		-C $(KERNEL_DIR) \
-		M=$(MBREF_REG_DIR) \
+		M=$(MBREF_UIO_DIR) \
 		modules_install
 	@$(call touch)
 
@@ -82,8 +82,8 @@ $(STATEDIR)/mbref-reg.targetinstall:
 # Clean
 # ----------------------------------------------------------------------------
 
-#$(STATEDIR)/mbref-reg.clean:
+#$(STATEDIR)/mbref-uio.clean:
 #	@$(call targetinfo)
-#	@$(call clean_pkg, MBREF_REG)
+#	@$(call clean_pkg, MBREF_UIO)
 
 # vim: syntax=make

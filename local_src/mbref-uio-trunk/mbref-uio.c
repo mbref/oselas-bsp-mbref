@@ -1,5 +1,5 @@
 /*
- * mbref-reg.c
+ * mbref-uio.c
  * Copyright (c) 2011 Li-Pro.Net, Stephan Linz
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,18 +26,18 @@
 #include <linux/of_device.h>
 #include <linux/of_platform.h>
 
-struct mbref_reg_platdata {
+struct mbref_uio_platdata {
 	struct uio_info *uioinfo;
 	spinlock_t lock;
 	unsigned long flags;
 };
 
-#define DRIVER_NAME "mbref-reg"
+#define DRIVER_NAME "mbref-uio"
 #define DRIVER_VERS "0.0.1"
 
-static irqreturn_t mbref_reg_handler(int irq, struct uio_info *dev_info)
+static irqreturn_t mbref_uio_handler(int irq, struct uio_info *dev_info)
 {
-	struct mbref_reg_platdata *priv = dev_info->priv;
+	struct mbref_uio_platdata *priv = dev_info->priv;
 
 	/* Just disable the interrupt in the interrupt controller, and
 	 * remember the state so we can allow user space to enable it later.
@@ -49,9 +49,9 @@ static irqreturn_t mbref_reg_handler(int irq, struct uio_info *dev_info)
 	return IRQ_HANDLED;
 }
 
-static int mbref_reg_irqcontrol(struct uio_info *dev_info, s32 irq_on)
+static int mbref_uio_irqcontrol(struct uio_info *dev_info, s32 irq_on)
 {
-	struct mbref_reg_platdata *priv = dev_info->priv;
+	struct mbref_uio_platdata *priv = dev_info->priv;
 	unsigned long flags;
 
 	/* Allow user space to enable and disable the interrupt
@@ -74,10 +74,10 @@ static int mbref_reg_irqcontrol(struct uio_info *dev_info, s32 irq_on)
 	return 0;
 }
 
-int __mbref_reg_pdrv_probe(struct device *dev, struct uio_info *uioinfo,
+int __mbref_uio_pdrv_probe(struct device *dev, struct uio_info *uioinfo,
 		struct resource *resources, unsigned int num_resources)
 {
-	struct mbref_reg_platdata *priv;
+	struct mbref_uio_platdata *priv;
 	struct uio_mem *uiomem;
 	unsigned int i;
 	int ret;
@@ -129,8 +129,8 @@ int __mbref_reg_pdrv_probe(struct device *dev, struct uio_info *uioinfo,
 	 */
 
 	uioinfo->irq_flags |= IRQF_DISABLED;
-	uioinfo->handler = mbref_reg_handler;
-	uioinfo->irqcontrol = mbref_reg_irqcontrol;
+	uioinfo->handler = mbref_uio_handler;
+	uioinfo->irqcontrol = mbref_uio_irqcontrol;
 	uioinfo->priv = priv;
 
 	ret = uio_register_device(dev, priv->uioinfo);
@@ -147,7 +147,7 @@ int __mbref_reg_pdrv_probe(struct device *dev, struct uio_info *uioinfo,
 	return ret;
 }
 
-static int __devinit mbref_reg_of_probe(struct of_device *op,
+static int __devinit mbref_uio_of_probe(struct of_device *op,
 		const struct of_device_id *match)
 {
 	struct uio_info *uioinfo;
@@ -178,7 +178,7 @@ static int __devinit mbref_reg_of_probe(struct of_device *op,
 					uioinfo->name, op->node->full_name,
 					resources[i].start, resources[i].end);
 
-	ret = __mbref_reg_pdrv_probe(&op->dev, uioinfo, resources, i);
+	ret = __mbref_uio_pdrv_probe(&op->dev, uioinfo, resources, i);
 	if (ret)
 		goto err_cleanup;
 
@@ -193,9 +193,9 @@ err_cleanup:
 	return ret;
 }
 
-static int __devexit mbref_reg_of_remove(struct of_device *op)
+static int __devexit mbref_uio_of_remove(struct of_device *op)
 {
-	struct mbref_reg_platdata *priv = dev_get_drvdata(&op->dev);
+	struct mbref_uio_platdata *priv = dev_get_drvdata(&op->dev);
 
 	uio_unregister_device(priv->uioinfo);
 
@@ -210,16 +210,17 @@ static int __devexit mbref_reg_of_remove(struct of_device *op)
 /* work with hotplug and coldplug */
 MODULE_ALIAS("platform:"DRIVER_NAME);
 
-static const struct of_device_id mbref_reg_of_match[] = {
+static const struct of_device_id mbref_uio_of_match[] = {
 	{ .compatible = "xlnx,plbv46-mbref-reg-1.00.a", },
+	{ .compatible = "xlnx,plbv46-mbref-mio-1.00.a", },
 	{ /* end of list */ },
 };
-MODULE_DEVICE_TABLE(of, mbref_reg_of_match);
+MODULE_DEVICE_TABLE(of, mbref_uio_of_match);
 
-static struct of_platform_driver mbref_reg_driver = {
-	.match_table	= mbref_reg_of_match,
-	.probe		= mbref_reg_of_probe,
-	.remove		= __devexit_p(mbref_reg_of_remove),
+static struct of_platform_driver mbref_uio_driver = {
+	.match_table	= mbref_uio_of_match,
+	.probe		= mbref_uio_of_probe,
+	.remove		= __devexit_p(mbref_uio_of_remove),
 	.driver		= {
 		.owner	= THIS_MODULE,
 		.name	= DRIVER_NAME,
@@ -227,7 +228,7 @@ static struct of_platform_driver mbref_reg_driver = {
 };
 
 /*
- * mbref_reg_init - function to insert this module into kernel space
+ * mbref_uio_init - function to insert this module into kernel space
  *
  * This is the first of two exported functions to handle inserting this
  * code into a running kernel
@@ -235,27 +236,27 @@ static struct of_platform_driver mbref_reg_driver = {
  * Returns 0 if successfull, otherwise -1
  */
 
-static int __init mbref_reg_init(void)
+static int __init mbref_uio_init(void)
 {
-	return of_register_platform_driver(&mbref_reg_driver);
+	return of_register_platform_driver(&mbref_uio_driver);
 }
 
 /*
- * mbref_reg_exit - function to cleanup this module from kernel space
+ * mbref_uio_exit - function to cleanup this module from kernel space
  *
  * This is the second of two exported functions to handle cleanup this
  * code from a running kernel
  */
 
-static void __exit mbref_reg_exit(void)
+static void __exit mbref_uio_exit(void)
 {
-	of_unregister_platform_driver(&mbref_reg_driver);
+	of_unregister_platform_driver(&mbref_uio_driver);
 }
 
-module_init(mbref_reg_init);
-module_exit(mbref_reg_exit);
+module_init(mbref_uio_init);
+module_exit(mbref_uio_exit);
 
 MODULE_AUTHOR("linz@li-pro.net");
-MODULE_DESCRIPTION("MicroBlaze References simple register bank for PLB v4.6.");
+MODULE_DESCRIPTION("MicroBlaze References simple UIO lowlevel driver.");
 MODULE_LICENSE("GPL v2");
 
