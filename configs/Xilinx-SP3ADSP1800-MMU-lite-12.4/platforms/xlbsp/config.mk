@@ -2,7 +2,7 @@
 # (C) Copyright 2007-2009 Michal Simek
 # Michal SIMEK <monstr@monstr.eu>
 #
-# (C) Copyright 2010 Li-Pro.Net
+# (C) Copyright 2010-2011 Li-Pro.Net
 # Stephan Linz <linz@li-pro.net>
 #
 # This program is free software; you can redistribute it and/or
@@ -40,6 +40,4 @@ CONFIG_SYS_TEXT_BASE = 0x27f00000
 # I2C controller not defined
 
 # Sysace CF controller not defined
-
-# S2I GigE Vision Ethernet MAC not defined
 
