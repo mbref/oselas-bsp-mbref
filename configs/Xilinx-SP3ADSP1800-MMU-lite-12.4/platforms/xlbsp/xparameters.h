@@ -57,7 +57,7 @@
 
 /* System memory is mpmc_0 */
 #define XILINX_RAM_START                         0x20000000
-#define XILINX_RAM_SIZE                          0x00000000
+#define XILINX_RAM_SIZE                          0x08000000
 
 /* NOR Flash memory is xps_mch_emc_0 */
 #define XILINX_FLASH_START                       0xaf000000
