@@ -2,7 +2,7 @@
 # (C) Copyright 2007-2009 Michal Simek
 # Michal SIMEK <monstr@monstr.eu>
 #
-# (C) Copyright 2010 Li-Pro.Net
+# (C) Copyright 2010-2011 Li-Pro.Net
 # Stephan Linz <linz@li-pro.net>
 #
 # This program is free software; you can redistribute it and/or
@@ -28,15 +28,8 @@
 # Project description at http://www.monstr.eu/
 #
 
+# PTXdist section key: this is part of the Xilinx BSP for a SoftCPU
 ## SECTION=xlbsp_softcpu
-
-# Project name
-comment "Project name"
-
-config PROJECT_NAME
-	string "Project name"
-	default "Xilinx-SP3ADSP1800-MMU-lite-12.2"
-
 
 # Microblaze is microblaze_0
 comment "Microblaze is microblaze_0"
