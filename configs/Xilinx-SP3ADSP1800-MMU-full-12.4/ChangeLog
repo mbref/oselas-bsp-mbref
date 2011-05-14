@@ -1,6 +1,7 @@
 2011-05-14	Stephan Linz <linz@li-pro.net>
 
 	* xlbsp: change eram size to real size
+	* kernelconfig: enable block layer and more filesystems
 
 2011-05-13	Stephan Linz <linz@li-pro.net>
 
