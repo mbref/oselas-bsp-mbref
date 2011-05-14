@@ -1,10 +1,7 @@
 From e9b9560f0842d45deb30cb6cd8a330a0b638ab06 Mon Sep 17 00:00:00 2001
-Message-Id: <e9b9560f0842d45deb30cb6cd8a330a0b638ab06.1295168975.git.linz@li-pro.net>
-In-Reply-To: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
-References: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
 From: Stephan Linz <linz@li-pro.net>
 Date: Mon, 29 Nov 2010 14:31:47 +0100
-Subject: [PATCH 5/7] iic: OF Support for xilinx i2c
+Subject: [PATCH 5/9] iic: OF Support for xilinx i2c
 
 Fast fix to get mailine i2c driver to work on microblaze.
 

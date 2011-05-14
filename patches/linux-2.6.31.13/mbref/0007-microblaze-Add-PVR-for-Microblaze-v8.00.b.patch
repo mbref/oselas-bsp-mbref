@@ -1,10 +1,7 @@
 From 0de8d5a5c00c3208860a52c83352bb4d43691ea4 Mon Sep 17 00:00:00 2001
-Message-Id: <0de8d5a5c00c3208860a52c83352bb4d43691ea4.1295168975.git.linz@li-pro.net>
-In-Reply-To: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
-References: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
 From: Michal Simek <monstr@monstr.eu>
 Date: Tue, 28 Dec 2010 14:44:51 +0100
-Subject: [PATCH 7/7] microblaze: Add PVR for Microblaze v8.00.b
+Subject: [PATCH 7/9] microblaze: Add PVR for Microblaze v8.00.b
 
 Microblaze v8.00.b have 0x13 version string.
 

@@ -1,0 +1,30 @@
+From 5cd0e00215e722567db77c72b0797dca0baa40f0 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Fri, 18 Feb 2011 22:21:41 +0100
+Subject: [PATCH 8/9] xilinx uratlite: expand numer of ports from 4 to 8
+
+avoid prope error like:
+[    0.804000] uartlite 84000000.serial: ttyUL4 too large
+[    0.808000] uartlite: probe of 84000000.serial failed with error -22
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/serial/uartlite.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/serial/uartlite.c b/drivers/serial/uartlite.c
+index 4320218..e2c5c99 100644
+--- a/drivers/serial/uartlite.c
++++ b/drivers/serial/uartlite.c
+@@ -37,7 +37,7 @@ MODULE_DEVICE_TABLE(of, ulite_of_match);
+ #define ULITE_NAME		"ttyUL"
+ #define ULITE_MAJOR		204
+ #define ULITE_MINOR		187
+-#define ULITE_NR_UARTS		4
++#define ULITE_NR_UARTS		8
+ 
+ /* ---------------------------------------------------------------------
+  * Register definitions
+-- 
+1.6.0.4
+

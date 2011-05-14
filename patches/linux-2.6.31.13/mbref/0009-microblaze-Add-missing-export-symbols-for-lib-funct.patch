@@ -1,0 +1,37 @@
+From 82bfb5a3503c701bf485e80347d7d22fa2e0da1c Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Thu, 24 Feb 2011 15:36:49 +0100
+Subject: [PATCH 9/9] microblaze: Add missing export symbols for lib functions
+
+Adding missing export symbols for loadable modules.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ arch/microblaze/kernel/microblaze_ksyms.c |   13 +++++++++++++
+ 1 files changed, 13 insertions(+), 0 deletions(-)
+
+diff --git a/arch/microblaze/kernel/microblaze_ksyms.c b/arch/microblaze/kernel/microblaze_ksyms.c
+index 78520d7..a00bc22 100644
+--- a/arch/microblaze/kernel/microblaze_ksyms.c
++++ b/arch/microblaze/kernel/microblaze_ksyms.c
+@@ -39,3 +39,16 @@ EXPORT_SYMBOL(__strncpy_user);
+ extern void _mcount(void);
+ EXPORT_SYMBOL(_mcount);
+ #endif
++
++extern void __divsi3(void);
++EXPORT_SYMBOL(__divsi3);
++extern void __modsi3(void);
++EXPORT_SYMBOL(__modsi3);
++extern void __muldi3(void);
++EXPORT_SYMBOL(__muldi3);
++extern void __mulsi3(void);
++EXPORT_SYMBOL(__mulsi3);
++extern void __udivsi3(void);
++EXPORT_SYMBOL(__udivsi3);
++extern void __umodsi3(void);
++EXPORT_SYMBOL(__umodsi3);
+-- 
+1.6.0.4
+

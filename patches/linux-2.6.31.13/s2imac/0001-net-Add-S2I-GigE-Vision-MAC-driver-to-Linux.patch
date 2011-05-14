@@ -1,26 +1,30 @@
-From c9d83d1df30226266145878ff4433c2a01c87a52 Mon Sep 17 00:00:00 2001
-Message-Id: <c9d83d1df30226266145878ff4433c2a01c87a52.1295945090.git.linz@li-pro.net>
+From a0ee34260ab20575521b77dec9bd49ddf6399eb6 Mon Sep 17 00:00:00 2001
+Message-Id: <a0ee34260ab20575521b77dec9bd49ddf6399eb6.1300995344.git.linz@li-pro.net>
 From: Stephan Linz <linz@li-pro.net>
-Date: Sat, 22 Jan 2011 17:07:30 +0100
-Subject: [PATCH 1/5] net: Add S2I GigE Vision MAC driver to Linux
+Date: Thu, 24 Mar 2011 20:34:37 +0100
+Subject: [PATCH 1/1] net: Add S2I GigE Vision MAC driver to Linux
 
-Add Sensor to Image (S2I) GigE Vision Ethernet MAC
-driver to Linux kernel. It is the first stage ofcw
-the 2010 version made by S2I.
+Add Sensor to Image (S2I) GigE Vision Ethernet MAC driver
+to Linux kernel. This is a pre-stage version. The special
+kernel configuration option CONFIG_S2IMAC_POLLING will be
+removed as soon as possible when interrupt handling works
+correctly.
 
 Signed-off-by: Stephan Linz <linz@li-pro.net>
 ---
- drivers/net/Kconfig  |    6 +
- drivers/net/Makefile |    1 +
- drivers/net/s2imac.c | 1299 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 1306 insertions(+), 0 deletions(-)
+ drivers/net/Kconfig    |   12 +
+ drivers/net/Makefile   |    1 +
+ drivers/net/s2imac.c   | 1482 ++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/if_s2i.h |   27 +
+ 4 files changed, 1522 insertions(+), 0 deletions(-)
  create mode 100644 drivers/net/s2imac.c
+ create mode 100644 include/linux/if_s2i.h
 
 diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
-index c27a43f..09628d1 100644
+index c27a43f..f4a6c5c 100644
 --- a/drivers/net/Kconfig
 +++ b/drivers/net/Kconfig
-@@ -2463,6 +2463,12 @@ config S6GMAC
+@@ -2463,6 +2463,18 @@ config S6GMAC
  	  To compile this driver as a module, choose M here. The module
  	  will be called s6gmac.
  
@@ -29,6 +33,12 @@ index c27a43f..09628d1 100644
 +	depends on XILINX_DRIVERS
 +	help
 +	  This driver supports the 10/100/1000 S2IMAC.
++
++config S2IMAC_POLLING
++	bool "  use in polling mode"
++	depends on S2IMAC
++	help
++	  FIXME
 +
  config XILINX_LLTEMAC
  	tristate "Xilinx LLTEMAC 10/100/1000 Ethernet MAC driver"
@@ -46,19 +56,24 @@ index 28e9b3a..de15c80 100644
  obj-$(CONFIG_NETCONSOLE) += netconsole.o
 diff --git a/drivers/net/s2imac.c b/drivers/net/s2imac.c
 new file mode 100644
-index 0000000..d6af739
+index 0000000..501e6a9
 --- /dev/null
 +++ b/drivers/net/s2imac.c
-@@ -0,0 +1,1299 @@
+@@ -0,0 +1,1482 @@
 +/*
 + * Linux driver for the s2imac device.
 + *
 + * Author: Roman Wagner rw@sensortoimage.de
 + *
-+ * This is a flat driver which is based on the original emac_lite
-+ * driver from John Williams <john.williams@petalogix.com>.
++ * This is a flat driver which is based on the emac_lite and lltemac
++ * driver from John Williams <john.williams@petalogix.com> and Xilinx, Inc.
 + *
 + * Copyright (C) 2010 Sensor to image GmbH
++ * October 2010 created
++ *
++ * Copyright (C) 2011 Li-Pro.Net, Stephan Linz <linz@li-pro.net>
++ * January 2011 code improvements and coding style corrections
++ * February 2001 change over to an interrupt driven network driver
 + *
 + * This program is free software; you can redistribute it and/or modify it
 + * under the terms of the GNU General Public License as published by the
@@ -74,334 +89,458 @@ index 0000000..d6af739
 +#include <linux/skbuff.h>
 +#include <linux/io.h>
 +
++/* for SIOS2I stuff */
++#include <linux/if_s2i.h>
++
 +#include <linux/of_device.h>
 +#include <linux/of_platform.h>
-+//#include <linux/of_mdio.h>
++#include <linux/of_mdio.h>
 +#include <linux/phy.h>
 +
 +#define DRIVER_NAME "s2imac"
++#define DRIVER_VERS "1.0"
 +
-+#define TX_TIMEOUT		(60*HZ)		/* Tx timeout is 60 seconds. */
-+#define ALIGNMENT		4
++/* MDIO register basis */
++#define MDIO_BASE		(lp->base_addr[S2IMAC_NETMAP] + 0x1000)
 +
-+/* BUFFER_ALIGN(adr) calculates the number of bytes to the next alignment. */
-+#define BUFFER_ALIGN(adr) ((ALIGNMENT - ((u32) adr)) % ALIGNMENT)
++/* Tx/Rx buffer basis */
++#define TXBUF     		(lp->base_addr[S2IMAC_NETMAP] + 0x4000)
++#define RXBUF     		(lp->base_addr[S2IMAC_NETMAP] + 0x8000)
 +
-+/* Register offsets for the s2iMac Core */
-+#define GCSR    		0xC000
-+#define CLK_FREQ		0xC008
-+#define TOCNT_DIV		0xC014
-+#define MDIO_ACC		0xC028
-+#define ETHSIZE  		0xC02C
-+#define MAC_HIGH 		0xC030
-+#define MAC_LOW  		0xC034
-+#define TX_LEN  		0xC048
-+#define RX_LEN   		0xC04C
-+#define MAC_RX_HIGH	0xC090
-+#define MAC_RX_LOW	0xC094
-+#define MAC_RX_HIGH	0xC090
-+#define MAC_RX_LOW	0xC094
-+#define TXBUF     	0x00004000
-+#define RXBUF     	0x00008000
++/* MAC registers definition */
++#define RCW1			(lp->base_addr[S2IMAC_NETMAP] + (0x240 << 2))
++#define TC			(lp->base_addr[S2IMAC_NETMAP] + (0x280 << 2))
++#define EMMC			(lp->base_addr[S2IMAC_NETMAP] + (0x300 << 2))
++#define MC			(lp->base_addr[S2IMAC_NETMAP] + (0x340 << 2))
++#define UAW0			(lp->base_addr[S2IMAC_NETMAP] + (0x380 << 2))
++#define UAW1			(lp->base_addr[S2IMAC_NETMAP] + (0x384 << 2))
++#define AFM			(lp->base_addr[S2IMAC_NETMAP] + (0x390 << 2))
 +
-+#define RCW1	(0x240 << 2) 
-+#define TC	  (0x280 << 2) 
-+#define EMMC  (0x300 << 2) 
-+#define MC  	(0x340 << 2)  
-+#define UAW0	(0x380 << 2)  
-+#define UAW1	(0x384 << 2)  
++#define MDIO_RXTX_JUMBO		(1 << 30)
++#define MDIO_RXTX_ENABLE	(1 << 28)
++#define MDIO_RXTX_HALFDUPLEX	(1 << 26)
 +
-+#define MDIO_ENABLE_MASK			0x40
-+#define MDIO_CLOCK_DIV_MASK		0x3F
++#define MDIO_EMMC_10BASET	(0)
++#define MDIO_EMMC_100BASET	(1 << 30)
++#define MDIO_EMMC_1000BASET	(1 << 31)
 +
-+#define ETHER_MTU		1520
++#define MDIO_ENABLE_MASK	(1 << 6)
++#define MDIO_CLOCK_DIV_MASK	((1 << 6) - 1)
 +
-+#define XTE_MTU             1500	/* max MTU size of an Ethernet frame */
-+#define XTE_JUMBO_MTU       8982	/* max MTU size of a jumbo Ethernet frame */
-+#define XTE_HDR_SIZE        14	/* size of an Ethernet header */
-+#define XTE_HDR_VLAN_SIZE   18	/* size of an Ethernet header with VLAN */
-+#define XTE_TRL_SIZE        4	/* size of an Ethernet trailer (FCS) */
-+#define XTE_MAX_FRAME_SIZE       (XTE_MTU + XTE_HDR_SIZE + XTE_TRL_SIZE)
-+#define XTE_MAX_VLAN_FRAME_SIZE  (XTE_MTU + XTE_HDR_VLAN_SIZE + XTE_TRL_SIZE)
++/* direct registers definition */
++#define GCSR    		(lp->base_addr[S2IMAC_NETMAP] + 0xC000)
++#define CLK_FREQ		(lp->base_addr[S2IMAC_NETMAP] + 0xC008)
++#define TOCNT_DIV		(lp->base_addr[S2IMAC_NETMAP] + 0xC014)
++#define MDIO_ACC		(lp->base_addr[S2IMAC_NETMAP] + 0xC028)
++#define ETHSIZE  		(lp->base_addr[S2IMAC_NETMAP] + 0xC02C)
++#define MAC_HIGH 		(lp->base_addr[S2IMAC_NETMAP] + 0xC030)
++#define MAC_LOW  		(lp->base_addr[S2IMAC_NETMAP] + 0xC034)
++#define TX_LEN  		(lp->base_addr[S2IMAC_NETMAP] + 0xC048)
++#define RX_LEN   		(lp->base_addr[S2IMAC_NETMAP] + 0xC04C)
++#define MAC_RX_HIGH		(lp->base_addr[S2IMAC_NETMAP] + 0xC090)
++#define MAC_RX_LOW		(lp->base_addr[S2IMAC_NETMAP] + 0xC094)
++
++#ifndef CONFIG_S2IMAC_POLLING
++#define INT_MASK		(lp->base_addr[S2IMAC_NETMAP] + 0xC0AC)
++#define INT_REQ 		(lp->base_addr[S2IMAC_NETMAP] + 0xC0B0)
++#endif
++
++#define GCSR_CONNECTED		(1)
++#define GCSR_RST_PHY		(1 << 2)
++
++#define MDIO_ACC_ENA_NBLOCK	(1 << 31)
++#define MDIO_ACC_NBLOCK		(1 << 16)
++#define MDIO_ACC_MIIRDY		(1 << 17)
++
++#ifndef CONFIG_S2IMAC_POLLING
++#define INT_ENABLE_RX		(1)
++#define INT_ENABLE_TX		(1 << 1)
++#define INT_ENABLE_IRQS		(1 << 31)
++#endif
++
++/* max MTU size of an ... */
++#define XTE_MTU			1500	/* Ethernet frame */
++#define XTE_JUMBO_MTU		8982	/* jumbo Ethernet frame */
++#define XTE_HDR_SIZE		14	/* Ethernet header */
++#define XTE_HDR_VLAN_SIZE	18	/* Ethernet header with VLAN */
++#define XTE_TRL_SIZE		4	/* Ethernet trailer (FCS) */
++#define XTE_MAX_FRAME_SIZE	(XTE_MTU + XTE_HDR_SIZE + XTE_TRL_SIZE)
++#define XTE_MAX_VLAN_FRAME_SIZE	(XTE_MTU + XTE_HDR_VLAN_SIZE + XTE_TRL_SIZE)
 +#define XTE_MAX_JUMBO_FRAME_SIZE (XTE_JUMBO_MTU + XTE_HDR_SIZE + XTE_TRL_SIZE)
 +
-+#define GCSR_CONNECTED      0x00000001
-+#define GCSR_RST_PHY        0x00000004
++/* Tx timeout is 60 seconds. */
++#define TX_TIMEOUT		(60*HZ)
 +
-+/* Use MII register 1 (MII status register) to detect PHY */
-+#define PHY_DETECT_REG  1
++/* BUFFER_ALIGN(adr) calculates the number of bytes to the next alignment. */
++#define ALIGNMENT		4
++#define BUFFER_ALIGN(adr)	((ALIGNMENT - ((u32) adr)) % ALIGNMENT)
 +
-+/* Mask used to verify certain PHY features (or register contents)
-+ * in the register above:
-+ *  0x1000: 10Mbps full duplex support
-+ *  0x0800: 10Mbps half duplex support
-+ *  0x0008: Auto-negotiation support
-+ */
-+#define PHY_DETECT_MASK 0x1808
-+
-+volatile u32 *gige_txbuf; 
-+volatile u32 *gige_rxbuf; 
++volatile u32 *gige_txbuf;
++volatile u32 *gige_rxbuf;
 +
 +/**
 + * struct net_local - Our private per device data
 + * @ndev:		instance of the network device
-+ * @base_addr:		base address of the s2imac device
++ * @base_addr[]:	base address of the s2imac device
++ * @coreclk:		ip core clock frequency in Hz
++ * @regmem_end:		physical end of GigEV register bank
++ * @regmem_start:	physical start of GigEV register bank
 + * @reset_lock:		lock used for synchronization
 + * @deferred_skb:	holds an skb (for transmission at a later time) when the
 + *			Tx buffer is not free
 + * @phy_dev:		pointer to the PHY device
 + * @phy_node:		pointer to the PHY device node
 + * @last_link:		last link status
++ * @cur_speed:		current speed
 + */
 +struct net_local {
 +
 +	struct net_device *ndev;
 +
-+	void __iomem *base_addr;
++#define S2IMAC_NETMAP	0
++#define S2IMAC_REGMAP	1
++#define MAX_S2IMAC_MAPS 2
++	void __iomem *base_addr[MAX_S2IMAC_MAPS];
++	unsigned int coreclk;
++
++	unsigned long regmem_end;
++	unsigned long regmem_start;
 +
 +	spinlock_t reset_lock;
 +	struct sk_buff *deferred_skb;
 +
-+	struct phy_device *phy_dev;
-+	struct device_node *phy_node;
++	/* FIXME: use mdio bus: struct phy_device *phy_dev; */
++	/* FIXME: use mdio bus: struct device_node *phy_node; */
++	u32 phy_addr;		/* FIXME: really global, use mdio bus */
 +
 +	int last_link;
 +	int cur_speed;
-+	u32 phy_addr;
 +
-+	struct timer_list irq_timer;
++#ifdef CONFIG_S2IMAC_POLLING
++	struct timer_list irq_timer;	/* ISR polling timer */
++#endif
++
 +	struct timer_list phy_timer;	/* PHY monitoring timer */
 +};
 +
-+
 +/*************************/
-+/* s2iMac driver calls */
++/* s2imac driver calls */
 +/*************************/
 +
-+
-+// ---- Read Ethernet PHY register ---------------------------------------------
-+u16 s2imac_phy_read(u32 base_address, u32 phy_address,u8 reg)
++#ifndef CONFIG_S2IMAC_POLLING
++/**
++ * s2imac_enable_interrupts - Enable the interrupts for the s2imac device
++ * @drvdata:	Pointer to the s2imac device private data
++ *
++ * This function enables the Tx and Rx interrupts for the s2imac device along
++ * with the Global Interrupt Enable.
++ */
++static void s2imac_enable_interrupts(struct net_local *lp)
 +{
-+  u32 ret;
++	u32 reg_data;
 +
-+  // Non-blocking mode (only this software thread waits for MDIO access)
-+  if (in_be32((u32 *)(base_address + MDIO_ACC)) & 0x00010000)
-+  {
-+	  ret = in_be32((u32 *)(base_address + 0x00001000 + ((phy_address & 0x1F) << 7) + ((reg & 0x1F) << 2)));
-+    while (!(in_be32((u32 *)(base_address + MDIO_ACC)) & 0x00020000)) {};
-+    ret = in_be32((u32 *)(base_address + MDIO_ACC));
-+  }
-+  // Blocking mode (whole system waits for the bus transaction to finish)
-+  else
-+  {
-+	  ret = in_be32((u32 *)(base_address + 0x00001000 + ((phy_address & 0x1F) << 7) + ((reg & 0x1F) << 2)));
-+  }
-+  return (u16)(ret & 0x0000FFFF);
++	/* get interrput mask register */
++	reg_data = in_be32((u32 *) INT_MASK);
++
++	/* Enable the Tx interrupts, enable Rx interrupts and enable the global interrupt */
++	out_be32 ((u32 *) INT_MASK, reg_data | INT_ENABLE_TX | INT_ENABLE_RX | INT_ENABLE_IRQS);
 +}
 +
-+// ---- Write Ethernet PHY register --------------------------------------------
-+void s2imac_phy_write(u32 base_address, u32 phy_address, u8 reg, u16 val)
++/**
++ * s2imac_disable_interrupts - Disable the interrupts for the s2imac device
++ * @drvdata:	Pointer to the s2imac device private data
++ *
++ * This function disables the Tx and Rx interrupts for the s2imac device,
++ * along with the Global Interrupt Enable.
++ */
++static void s2imac_disable_interrupts(struct net_local *lp)
 +{
-+  // Non-blocking mode (only this software thread waits for MDIO access)
-+  if (in_be32((u32 *)(base_address + MDIO_ACC)) & 0x00010000)
-+  {
-+	  out_be32((u32 *)(base_address + 0x00001000 + (phy_address << 7) + ((reg) << 2)),val);
-+    while (!(in_be32((u32 *)(base_address + MDIO_ACC)) & 0x00020000)) {};
-+  }
-+  // Blocking mode (whole system waits for the bus transaction to finish)
-+  else
-+  {
-+	  out_be32((u32 *)(base_address + 0x00001000 + (phy_address << 7) + ((reg) << 2)),val);
-+  }
-+  return;
++	u32 reg_data;
++
++	/* get interrput mask register */
++	reg_data = in_be32((u32 *) INT_MASK);
++
++	/* disable the Tx interrupts, disable Rx interrupts and disable the global interrupt */
++	out_be32 ((u32 *) INT_MASK, reg_data & (~INT_ENABLE_TX) & (~INT_ENABLE_RX) & (~INT_ENABLE_IRQS));
++}
++#endif
++
++/* Read Ethernet PHY register */
++static u16 s2imac_phy_read (struct net_local *lp, u8 reg_addr)
++{
++	u32 ret;
++
++	if (in_be32 ((u32 *) MDIO_ACC) & MDIO_ACC_NBLOCK) {
++		/*
++		 * Non-blocking mode
++		 * (only this software thread waits for MDIO access)
++		 */
++		ret = in_be32 ((u32 *) (MDIO_BASE + ((lp->phy_addr & 0x1F) << 7)
++					+ ((reg_addr & 0x1F) << 2)));
++
++		/*
++		 * Wait here polling, until the value is ready to be read.
++		 * Should we avoid endless loop due to hardware?
++		 */
++		do {
++			ret = in_be32 ((u32 *) MDIO_ACC);
++		} while (!(ret & MDIO_ACC_MIIRDY));
++	} else {
++		/*
++		 * Blocking mode
++		 * (whole system waits for the bus transaction to finish)
++		 */
++		ret = in_be32 ((u32 *) (MDIO_BASE + ((lp->phy_addr & 0x1F) << 7)
++					+ ((reg_addr & 0x1F) << 2)));
++	}
++	return (u16) (ret & 0xFFFF);
 +}
 +
-+static int detect_phy(struct net_local *lp, struct device *dev)
++/* Write Ethernet PHY register */
++static void s2imac_phy_write (struct net_local *lp, u8 reg_addr, u16 reg_data)
++{
++	u32 ret;
++
++	if (in_be32 ((u32 *) MDIO_ACC) & MDIO_ACC_NBLOCK) {
++		/*
++		 * Non-blocking mode
++		 * (only this software thread waits for MDIO access)
++		 */
++		out_be32 ((u32 *) (MDIO_BASE + (lp->phy_addr << 7)
++				   + ((reg_addr) << 2)), reg_data);
++
++		/*
++		 * Wait here polling, until the value is ready written.
++		 * Should we avoid endless loop due to hardware?
++		 */
++		do {
++			ret = in_be32 ((u32 *) MDIO_ACC);
++		} while (!(ret & MDIO_ACC_MIIRDY));
++	} else {
++		/*
++		 * Blocking mode
++		 * (whole system waits for the bus transaction to finish)
++		 */
++		out_be32 ((u32 *) (MDIO_BASE + (lp->phy_addr << 7)
++				   + ((reg_addr) << 2)), reg_data);
++	}
++}
++
++/*
++ * Detect the PHY address by scanning addresses 0 to 31 and
++ * looking at the MII status register (register 1) and assuming
++ * the PHY supports 10Mbps full/half duplex. Feel free to change
++ * this code to match your PHY, or hardcode the address if needed.
++ *
++ * Use MII register 1 (MII status register) to detect PHY
++ *
++ * Mask used to verify certain PHY features (or register contents)
++ * in the register above:
++ *  0x1000: 10Mbps full duplex support
++ *  0x0800: 10Mbps half duplex support
++ *  0x0008: Auto-negotiation support
++ */
++#define PHY_DETECT_REG		1
++#define PHY_DETECT_MASK		0x1808
++static int detect_phy (struct net_local *lp, struct device *dev)
 +{
 +	u16 phy_reg;
-+	u32 phy_addr;
 +
-+	for (phy_addr = 31; phy_addr > 0; phy_addr--) 
-+	{
-+		phy_reg = s2imac_phy_read(lp->base_addr, phy_addr, PHY_DETECT_REG);
-+
-+		if ((phy_reg != 0xFFFF) &&((phy_reg & PHY_DETECT_MASK) == PHY_DETECT_MASK)) 
-+		{
++	for (lp->phy_addr = 31; lp->phy_addr > 0; lp->phy_addr--) {
++		phy_reg = s2imac_phy_read (lp, PHY_DETECT_REG);
++		if ((phy_reg != 0xFFFF) && ((phy_reg & PHY_DETECT_MASK)
++					    == PHY_DETECT_MASK)) {
 +			/* Found a valid PHY address */
-+	  	dev_info(dev, "PHY detected at address %d.\n",phy_addr);
-+			return phy_addr;
++			dev_info (dev, "PHY detected at address %d.\n",
++				  lp->phy_addr);
++			return lp->phy_addr;
 +		}
 +	}
-+ 	dev_info(dev, "No PHY detected.  Assuming a PHY at address 0.\n",phy_addr);
-+	return 0;		/* default to zero */
++
++	/* default to zero */
++	dev_info (dev, "No PHY detected. Assuming a PHY at address  %d.\n", lp->phy_addr);
++	return lp->phy_addr;
 +}
 +
-+
-+static void set_mac_speed(struct net_local *lp)
++static void set_mac_speed (struct net_local *lp)
 +{
-+  u32 cfg, rxtx;
-+	struct net_device *dev = lp->ndev;
++	u32 cfg, rxtx;
++	struct net_device *ndev = lp->ndev;
 +
-+  switch ((s2imac_phy_read(lp-> base_addr,lp->phy_addr,0x11)) & 0xE000)
-+  {
-+	      // 10BASE-T, half-duplex
-+  	    case 0x0000:
-+    	      cfg  = 0x00000000;
-+            rxtx = 0x14000000;
-+						lp->cur_speed = 10;
-+						printk(KERN_INFO "%s: speed set to 10BASE-T/HD\n", dev->name);
-+            break;
-+        // 10BASE-T, full-duplex
-+        case 0x2000:
-+            cfg  = 0x00000000;
-+            rxtx = 0x10000000;
-+						lp->cur_speed = 10;
-+						printk(KERN_INFO "%s: speed set to 10BASE-T/FD\n", dev->name);
-+            break;
-+        // 100BASE-TX, half-duplex
-+        case 0x4000:
-+            cfg  = 0x40000000;
-+            rxtx = 0x14000000;
-+						lp->cur_speed = 100;
-+						printk(KERN_INFO "%s: speed set to 100BASE-T/HD\n", dev->name);
-+            break;
-+        // 100BASE-TX, full-duplex
-+        case 0x6000:
-+            cfg  = 0x40000000;
-+            rxtx = 0x10000000;
-+						lp->cur_speed = 100;
-+						printk(KERN_INFO "%s: speed set to 100BASE-T/FD\n", dev->name);
-+            break;
-+        // 1000BASE-T, half-duplex
-+        case 0x8000:
-+            cfg  = 0x80000000;
-+            rxtx = 0x14000000;
-+						lp->cur_speed = 1000;
-+						printk(KERN_INFO "%s: speed set to 1000BASE-T/HD\n", dev->name);
-+            break;
-+        // 1000BASE-T, full-duplex
-+        case 0xA000:
-+            cfg  = 0x80000000;
-+            rxtx = 0x10000000;
-+						lp->cur_speed = 1000;
-+						printk(KERN_INFO "%s: speed set to 1000BASE-T/FD\n", dev->name);
-+            break;
-+        default:
-+            return;
-+  }
++	switch ((s2imac_phy_read (lp, 0x11)) & 0xE000) {
++	case 0x0000:
++		/* 10BASE-T, half-duplex */
++		cfg = MDIO_EMMC_10BASET;
++		rxtx = (MDIO_RXTX_ENABLE | MDIO_RXTX_HALFDUPLEX);
++		lp->cur_speed = 10;
++		dev_info (&ndev->dev, "speed set to 10BASE-T/HD\n");
++		break;
++	case 0x2000:
++		/* 10BASE-T, full-duplex */
++		cfg = MDIO_EMMC_10BASET;
++		rxtx = MDIO_RXTX_ENABLE;
++		lp->cur_speed = 10;
++		dev_info (&ndev->dev, "speed set to 10BASE-T/FD\n");
++		break;
++	case 0x4000:
++		/* 100BASE-TX, half-duplex */
++		cfg = MDIO_EMMC_100BASET;
++		rxtx = (MDIO_RXTX_ENABLE | MDIO_RXTX_HALFDUPLEX);
++		lp->cur_speed = 100;
++		dev_info (&ndev->dev, "speed set to 100BASE-T/HD\n");
++		break;
++	case 0x6000:
++		/* 100BASE-TX, full-duplex */
++		cfg = MDIO_EMMC_100BASET;
++		rxtx = MDIO_RXTX_ENABLE;
++		lp->cur_speed = 100;
++		dev_info (&ndev->dev, "speed set to 100BASE-T/FD\n");
++		break;
++	case 0x8000:
++		/* 1000BASE-T, half-duplex */
++		cfg = MDIO_EMMC_1000BASET;
++		rxtx = (MDIO_RXTX_ENABLE | MDIO_RXTX_HALFDUPLEX);
++		lp->cur_speed = 1000;
++		dev_info (&ndev->dev, "speed set to 1000BASE-T/HD\n");
++		break;
++	case 0xA000:
++		/* 1000BASE-T, full-duplex */
++		cfg = MDIO_EMMC_1000BASET;
++		rxtx = MDIO_RXTX_ENABLE;
++		lp->cur_speed = 1000;
++		dev_info (&ndev->dev, "speed set to 1000BASE-T/FD\n");
++		break;
++	default:
++		return;
++	}
 +
-+	out_be32((u32 *)(lp-> base_addr + EMMC), cfg);
-+	out_be32((u32 *)(lp-> base_addr + TC), rxtx | 0x40000000); // Transmitter - enable jumbo frames
-+	out_be32((u32 *)(lp-> base_addr + RCW1) , rxtx | 0x40000000); // Receiver - enable jumbo frames
++	out_be32 ((u32 *) EMMC, cfg);
++	/* Enable jumbo frames for Tx and Rx */
++	out_be32 ((u32 *) TC, rxtx | MDIO_RXTX_JUMBO);
++	out_be32 ((u32 *) RCW1, rxtx | MDIO_RXTX_JUMBO);
 +}
 +
 +/*
 + * Perform any necessary special phy setup. In the gmii case, nothing needs to
 + * be done.
 + */
-+static void phy_setup(struct net_local *lp)
++static void phy_setup (struct net_local *lp)
 +{
-+  u32 reg;
++	u32 reg;
 +	unsigned retries = 10;
 +
-+  // Enable non-blocking PHY access if supported
-+  out_be32((u32 *)(lp-> base_addr + MDIO_ACC),0x80000000);
++	/* non-blocking PHY access enabled (if supported) */
++	out_be32 ((u32 *) MDIO_ACC, MDIO_ACC_ENA_NBLOCK);
 +
-+	//Reset the PHY
-+//  reg = in_be32((u32 *)(lp-> base_addr + GCSR));
-+//	reg |= GCSR_RST_PHY;
-+//  out_be32((u32 *)(lp-> base_addr + GCSR),reg);
++	/* reset the PHY
++	   reg = in_be32 ((u32 *) GCSR);
++	   reg |= GCSR_RST_PHY;
++	   out_be32 ((u32 *) GCSR, reg); */
 +
-+  // Wait for end of PHY reset
-+  while (in_be32((u32 *)(lp-> base_addr + GCSR)) & GCSR_RST_PHY) {};
++	/* wait for end of PHY reset */
++	do {
++		reg = in_be32 ((u32 *) GCSR);
++	} while (reg & GCSR_RST_PHY);
 +
-+	out_be32((u32 *)(lp-> base_addr + MC), MDIO_ENABLE_MASK | (MDIO_CLOCK_DIV_MASK & ((62500000 / (2 * 2500000)) - 1)));
++	/*
++	 * Setup timers and clock generators
++	 *   - timeout counter clock period 1 ms
++	 *   - PHY MDC frequency (max 2.5 MHz according to IEEE Std 802.3-2002,
++	 *     BCM5461A supports 12.5 MHz)
++	 */
++#define MDIO_CLOCK	(2500000)	/* 2.5 MHz */
++#define MDIO_CLOCK_DIV	(MDIO_CLOCK_DIV_MASK & \
++			((lp->coreclk / (2 * MDIO_CLOCK)) - 1))
 +
-+	// wait for link up 
-+	while (retries-- &&	((s2imac_phy_read(lp-> base_addr,lp->phy_addr,1) & 0x24) == 0x24)) ;
++	out_be32 ((u32 *) CLK_FREQ, lp->coreclk);
++	out_be32 ((u32 *) TOCNT_DIV, (lp->coreclk / 1000) - 1);
++	out_be32 ((u32 *) MC, MDIO_ENABLE_MASK | MDIO_CLOCK_DIV);
 +
-+  reg = in_be32((u32 *)(lp-> base_addr + GCSR));
-+  reg |= GCSR_CONNECTED;
-+	out_be32((u32 *)(lp-> base_addr + GCSR),reg);
++	/* wait for link up */
++	while (retries-- && ((s2imac_phy_read (lp, 1) & 0x24) != 0x24)) ;
++
++	/* enable receive and transmit clients */
++	reg = in_be32 ((u32 *) GCSR);
++	reg |= GCSR_CONNECTED;
++	out_be32 ((u32 *) GCSR, reg);
 +}
 +
 +/*
 + * The PHY registers read here should be standard registers in all PHY chips
 + */
-+static int get_phy_status(struct net_device *dev, int *linkup)
++static int get_phy_status (struct net_device *ndev, int *linkup)
 +{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
 +	u16 reg;
 +
-+	reg = s2imac_phy_read(lp->base_addr,lp->phy_addr,MII_BMSR);
++	reg = s2imac_phy_read (lp, MII_BMSR);
 +	*linkup = (reg & BMSR_LSTATUS) != 0;
 +
 +	return 0;
 +}
 +
 +/*
-+ * This routine is used for two purposes.  The first is to keep the
-+ * EMAC's duplex setting in sync with the PHY's.  The second is to keep
-+ * the system apprised of the state of the link.  Note that this driver
-+ * does not configure the PHY.  Either the PHY should be configured for
-+ * auto-negotiation or it should be handled by something like mii-tool. */
-+static void poll_gmii(unsigned long data)
++ * This routine is used for two purposes. The first is to keep Xilinx
++ * EMAC's duplex setting in sync with the PHY's. The second is to keep
++ * the system apprised of the state of the link. Note that this driver
++ * does not configure the PHY. Either the PHY should be configured for
++ * auto-negotiation or it should be handled by something like mii-tool.
++ */
++static void poll_gmii (unsigned long data)
 +{
-+	struct net_device *dev;
++	struct net_device *ndev;
 +	struct net_local *lp;
 +	int phy_carrier;
 +	int netif_carrier;
 +	u32 reg;
-+	dev = (struct net_device *) data;
-+	lp = (struct net_local *) netdev_priv(dev);
++	ndev = (struct net_device *)data;
++	lp = (struct net_local *)netdev_priv (ndev);
 +
-+	/* First, find out what's going on with the PHY. */
-+	if (get_phy_status(dev, &phy_carrier)) {
-+		printk(KERN_ERR "%s: terminating link monitoring.\n",
-+		       dev->name);
++	/* first, find out what's going on with the PHY */
++	if (get_phy_status (ndev, &phy_carrier)) {
++		dev_err (&ndev->dev, "terminating link monitoring\n");
 +		return;
 +	}
-+	netif_carrier = netif_carrier_ok(dev) != 0;
++
++	netif_carrier = netif_carrier_ok (ndev) != 0;
++
 +	if (phy_carrier != netif_carrier) {
-+		if (phy_carrier) 
-+		{
-+			set_mac_speed(lp);
-+			// enable receive and transmit clients.
-+		  reg = in_be32((u32 *)(lp-> base_addr + GCSR));
-+		  reg |= GCSR_CONNECTED;
-+			out_be32((u32 *)(lp-> base_addr + GCSR),reg);
++		if (phy_carrier) {
 +
-+			printk(KERN_INFO
-+			       "%s: PHY Link carrier restored.\n",
-+			       dev->name);
-+			netif_carrier_on(dev);
-+		}
-+		else 
-+		{
-+			// edisable receive and transmit clients.
-+		  reg = in_be32((u32 *)(lp-> base_addr + GCSR));
-+		  reg &= ~GCSR_CONNECTED;
-+			out_be32((u32 *)(lp-> base_addr + GCSR),reg);
++			set_mac_speed (lp);
 +
-+			printk(KERN_INFO "%s: PHY Link carrier lost.\n",
-+			       dev->name);
-+			netif_carrier_off(dev);
++			/* enable receive and transmit clients */
++			reg = in_be32 ((u32 *) GCSR);
++			reg |= GCSR_CONNECTED;
++			out_be32 ((u32 *) GCSR, reg);
++
++			dev_info (&ndev->dev, "PHY link carrier restored\n");
++			netif_carrier_on (ndev);
++
++		} else {
++
++			/* disable receive and transmit clients */
++			reg = in_be32 ((u32 *) GCSR);
++			reg &= ~GCSR_CONNECTED;
++			out_be32 ((u32 *) GCSR, reg);
++
++			dev_info (&ndev->dev, "PHY link carrier lost\n");
++			netif_carrier_off (ndev);
 +		}
 +	}
 +
 +	/* Set up the timer so we'll get called again in 2 seconds. */
 +	lp->phy_timer.expires = jiffies + 2 * HZ;
-+	add_timer(&lp->phy_timer);
++	add_timer (&lp->phy_timer);
 +}
-+
 +
 +/**
 + * s2imac_send_data - Send an Ethernet frame
-+ * @drvdata:	Pointer to the Emaclite device private data
++ * @lp:		Pointer to the S2IMAC device private data
 + * @data:	Pointer to the data to be sent
 + * @byte_count:	Total frame size, including header
 + *
-+ * This function checks if the Tx buffer of the s2iMac device is free to send
++ * This function checks if the Tx buffer of the s2imac device is free to send
 + * data. If so, it fills the Tx buffer with data for transmission. Otherwise, it
 + * returns an error.
 + *
@@ -410,12 +549,16 @@ index 0000000..d6af739
 + * Note:	The maximum Tx packet size can not be more than Ethernet header
 + *		(14 Bytes) + Maximum MTU (1500 bytes). This is excluding FCS.
 + */
-+static int s2imac_send_data(struct net_local *drvdata, u8 *data,
-+			       unsigned int byte_count)
++static int s2imac_send_data (struct net_local *lp, u8 * data,
++			     unsigned int byte_count)
 +{
-+	u32 reg_data;
-+	u16 *buf,val,val1;
++	u16 *buf, val, val1;
 +	u32 len, i;
++
++#ifndef CONFIG_S2IMAC_POLLING
++	if(in_be32 ((u32 *) TX_LEN))
++		return -1; /* Buffer was full, return failure */
++#endif
 +
 +	/* If the length is too large, truncate it */
 +	if (byte_count > ETH_FRAME_LEN)
@@ -423,152 +566,27 @@ index 0000000..d6af739
 +
 +	len = (byte_count / 4) + 1;
 +
-+	buf = (u16 *)data;
++	buf = (u16 *) data;
 +
-+	// Write the frame to the buffer 
-+
-+  // first 2 bytes of buffer not used
++	/* first 2 bytes of buffer not used */
 +	val = *buf++;
-+	gige_txbuf[0] = (u32)(((u32)0x0000 << 16) | (u32)val);
++	gige_txbuf[0] = (u32) (((u32) 0x0000 << 16) | (u32) val);
 +
-+//	printk(KERN_INFO "%08X\n",gige_txbuf[0]);
-+
-+	for (i = 1; i < len; i++) 
-+  {
++	for (i = 1; i < len; i++) {
 +		val = *buf++;
 +		val1 = *buf++;
-+		gige_txbuf[i] = (u32)(((u32)val << 16) | ((u32)val1));
-+//	printk(KERN_INFO "%08X\n",gige_txbuf[i]);
-+
++		gige_txbuf[i] = (u32) (((u32) val << 16) | ((u32) val1));
 +	}
 +
-+  // Send reply
-+  while (in_be32((u32 *)(drvdata->base_addr + TX_LEN))) {};
-+  out_be32((u32 *)(drvdata->base_addr + TX_LEN),byte_count);
++	/* send reply */
++	while (in_be32 ((u32 *) TX_LEN)) {
++	};
++	out_be32 ((u32 *) TX_LEN, byte_count);
 +
 +	return 0;
 +}
 +
-+/**
-+ * s2imac_recv_data - Receive a frame
-+ * @drvdata:	Pointer to the s2IMac device private data
-+ * @data:	Address where the data is to be received
-+ *
-+ * This function is intended to be called from the interrupt context or
-+ * with a wrapper which waits for the receive frame to be available.
-+ *
-+ * Return:	Total number of bytes received
-+ */
-+static u16 s2imac_recv_data(struct net_local *drvdata, u8 *data)
-+{
-+	return 0;
-+}
-+
-+/**
-+ * s2imac_update_address - Update the MAC address in the device
-+ * @drvdata:	Pointer to the s2iMac device private data
-+ * @address_ptr:Pointer to the MAC address (MAC address is a 48-bit value)
-+ *
-+ * Tx must be idle and Rx should be idle for deterministic results.
-+ * It is recommended that this function should be called after the
-+ * initialization and before transmission of any packets from the device.
-+ * The MAC address can be programmed using any of the two transmit
-+ * buffers (if configured).
-+ */
-+static void s2imac_update_address(struct net_local *drvdata,
-+				     u8 *address_ptr)
-+{
-+	int val;
-+  u32 mac_l, mac_h;
-+
-+	/* set up unicast MAC address filter */
-+	val = ((address_ptr[3] << 24) | (address_ptr[2] << 16) |
-+		(address_ptr[1] << 8) | (address_ptr[0] ));
-+
-+	out_be32((u32 *)(drvdata->base_addr + UAW0), val);
-+
-+	val = (address_ptr[5] << 8) | address_ptr[4] ;
-+
-+	out_be32((u32 *)(drvdata->base_addr + UAW1), val);
-+
-+	mac_h = (address_ptr[0] << 8) | address_ptr[1] ;
-+	mac_l = ((address_ptr[2] << 24) | (address_ptr[3] << 16) |
-+		       (address_ptr[4] << 8) | (address_ptr[5] ));
-+
-+	// set gige_mac_h register
-+	out_be32((u32 *)(drvdata->base_addr + MAC_HIGH),mac_h);
-+	// set gige_mac_l register
-+	out_be32((u32 *)(drvdata->base_addr + MAC_LOW),mac_l);
-+
-+	// set gige_rx_mac_h register
-+	out_be32((u32 *)(drvdata->base_addr + MAC_RX_HIGH),mac_h);
-+	// set gige_rx_mac_l register
-+	out_be32((u32 *)(drvdata->base_addr + MAC_RX_LOW),mac_l);
-+}
-+
-+/**
-+ * s2imac_set_mac_address - Set the MAC address for this device
-+ * @dev:	Pointer to the network device instance
-+ * @addr:	Void pointer to the sockaddr structure
-+ *
-+ * This function copies the HW address from the sockaddr strucutre to the
-+ * net_device structure and updates the address in HW.
-+ *
-+ * Return:	Error if the net device is busy or 0 if the addr is set
-+ *		successfully
-+ */
-+static int s2imac_set_mac_address(struct net_device *dev, void *address)
-+{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
-+	struct sockaddr *addr = address;
-+
-+	if (netif_running(dev))
-+		return -EBUSY;
-+
-+	memcpy(dev->dev_addr, addr->sa_data, dev->addr_len);
-+	s2imac_update_address(lp, dev->dev_addr);
-+	return 0;
-+}
-+
-+/**
-+ * s2imac_tx_timeout - Callback for Tx Timeout
-+ * @dev:	Pointer to the network device
-+ *
-+ * This function is called when Tx time out occurs for Emaclite device.
-+ */
-+static void s2imac_tx_timeout(struct net_device *dev)
-+{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
-+	unsigned long flags;
-+
-+	dev_err(&lp->ndev->dev, "Exceeded transmit timeout of %lu ms\n",
-+		TX_TIMEOUT * 1000UL / HZ);
-+
-+	dev->stats.tx_errors++;
-+
-+	/* Reset the device */
-+	spin_lock_irqsave(&lp->reset_lock, flags);
-+
-+	/* Shouldn't really be necessary, but shouldn't hurt */
-+	netif_stop_queue(dev);
-+
-+//	xemaclite_disable_interrupts(lp);
-+//	xemaclite_enable_interrupts(lp);
-+
-+	if (lp->deferred_skb) {
-+		dev_kfree_skb(lp->deferred_skb);
-+		lp->deferred_skb = NULL;
-+		dev->stats.tx_errors++;
-+	}
-+
-+	/* To exclude tx timeout */
-+	dev->trans_start = 0xffffffff - TX_TIMEOUT - TX_TIMEOUT;
-+
-+	/* We're all ready to go. Start the queue */
-+	netif_wake_queue(dev);
-+	spin_unlock_irqrestore(&lp->reset_lock, flags);
-+}
-+
++#ifndef CONFIG_S2IMAC_POLLING
 +/**********************/
 +/* Interrupt Handlers */
 +/**********************/
@@ -583,14 +601,12 @@ index 0000000..d6af739
 +static void s2imac_tx_handler(struct net_device *dev)
 +{
 +	struct net_local *lp = (struct net_local *) netdev_priv(dev);
-+/*
-+	dev->stats.tx_packets++;
++
 +	if (lp->deferred_skb) {
-+		if (xemaclite_send_data(lp,
-+					(u8 *) lp->deferred_skb->data,
-+					lp->deferred_skb->len) != 0)
-+			return;
-+		else {
++		dev->stats.tx_packets++;
++		if (s2imac_send_data(lp,
++				(u8 *) lp->deferred_skb->data,
++				lp->deferred_skb->len) != 0) {
 +			dev->stats.tx_bytes += lp->deferred_skb->len;
 +			dev_kfree_skb_irq(lp->deferred_skb);
 +			lp->deferred_skb = NULL;
@@ -598,7 +614,8 @@ index 0000000..d6af739
 +			netif_wake_queue(dev);
 +		}
 +	}
-+*/
++	/* clear tx interrupt */
++	out_be32 ((u32 *) INT_REQ,  INT_ENABLE_TX);
 +}
 +
 +/**
@@ -613,46 +630,66 @@ index 0000000..d6af739
 +	struct net_local *lp = (struct net_local *) netdev_priv(dev);
 +	struct sk_buff *skb;
 +	unsigned int align;
-+	u32 len;
++	u32 len, l, i, align_buffer;
++	u16 *to_u16_ptr, *from_u16_ptr;
 +
-+	len = ETH_FRAME_LEN + ETH_FCS_LEN;
-+	skb = dev_alloc_skb(len + ALIGNMENT);
-+	if (!skb) {
-+		/* Couldn't get memory. */
-+		dev->stats.rx_dropped++;
-+		dev_err(&lp->ndev->dev, "Could not allocate receive buffer\n");
-+		return;
-+	}
++	len = in_be32 ((u32 *) RX_LEN);
 +
-+	/*
-+	 * A new skb should have the data halfword aligned, but this code is
-+	 * here just in case that isn't true. Calculate how many
-+	 * bytes we should reserve to get the data to start on a word
-+	 * boundary */
-+	align = BUFFER_ALIGN(skb->data);
-+	if (align)
-+		skb_reserve(skb, align);
++	if (len) {
++		skb = dev_alloc_skb (len + ALIGNMENT);
++		if (!skb) {
++			dev->stats.rx_dropped++;
++			dev_err (&dev->dev,
++				 "Could not allocate receive buffer\n");
++			return;
++		}
 +
-+	skb_reserve(skb, 2);
++		/*
++		 * A new skb should have the data halfword aligned, but this code is
++		 * here just in case that isn't true. Calculate how many
++		 * bytes we should reserve to get the data to start on a word
++		 * boundary
++		 */
++		align = BUFFER_ALIGN (skb->data);
++		if (align)
++			skb_reserve (skb, align);
 +
-+	len = s2imac_recv_data(lp, (u8 *) skb->data);
++		skb_reserve (skb, 2);
 +
-+	if (!len) {
++		l = (len / 4) + 1;
++
++		to_u16_ptr = (u16 *) skb->data;
++
++		/* first 2 bytes of buffer not used */
++		for (i = 0; i < l; i++) {
++			align_buffer =
++			    ((gige_rxbuf[i] << 16) | (gige_rxbuf[i + 1] >> 16));
++			from_u16_ptr = (u16 *) & align_buffer;
++
++			/* Read data from source */
++			*to_u16_ptr++ = *from_u16_ptr++;
++			*to_u16_ptr++ = *from_u16_ptr++;
++
++		}
++
++		/* clear rx interrupt */
++		out_be32 ((u32 *) INT_REQ,  INT_ENABLE_RX);
++		out_be32 ((u32 *) RX_LEN, 0);
++
++		skb_put (skb, len);	/* Tell the skb how much data we got */
++		skb->dev = dev;	/* Fill out required meta-data */
++
++		skb->protocol = eth_type_trans (skb, dev);
++		skb->ip_summed = CHECKSUM_NONE;
++
++		dev->stats.rx_packets++;
++		dev->stats.rx_bytes += len;
++
++		netif_rx (skb);	/* Send the packet upstream */
++
++	} else {
 +		dev->stats.rx_errors++;
-+		dev_kfree_skb_irq(skb);
-+		return;
 +	}
-+
-+	skb_put(skb, len);	/* Tell the skb how much data we got */
-+	skb->dev = dev;		/* Fill out required meta-data */
-+
-+	skb->protocol = eth_type_trans(skb, dev);
-+	skb->ip_summed = CHECKSUM_NONE;
-+
-+	dev->stats.rx_packets++;
-+	dev->stats.rx_bytes += len;
-+
-+	netif_rx(skb);		/* Send the packet upstream */
 +}
 +
 +/**
@@ -661,11 +698,198 @@ index 0000000..d6af739
 + * @dev_id:	Void pointer to the network device instance used as callback
 + *		reference
 + *
-+ * This function handles the Tx and Rx interrupts of the EmacLite device.
++ * This function handles the Tx and Rx interrupts of the s2imac device.
 + */
 +static irqreturn_t s2imac_interrupt(int irq, void *dev_id)
 +{
++	struct net_device *dev = dev_id;
++	struct net_local *lp = (struct net_local *) netdev_priv(dev);
++	u32 reg_data;
++	unsigned long flags;
++
++	spin_lock_irqsave (&lp->reset_lock, flags);
++
++	/* read the irq status */
++	reg_data = in_be32((u32 *) INT_REQ);
++
++	/* check if rx interrupt */
++	if((reg_data & INT_ENABLE_RX) == INT_ENABLE_RX)
++		s2imac_rx_handler(dev);
++
++	/* check if tx interrupt */
++	if((reg_data & INT_ENABLE_TX) == INT_ENABLE_TX)
++		s2imac_tx_handler(dev);
++
++	spin_unlock_irqrestore (&lp->reset_lock, flags);
++
 +	return IRQ_HANDLED;
++}
++
++#else
++
++static void s2imac_irq_timer (unsigned long data)
++{
++	struct net_device *ndev = (struct net_device *)data;
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
++	struct sk_buff *skb;
++	unsigned int align;
++	u32 len, l, i, align_buffer;
++	u16 *to_u16_ptr, *from_u16_ptr;
++
++	len = in_be32 ((u32 *) RX_LEN);
++
++	if (len) {
++		skb = dev_alloc_skb (len + ALIGNMENT);
++		if (!skb) {
++			ndev->stats.rx_dropped++;
++			dev_err (&ndev->dev,
++				"Could not allocate receive buffer\n");
++			return;
++		}
++
++		/*
++		 * A new skb should have the data halfword aligned, but this code is
++		 * here just in case that isn't true. Calculate how many
++		 * bytes we should reserve to get the data to start on a word
++		 * boundary
++		 */
++		align = BUFFER_ALIGN (skb->data);
++		if (align)
++			skb_reserve (skb, align);
++
++		skb_reserve (skb, 2);
++
++		l = (len / 4) + 1;
++
++		to_u16_ptr = (u16 *) skb->data;
++
++		/* first 2 bytes of buffer not used */
++		for (i = 0; i < l; i++) {
++			align_buffer =
++				((gige_rxbuf[i] << 16) | (gige_rxbuf[i + 1] >> 16));
++			from_u16_ptr = (u16 *) & align_buffer;
++
++			/* Read data from source */
++			*to_u16_ptr++ = *from_u16_ptr++;
++			*to_u16_ptr++ = *from_u16_ptr++;
++
++		}
++		out_be32 ((u32 *) RX_LEN, 0);
++
++		skb_put (skb, len);	/* Tell the skb how much data we got */
++		skb->dev = ndev;	/* Fill out required meta-data */
++
++		skb->protocol = eth_type_trans (skb, ndev);
++		skb->ip_summed = CHECKSUM_NONE;
++
++		ndev->stats.rx_packets++;
++		ndev->stats.rx_bytes += len;
++
++		netif_rx (skb);		/* Send the packet upstream */
++
++	} else {
++		ndev->stats.rx_errors++;
++	}
++
++	mod_timer (&lp->irq_timer, jiffies);
++}
++#endif
++
++/**
++ * s2imac_update_address - Update the MAC address in the device
++ * @lp:		Pointer to the s2imac device private data
++ * @address_ptr:Pointer to the MAC address (MAC address is a 48-bit value)
++ *
++ * Tx must be idle and Rx should be idle for deterministic results.
++ * It is recommended that this function should be called after the
++ * initialization and before transmission of any packets from the device.
++ * The MAC address can be programmed using any of the two transmit
++ * buffers (if configured).
++ */
++static void s2imac_update_address (struct net_local *lp, u8 * address_ptr)
++{
++	int val;
++	u32 mac_l, mac_h;
++
++	/* set up unicast MAC address filter */
++	val = ((address_ptr[3] << 24) | (address_ptr[2] << 16) |
++	       (address_ptr[1] << 8) | (address_ptr[0]));
++	out_be32 ((u32 *) UAW0, val);
++	val = (address_ptr[5] << 8) | address_ptr[4];
++	out_be32 ((u32 *) UAW1, val);
++
++	mac_h = (address_ptr[0] << 8) | address_ptr[1];
++	mac_l = ((address_ptr[2] << 24) | (address_ptr[3] << 16) |
++		 (address_ptr[4] << 8) | (address_ptr[5]));
++	out_be32 ((u32 *) MAC_HIGH, mac_h);	/* set gige_mac_h register */
++	out_be32 ((u32 *) MAC_LOW, mac_l);	/* set gige_mac_l register */
++	out_be32 ((u32 *) MAC_RX_HIGH, mac_h);	/* set gige_rx_mac_h register */
++	out_be32 ((u32 *) MAC_RX_LOW, mac_l);	/* set gige_rx_mac_l register */
++}
++
++/**
++ * s2imac_set_mac_address - Set the MAC address for this device
++ * @dev:	Pointer to the network device instance
++ * @addr:	Void pointer to the sockaddr structure
++ *
++ * This function copies the HW address from the sockaddr strucutre to the
++ * net_device structure and updates the address in HW.
++ *
++ * Return:	Error if the net device is busy or 0 if the addr is set
++ *		successfully
++ */
++static int s2imac_set_mac_address (struct net_device *ndev, void *address)
++{
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
++	struct sockaddr *addr = address;
++
++	if (netif_running (ndev))
++		return -EBUSY;
++
++	memcpy (ndev->dev_addr, addr->sa_data, ndev->addr_len);
++	s2imac_update_address (lp, ndev->dev_addr);
++	return 0;
++}
++
++/**
++ * s2imac_tx_timeout - Callback for Tx Timeout
++ * @dev:	Pointer to the network device
++ *
++ * This function is called when Tx time out occurs for S2IMAC device.
++ */
++static void s2imac_tx_timeout (struct net_device *ndev)
++{
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
++	unsigned long flags;
++
++	dev_err (&ndev->dev, "Exceeded transmit timeout of %lu ms\n",
++		 TX_TIMEOUT * 1000UL / HZ);
++
++	ndev->stats.tx_errors++;
++
++	/* Reset the device */
++	spin_lock_irqsave (&lp->reset_lock, flags);
++
++	/* Shouldn't really be necessary, but shouldn't hurt */
++	netif_stop_queue (ndev);
++
++#ifndef CONFIG_S2IMAC_POLLING
++	s2imac_disable_interrupts(lp);
++	s2imac_enable_interrupts(lp);
++#endif
++
++	if (lp->deferred_skb) {
++		dev_kfree_skb (lp->deferred_skb);
++		lp->deferred_skb = NULL;
++		ndev->stats.tx_errors++;
++	}
++
++	/* To exclude tx timeout */
++	ndev->trans_start = 0xffffffff - TX_TIMEOUT - TX_TIMEOUT;
++
++	/* We're all ready to go. Start the queue */
++	netif_wake_queue (ndev);
++	spin_unlock_irqrestore (&lp->reset_lock, flags);
 +}
 +
 +/**
@@ -673,42 +897,61 @@ index 0000000..d6af739
 + * @dev:	Pointer to the network device
 + *
 + * This function sets the MAC address, requests an IRQ and enables interrupts
-+ * for the Emaclite device and starts the Tx queue.
++ * for the s2imac device and starts the Tx queue.
 + * It also connects to the phy device, if MDIO is included in s2imac device.
 + */
-+static int s2imac_open(struct net_device *dev)
++static int s2imac_open (struct net_device *ndev)
 +{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
-+	int retval;
++	u32 reg;
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
 +
++#ifndef CONFIG_S2IMAC_POLLING
++	int retval;
++	s2imac_disable_interrupts(lp);
++#endif
 +
 +	/* Just to be safe, stop the device first */
-+	netif_stop_queue(dev);
++	netif_stop_queue (ndev);
 +
 +	/* Set the MAC address each time opened */
-+	s2imac_update_address(lp, dev->dev_addr);
++	s2imac_update_address (lp, ndev->dev_addr);
 +
-+	// Transmit and receive packet buffers
-+	gige_txbuf = (volatile u32 *)(lp->base_addr + TXBUF);
-+	gige_rxbuf = (volatile u32 *)(lp->base_addr + RXBUF);
++	/* transmit and receive packet buffers */
++	gige_txbuf = (volatile u32 *)TXBUF;
++	gige_rxbuf = (volatile u32 *)RXBUF;
++
++	/* setup phy */
++	set_mac_speed (lp);
++
++	/* enable receive and transmit clients */
++	reg = in_be32 ((u32 *) GCSR);
++	reg |= GCSR_CONNECTED;
++	out_be32 ((u32 *) GCSR, reg);
++
++#ifndef CONFIG_S2IMAC_POLLING
++	/* grab the IRQ */
++	retval = request_irq(ndev->irq, s2imac_interrupt, 0, ndev->name, ndev);
++	if (retval) {
++		dev_err(&lp->ndev->dev, "Could not allocate interrupt %d\n",
++			ndev->irq);
++		return retval;
++	}
 +
 +	/* Enable Interrupts */
-+
-+	// setup phy
-+	phy_setup(lp);
-+	set_mac_speed(lp);
-+
-+	mod_timer(&lp->irq_timer, jiffies);
++	s2imac_enable_interrupts(lp);
++#else
++	mod_timer (&lp->irq_timer, jiffies);
++#endif
 +
 +	/* We're ready to go */
-+	netif_start_queue(dev);
++	netif_start_queue (ndev);
 +
 +	/* Set up the PHY monitoring timer. */
 +	lp->phy_timer.expires = jiffies + 2 * HZ;
-+	lp->phy_timer.data = (unsigned long) dev;
++	lp->phy_timer.data = (unsigned long)ndev;
 +	lp->phy_timer.function = &poll_gmii;
-+	init_timer(&lp->phy_timer);
-+	add_timer(&lp->phy_timer);
++	init_timer (&lp->phy_timer);
++	add_timer (&lp->phy_timer);
 +
 +	return 0;
 +}
@@ -719,16 +962,27 @@ index 0000000..d6af739
 + *
 + * This function stops the Tx queue, disables interrupts and frees the IRQ for
 + * the s2imac device.
-+ * It also disconnects the phy device associated with the Emaclite device.
++ * It also disconnects the phy device associated with the S2IMAC device.
 + */
-+static int s2imac_close(struct net_device *dev)
++static int s2imac_close (struct net_device *ndev)
 +{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
++	u32 reg;
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
 +
-+	netif_stop_queue(dev);
++	netif_stop_queue (ndev);
++
++#ifndef CONFIG_S2IMAC_POLLING
++	s2imac_disable_interrupts(lp);
++	free_irq(ndev->irq, ndev);
++#endif
 +
 +	/* Shut down the PHY monitoring timer. */
-+	del_timer_sync(&lp->phy_timer);
++	del_timer_sync (&lp->phy_timer);
++
++	/* disable receive and transmit clients */
++	reg = in_be32 ((u32 *) GCSR);
++	reg &= ~GCSR_CONNECTED;
++	out_be32 ((u32 *) GCSR, reg);
 +
 +	return 0;
 +}
@@ -743,9 +997,9 @@ index 0000000..d6af739
 + *
 + * Return:	Pointer to the net_device_stats structure.
 + */
-+static struct net_device_stats *s2imac_get_stats(struct net_device *dev)
++static struct net_device_stats *s2imac_get_stats (struct net_device *ndev)
 +{
-+	return &dev->stats;
++	return &ndev->stats;
 +}
 +
 +/**
@@ -753,18 +1007,18 @@ index 0000000..d6af739
 + * @orig_skb:	Pointer to the socket buffer to be transmitted
 + * @dev:	Pointer to the network device
 + *
-+ * This function checks if the Tx buffer of the Emaclite device is free to send
++ * This function checks if the Tx buffer of the s2imac device is free to send
 + * data. If so, it fills the Tx buffer with data from socket buffer data,
 + * updates the stats and frees the socket buffer. The Tx completion is signaled
 + * by an interrupt. If the Tx buffer isn't free, then the socket buffer is
 + * deferred and the Tx queue is stopped so that the deferred socket buffer can
-+ * be transmitted when the Emaclite device is free to transmit data.
++ * be transmitted when the s2imac device is free to transmit data.
 + *
 + * Return:	0, always.
 + */
-+static int s2imac_send(struct sk_buff *orig_skb, struct net_device *dev)
++static int s2imac_send (struct sk_buff *orig_skb, struct net_device *ndev)
 +{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
 +	struct sk_buff *new_skb;
 +	unsigned int len;
 +	unsigned long flags;
@@ -773,21 +1027,23 @@ index 0000000..d6af739
 +
 +	new_skb = orig_skb;
 +
-+	spin_lock_irqsave(&lp->reset_lock, flags);
-+	if (s2imac_send_data(lp, (u8 *) new_skb->data, len) != 0) {
-+		/* If the Emaclite Tx buffer is busy, stop the Tx queue and
++	spin_lock_irqsave (&lp->reset_lock, flags);
++	if (s2imac_send_data (lp, (u8 *) new_skb->data, len) != 0) {
++		/*
++		 * If the s2imac Tx buffer is busy, stop the Tx queue and
 +		 * defer the skb for transmission at a later point when the
-+		 * current transmission is complete */
-+		netif_stop_queue(dev);
++		 * current transmission is complete
++		 */
++		netif_stop_queue (ndev);
 +		lp->deferred_skb = new_skb;
-+		spin_unlock_irqrestore(&lp->reset_lock, flags);
++		spin_unlock_irqrestore (&lp->reset_lock, flags);
 +		return 0;
 +	}
-+	spin_unlock_irqrestore(&lp->reset_lock, flags);
++	spin_unlock_irqrestore (&lp->reset_lock, flags);
 +
-+	dev->stats.tx_bytes += len;
-+	dev_kfree_skb(new_skb);
-+	dev->trans_start = jiffies;
++	ndev->stats.tx_bytes += len;
++	dev_kfree_skb (new_skb);
++	ndev->trans_start = jiffies;
 +
 +	return 0;
 +}
@@ -796,128 +1052,33 @@ index 0000000..d6af739
 + * s2imac_remove_ndev - Free the network device
 + * @ndev:	Pointer to the network device to be freed
 + *
-+ * This function un maps the IO region of the Emaclite device and frees the net
++ * This function un maps the IO region of the S2IMAC device and frees the net
 + * device.
 + */
-+static void s2imac_remove_ndev(struct net_device *ndev)
++static void s2imac_remove_ndev (struct net_device *ndev)
 +{
 +	if (ndev) {
-+		struct net_local *lp = (struct net_local *) netdev_priv(ndev);
++		struct net_local *lp = (struct net_local *)netdev_priv (ndev);
 +
-+		if (lp->base_addr)
-+			iounmap((void __iomem __force *) (lp->base_addr));
-+		free_netdev(ndev);
++		if (lp->base_addr[S2IMAC_NETMAP])
++			iounmap ((void __iomem __force *)(lp->base_addr
++							  [S2IMAC_NETMAP]));
++		free_netdev (ndev);
 +	}
 +}
 +
-+static void s2imac_irq_timer(unsigned long data)
++static int s2imac_ethtool_get_settings (struct net_device *ndev,
++					struct ethtool_cmd *ecmd)
 +{
-+	struct net_device  *dev = (struct net_device  *)data;
-+	struct net_local *lp = (struct net_local *) netdev_priv(data);
-+	struct sk_buff *skb;
-+	unsigned int align;
-+	u32 len,l,i,align_buffer;
-+	u16 *to_u16_ptr, *from_u16_ptr;
-+
-+	len = in_be32((u32 *)(lp->base_addr + RX_LEN));
-+
-+//	if(in_be32((u32 *)(lp->base_addr + RX_LEN)) != 60)
-+	if(len)
-+  {
-+	//	printk(KERN_INFO "data in %d (%08X,%08X).....\n",len, gige_rxbuf[4],gige_rxbuf[5]);
-+		skb = dev_alloc_skb(len + ALIGNMENT);
-+		if (!skb) 
-+		{
-+			// Couldn't get memory. 
-+			dev->stats.rx_dropped++;
-+			dev_err(&lp->ndev->dev, "Could not allocate receive buffer\n");
-+			return;
-+		}
-+
-+		/*
-+		 * A new skb should have the data halfword aligned, but this code is
-+	 	 * here just in case that isn't true. Calculate how many
-+	 	 * bytes we should reserve to get the data to start on a word
-+	   * boundary */
-+		align = BUFFER_ALIGN(skb->data);
-+		if (align)
-+			skb_reserve(skb, align);
-+
-+		skb_reserve(skb, 2);
-+
-+		l = (len / 4) + 1;
-+
-+//		data = (u32 *)skb_put(skb, len);
-+//		phelp = (u16 *)skb->data;
-+		to_u16_ptr = (u16 *) skb->data;
-+
-+    // first 2 bytes of buffer not used
-+		for (i = 0; i < l; i++) 
-+		{
-+//			*phelp++ = ( (gige_rxbuf[i] << 16) | (gige_rxbuf[i+1] >> 16)); 
-+			align_buffer = ( (gige_rxbuf[i] << 16) | (gige_rxbuf[i+1] >> 16)); 
-+//			*phelp++ = (u16) (gige_rxbuf[i+1] >> 16); 
-+//			*phelp++ = (u16) (gige_rxbuf[i] << 16);
-+
-+			from_u16_ptr = (u16 *)&align_buffer;
-+			/* Read data from source */
-+			*to_u16_ptr++ = *from_u16_ptr++;
-+			*to_u16_ptr++ = *from_u16_ptr++;
-+
-+		}
-+	  out_be32((u32 *)(lp->base_addr + RX_LEN), 0);
-+
-+ 
-+	//	xemaclite_aligned_read((u32 *)rx_buffer, (u8 *)skb->data,len+2);
-+
-+/*		phelp = (u32 *)skb->data;
-+		phelp += 2;
-+
-+    phelp1 = (u32 *)rx_buffer;
-+		phelp1 += 2;
-+
-+		printk(KERN_INFO "data in %d (%08X,%08X).....\n",len, *phelp,*phelp1);
-+*/
-+//		whelp = (u16 *)skb->data;
-+//		whelp += 20;
-+//		printk(KERN_INFO "whelp %d,%04X....\n",*whelp,*whelp);
-+
-+		if (!len) 
-+		{
-+			dev->stats.rx_errors++;
-+			dev_kfree_skb_irq(skb);
-+			return;
-+		}
-+
-+		skb_put(skb, len);	/* Tell the skb how much data we got */
-+		skb->dev = dev;		/* Fill out required meta-data */
-+
-+		skb->protocol = eth_type_trans(skb, dev);
-+		skb->ip_summed = CHECKSUM_NONE;
-+
-+		dev->stats.rx_packets++;
-+		dev->stats.rx_bytes += len;
-+
-+		netif_rx(skb);		/* Send the packet upstream */
-+
-+  }
-+
-+//	mod_timer(&lp->blink_timer, jiffies + HZ / 4);
-+	mod_timer(&lp->irq_timer, jiffies);
-+}
-+
-+static int
-+s2imac_ethtool_get_settings(struct net_device *dev, struct ethtool_cmd *ecmd)
-+{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
 +	u16 gmii_cmd, gmii_status, gmii_advControl;
 +
-+	memset(ecmd, 0, sizeof(struct ethtool_cmd));
++	memset (ecmd, 0, sizeof (struct ethtool_cmd));
 +
-+	gmii_cmd = s2imac_phy_read(lp->base_addr,lp->phy_addr,MII_BMCR);
-+	gmii_status = s2imac_phy_read(lp->base_addr,lp->phy_addr,MII_BMSR);
++	gmii_cmd = s2imac_phy_read (lp, MII_BMCR);
++	gmii_status = s2imac_phy_read (lp, MII_BMSR);
 +
-+	gmii_advControl = s2imac_phy_read(lp->base_addr,lp->phy_addr,MII_ADVERTISE);
++	gmii_advControl = s2imac_phy_read (lp, MII_ADVERTISE);
 +
 +	ecmd->duplex = DUPLEX_FULL;
 +
@@ -933,49 +1094,41 @@ index 0000000..d6af739
 +	if (gmii_status & BMSR_ANEGCOMPLETE) {
 +		ecmd->autoneg = AUTONEG_ENABLE;
 +		ecmd->advertising |= ADVERTISED_Autoneg;
-+	}
-+	else {
++	} else {
 +		ecmd->autoneg = AUTONEG_DISABLE;
 +	}
-+	ecmd->phy_address = lp->base_addr;
++	ecmd->phy_address = lp->phy_addr;
 +	ecmd->transceiver = XCVR_INTERNAL;
 +
 +	ecmd->supported |= SUPPORTED_10baseT_Full | SUPPORTED_100baseT_Full |
-+		SUPPORTED_1000baseT_Full | SUPPORTED_Autoneg;
++	    SUPPORTED_1000baseT_Full | SUPPORTED_Autoneg;
 +
 +	return 0;
 +}
 +
-+static int
-+s2imac_ethtool_set_settings(struct net_device *dev, struct ethtool_cmd *ecmd)
++static int s2imac_ethtool_set_settings (struct net_device *ndev,
++					struct ethtool_cmd *ecmd)
 +{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
 +
 +	if ((ecmd->duplex != DUPLEX_FULL) ||
 +	    (ecmd->transceiver != XCVR_INTERNAL) ||
-+	    (ecmd->phy_address &&
-+	     (ecmd->phy_address != lp->base_addr))) {
++	    (ecmd->phy_address && (ecmd->phy_address != lp->phy_addr))) {
 +		return -EOPNOTSUPP;
 +	}
 +
 +	if ((ecmd->speed != 1000) && (ecmd->speed != 100) &&
 +	    (ecmd->speed != 10)) {
-+		printk(KERN_ERR
-+		       "%s: s2imac_ethtool_set_settings speed not supported: %d\n",
-+		       dev->name, ecmd->speed);
++		dev_err (&ndev->dev, "speed not supported: %d\n", ecmd->speed);
 +		return -EOPNOTSUPP;
 +	}
 +
-+	if (ecmd->speed != lp->cur_speed) 
-+	{
-+	//	renegotiate_speed(dev, ecmd->speed, FULL_DUPLEX);
-+	//	_XLlTemac_SetOperatingSpeed(&lp->Emac, ecmd->speed);
++	if (ecmd->speed != lp->cur_speed) {
 +		lp->cur_speed = ecmd->speed;
++		dev_err (&ndev->dev, "can not change speed to: %d\n", ecmd->speed);
 +	}
 +	return 0;
 +}
-+
-+
 +
 +static struct net_device_ops s2imac_netdev_ops;
 +
@@ -986,7 +1139,6 @@ index 0000000..d6af739
 +	.get_link = ethtool_op_get_link
 +};
 +
-+
 +/**
 + * s2imac_of_probe - Probe method for the s2imac device.
 + * @ofdev:	Pointer to OF device structure
@@ -996,143 +1148,214 @@ index 0000000..d6af739
 + * It initializes the driver data structure and the hardware, sets the MAC
 + * address and registers the network device.
 + *
-+ * Return:	0, if the driver is bound to the Emaclite device, or
++ * Return:	0, if the driver is bound to the S2IMAC device, or
 + *		a negative error if there is failure.
 + */
-+static int __devinit s2imac_of_probe(struct of_device *ofdev,
-+					const struct of_device_id *match)
++static int __devinit s2imac_of_probe (struct of_device *ofdev,
++				      const struct of_device_id *match)
 +{
++#ifndef CONFIG_S2IMAC_POLLING
 +	struct resource r_irq; /* Interrupt resources */
-+	struct resource r_mem; /* IO mem resources */
-+	struct net_device *ndev = NULL;
-+	struct net_local *lp = NULL;
++#endif
++	struct resource r_mem;	/* IO mem resources */
++	struct net_device *ndev;
++	struct net_local *lp;
++	struct device_node *np = ofdev->node;
 +	struct device *dev = &ofdev->dev;
 +	const void *mac_address;
-+
++	const unsigned int *clk;
 +	int rc = 0;
-+  u32 mac_l, mac_h;
++	u32 mac_l, mac_h;
 +
-+	printk(KERN_INFO "Device Tree Probing \'%s\'\n", ofdev->node->name);
++#ifdef CONFIG_MICROBLAZE
++	struct device_node *cpu;
++#endif
 +
-+	/* Get iospace for the device */
-+	rc = of_address_to_resource(ofdev->node, 0, &r_mem);
-+	if (rc) {
-+		dev_err(dev, "invalid address\n");
-+		return rc;
-+	}
++	dev_info (dev, "probing \'%s\'\n", np->name);
 +
 +	/* Create an ethernet device instance */
-+	ndev = alloc_etherdev(sizeof(struct net_local));
++	ndev = alloc_etherdev (sizeof (struct net_local));
 +	if (!ndev) {
-+		dev_err(dev, "Could not allocate network device\n");
++		dev_err (dev, "Could not allocate network device\n");
 +		return -ENOMEM;
 +	}
 +
-+	dev_set_drvdata(dev, ndev);
-+	SET_NETDEV_DEV(ndev, &ofdev->dev);
++	dev_set_drvdata (dev, ndev);
++	SET_NETDEV_DEV (ndev, dev);
++
++	lp = netdev_priv (ndev);
++	lp->ndev = ndev;
++
++	/* Get clock configuration for the device */
++	clk = of_get_property (np, "clock-frequency", NULL);
++	if (!clk) {
++		dev_warn (dev, "no clock-frequency property set\n");
++		rc = -ENODEV;
++
++#ifndef CONFIG_MICROBLAZE
++
++		goto error3;
++
++#else /* is CONFIG_MICROBLAZE */
++
++		cpu = of_find_node_by_type (NULL, "cpu");
++		if (!cpu) {
++			dev_err (dev, "you don't have a cpu?\n");
++			goto error3;
++		}
++
++		clk = of_get_property (cpu, "clock-frequency", NULL);
++		if (!clk) {
++			dev_err (dev, "no CPU clock-frequency property set\n");
++			goto error3;
++		}
++
++		dev_warn (dev, "use CPU clock-frequency\n");
++		rc = 0;
++#endif
++	}
++
++	lp->coreclk = *clk;
++	dev_info (dev, "core clock is %d Hz\n", lp->coreclk);
++
++	/* Get iospace for the device */
++	rc = of_address_to_resource (np, S2IMAC_NETMAP, &r_mem);
++	if (rc) {
++		dev_err (dev, "invalid address\n");
++		goto error3;
++	}
 +
 +	ndev->mem_start = r_mem.start;
 +	ndev->mem_end = r_mem.end;
 +
-+	lp = netdev_priv(ndev);
-+	lp->ndev = ndev;
++	if (!request_mem_region (ndev->mem_start,
++				 ndev->mem_end - ndev->mem_start + 1,
++				 DRIVER_NAME)) {
++		dev_err (dev, "Couldn't lock memory region at %p\n",
++			 (void *)ndev->mem_start);
++		rc = -EBUSY;
++		goto error3;
++	}
 +
-+	if (!request_mem_region(ndev->mem_start,
-+				ndev->mem_end - ndev->mem_start + 1,
-+				DRIVER_NAME)) {
-+		dev_err(dev, "Couldn't lock memory region at %p\n",
-+			(void *)ndev->mem_start);
++	/* Get iospace for the register */
++	rc = of_address_to_resource (np, S2IMAC_REGMAP, &r_mem);
++	if (rc) {
++		dev_err (dev, "invalid address\n");
++		goto error2;
++	}
++
++	lp->regmem_start = r_mem.start;
++	lp->regmem_end = r_mem.end;
++
++	if (!request_mem_region (lp->regmem_start,
++				 lp->regmem_end - lp->regmem_start + 1,
++				 DRIVER_NAME)) {
++		dev_err (dev, "Couldn't lock memory region at %p\n",
++			 (void *)ndev->mem_start);
 +		rc = -EBUSY;
 +		goto error2;
 +	}
 +
-+	/* Get the virtual base address for the device */
-+	lp->base_addr = ioremap(r_mem.start, r_mem.end - r_mem.start + 1);
-+	if (NULL == lp->base_addr) {
-+		dev_err(dev, "s2iMac: Could not allocate iomem\n");
++	/* Get the virtual base address for the device and register */
++	lp->base_addr[S2IMAC_NETMAP] =
++	    ioremap (ndev->mem_start, ndev->mem_end - ndev->mem_start + 1);
++	lp->base_addr[S2IMAC_REGMAP] =
++	    ioremap (lp->regmem_start, lp->regmem_end - lp->regmem_start + 1);
++	if ((NULL == lp->base_addr[S2IMAC_NETMAP])
++	    || (NULL == lp->base_addr[S2IMAC_REGMAP])) {
++		dev_err (dev, "Could not allocate iomem\n");
 +		rc = -EIO;
 +		goto error1;
 +	}
 +
-+	spin_lock_init(&lp->reset_lock);
++	dev_info (dev, "core found at 0x%p mapped to 0x%p\n",
++		  (void *)ndev->mem_start,
++		  (void *)lp->base_addr[S2IMAC_NETMAP]);
 +
-+	// check if mac address is already set
-+	// get gige_mac_h register
-+	mac_h = in_be32((u32 *)(lp->base_addr + MAC_HIGH));
-+	// get gige_mac_l register
-+	mac_l = in_be32((u32 *)(lp->base_addr + MAC_LOW));
++	dev_info (dev, "register found at 0x%p mapped to 0x%p\n",
++		  (void *)lp->regmem_start,
++		  (void *)lp->base_addr[S2IMAC_REGMAP]);
 +
-+//	dev_info(dev,"MAC: %08X, %08X\n",mac_h,mac_l);
++#ifndef CONFIG_S2IMAC_POLLING
++	/* Get IRQ for the device */
++	rc = of_irq_to_resource(np, 0, &r_irq);
++	if (rc == NO_IRQ) {
++		dev_err(dev, "no IRQ found\n");
++		goto error0;
++	}
++	ndev->irq = r_irq.start;
++	dev_info(dev,"interrupt is %d\n", ndev->irq);
++#endif
 +
-+	if((mac_h == 0) && (mac_l == 0))
-+	{
-+		mac_address = of_get_mac_address(ofdev->node);
++	spin_lock_init (&lp->reset_lock);
++
++	/* check if mac address is already set */
++	mac_h = in_be32 ((u32 *) MAC_HIGH);
++	mac_l = in_be32 ((u32 *) MAC_LOW);
++
++	if ((mac_h == 0) && (mac_l == 0)) {
++		mac_address = of_get_mac_address (np);
 +		if (mac_address)
-+			/* Set the MAC address. */
-+			memcpy(ndev->dev_addr, mac_address, 6);
++			/* Copy the MAC address from OF node. */
++			memcpy (ndev->dev_addr, mac_address, 6);
 +		else
-+			dev_warn(dev, "No MAC address found\n");
++			dev_warn (dev, "No MAC address found\n");
 +
 +		/* Set the MAC address in the device */
-+		s2imac_update_address(lp, ndev->dev_addr);
++		s2imac_update_address (lp, ndev->dev_addr);
++	} else {
++		ndev->dev_addr[0] = (u8) (mac_h >> 8);
++		ndev->dev_addr[1] = (u8) (mac_h & 0xff);
++		ndev->dev_addr[2] = (u8) (mac_l >> 24);
++		ndev->dev_addr[3] = (u8) (mac_l >> 16);
++		ndev->dev_addr[4] = (u8) (mac_l >> 8);
++		ndev->dev_addr[5] = (u8) (mac_l & 0xff);
 +	}
-+	else
-+	{
-+		 ndev->dev_addr[0] = (u8)(mac_h >> 8);
-+		 ndev->dev_addr[1] = (u8)(mac_h & 0xff);
 +
-+		 ndev->dev_addr[2] = (u8)(mac_l >> 24);
-+		 ndev->dev_addr[3] = (u8)(mac_l >> 16);
-+		 ndev->dev_addr[4] = (u8)(mac_l >>  8);
-+		 ndev->dev_addr[5] = (u8)(mac_l & 0xff);
-+	}
-+	dev_info(dev,
-+		 "MAC address is now %02x:%02x:%02x:%02x:%02x:%02x\n",
-+		 ndev->dev_addr[0], ndev->dev_addr[1],
-+		 ndev->dev_addr[2], ndev->dev_addr[3],
-+		 ndev->dev_addr[4], ndev->dev_addr[5]);
-+
-+
-+	/* Clear the Tx CSR's in case this is a restart */
-+//	out_be32(lp->base_addr + XEL_TSR_OFFSET, 0);
-+//	out_be32(lp->base_addr + XEL_BUFFER_OFFSET + XEL_TSR_OFFSET, 0);
-+
++	dev_info (dev, "MAC address is now %02x:%02x:%02x:%02x:%02x:%02x\n",
++		  ndev->dev_addr[0], ndev->dev_addr[1], ndev->dev_addr[2],
++		  ndev->dev_addr[3], ndev->dev_addr[4], ndev->dev_addr[5]);
 +
 +	/* Scan to find the PHY */
-+	lp->phy_addr = detect_phy(lp,dev);
++	phy_setup (lp);
++	lp->phy_addr = detect_phy (lp, dev);
++
++#ifdef CONFIG_S2IMAC_POLLING
++	init_timer (&lp->irq_timer);
++	lp->irq_timer.function = s2imac_irq_timer;
++	lp->irq_timer.data = (unsigned long)ndev;
++#endif
 +
 +	ndev->netdev_ops = &s2imac_netdev_ops;
 +	ndev->flags &= ~IFF_MULTICAST;
 +	ndev->watchdog_timeo = TX_TIMEOUT;
 +
-+	init_timer(&lp->irq_timer);
-+	lp->irq_timer.function = s2imac_irq_timer;
-+	lp->irq_timer.data = (unsigned long)ndev;
-+
-+	/* Set ethtool IOCTL handler vectors.
-+	 * s2imac_do_ethtool_ioctl() is deprecated.
-+	 */
-+	SET_ETHTOOL_OPS(ndev, &ethtool_ops);
++	/* Set ethtool IOCTL handler vectors. */
++	SET_ETHTOOL_OPS (ndev, &ethtool_ops);
 +
 +	/* Finally, register the device */
-+	rc = register_netdev(ndev);
++	rc = register_netdev (ndev);
 +	if (rc) {
-+		dev_err(dev,
-+			"Cannot register network device, aborting\n");
-+		goto error1;
++		dev_err (dev, "Cannot register network device, aborting\n");
++		goto error0;
 +	}
 +
-+	dev_info(dev,
-+		 "s2iMac at 0x%08X mapped to 0x%08X\n",
-+		 (unsigned int __force)ndev->mem_start,
-+		 (unsigned int __force)lp->base_addr);
 +	return 0;
 +
++error0:
++	iounmap (lp->base_addr[S2IMAC_REGMAP]);
++	iounmap (lp->base_addr[S2IMAC_NETMAP]);
++
 +error1:
-+	release_mem_region(ndev->mem_start, r_mem.end - r_mem.start + 1);
++	release_mem_region (lp->regmem_start,
++			    lp->regmem_end - lp->regmem_start + 1);
 +
 +error2:
-+	s2imac_remove_ndev(ndev);
++	release_mem_region (ndev->mem_start,
++			    ndev->mem_end - ndev->mem_start + 1);
++
++error3:
++	s2imac_remove_ndev (ndev);
 +	return rc;
 +}
 +
@@ -1146,33 +1369,36 @@ index 0000000..d6af739
 + *
 + * Return:	0, always.
 + */
-+static int __devexit s2imac_of_remove(struct of_device *of_dev)
++static int __devexit s2imac_of_remove (struct of_device *of_dev)
 +{
 +	struct device *dev = &of_dev->dev;
-+	struct net_device *ndev = dev_get_drvdata(dev);
++	struct net_device *ndev = dev_get_drvdata (dev);
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
 +
-+	struct net_local *lp = (struct net_local *) netdev_priv(ndev);
++	unregister_netdev (ndev);
 +
-+	unregister_netdev(ndev);
++	iounmap (lp->base_addr[S2IMAC_REGMAP]);
++	iounmap (lp->base_addr[S2IMAC_NETMAP]);
 +
-+	release_mem_region(ndev->mem_start, ndev->mem_end-ndev->mem_start + 1);
++	release_mem_region (lp->regmem_start,
++			    lp->regmem_end - lp->regmem_start + 1);
++	release_mem_region (ndev->mem_start,
++			    ndev->mem_end - ndev->mem_start + 1);
 +
-+	s2imac_remove_ndev(ndev);
-+	dev_set_drvdata(dev, NULL);
++	s2imac_remove_ndev (ndev);
++	dev_set_drvdata (dev, NULL);
 +
 +	return 0;
 +}
 +
-+static int s2imac_change_mtu(struct net_device *dev, int new_mtu)
++static int s2imac_change_mtu (struct net_device *ndev, int new_mtu)
 +{
-+	int result;
 +	int device_enable = 0;
 +#ifdef CONFIG_XILINX_GIGE_VLAN
 +	int head_size = XTE_HDR_VLAN_SIZE;
 +#else
 +	int head_size = XTE_HDR_SIZE;
 +#endif
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
 +	int max_frame = new_mtu + head_size + XTE_TRL_SIZE;
 +	int min_frame = 1 + head_size + XTE_TRL_SIZE;
 +
@@ -1180,117 +1406,80 @@ index 0000000..d6af739
 +		return -EINVAL;
 +
 +	if (max_frame > XTE_MAX_JUMBO_FRAME_SIZE) {
-+		printk(KERN_INFO "Wrong MTU packet size. Use %d size\n",
-+							XTE_JUMBO_MTU);
++		dev_info (&ndev->dev, "Wrong MTU packet size. Use %d size\n",
++			XTE_JUMBO_MTU);
 +		new_mtu = XTE_JUMBO_MTU;
 +	}
 +
-+	dev->mtu = new_mtu;	/* change mtu in net_device structure */
++	ndev->mtu = new_mtu;	/* change mtu in net_device structure */
 +
 +	/* stop driver */
-+	if (netif_running(dev)) {
++	if (netif_running (ndev)) {
 +		device_enable = 1;
-+		s2imac_close(dev);
++		s2imac_close (ndev);
 +	}
-+	/* free all created descriptors for previous size */
-+//	free_descriptor_skb(dev);
-+	/* setup new frame size */
-+//	lp->frame_size = dev->mtu + XTE_HDR_SIZE + XTE_TRL_SIZE;
-+//	XLlDma_Initialize(&lp->Dma, lp->virt_dma_addr); /* initialize dma */
-+
-+//	result = descriptor_init(dev); /* create new skb with new size */
-+//	if (result) {
-+//		printk(KERN_ERR "Descriptor initialization failed.\n");
-+//		return -EINVAL;
-+//	}
 +
 +	if (device_enable)
-+		s2imac_open(dev); /* open the device */
++		s2imac_open (ndev);	/* open the device */
 +	return 0;
 +}
 +
-+
-+/*
-+ * xenet_do_ethtool_ioctl:
-+ * DEPRECATED
-+ */
-+static int xenet_do_ethtool_ioctl(struct net_device *dev, struct ifreq *rq)
++static int s2imac_ioctl (struct net_device *ndev, struct ifreq *rq, int cmd)
 +{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
-+	struct ethtool_cmd ecmd;
-+	int ret = -EOPNOTSUPP;
++	struct net_local *lp = (struct net_local *)netdev_priv (ndev);
++	s2igen_content_t gen_content;
 +
-+	if (copy_from_user(&ecmd, rq->ifr_data, sizeof(ecmd)))
++	if (copy_from_user (&gen_content, rq->ifr_data, sizeof (gen_content)))
 +		return -EFAULT;
-+	switch (ecmd.cmd) {
-+	case ETHTOOL_GSET:	/* Get setting. No command option needed w/ ethtool */
-+		ret = s2imac_ethtool_get_settings(dev, &ecmd);
-+		if (ret < 0)
-+			return -EIO;
-+		if (copy_to_user(rq->ifr_data, &ecmd, sizeof(ecmd)))
-+			return -EFAULT;
-+		ret = 0;
-+		break;
-+	case ETHTOOL_SSET:	/* Change setting. Use "-s" command option w/ ethtool */
-+		ret = s2imac_ethtool_set_settings(dev, &ecmd);
-+		break;
 +
-+	default:
-+		return -EOPNOTSUPP;	/* All other operations not supported */
++	/* check address range 1st slot --> device base address */
++	if((cmd == SIOS2IGENRD) || (cmd == SIOS2IGENWR)){
++
++		if (gen_content.address > (ndev->mem_end - ndev->mem_start + 1))
++			return -EINVAL;
 +	}
-+	return ret;
-+}
 +
++	/* check address range 2st slot --> register base address */
++	if((cmd == SIOS2IREGRD) || (cmd == SIOS2IREGWR)){
 +
-+
-+/*
-+struct register_dword
-+{
-+   // register address
-+   u32 reg_address;
-+   // value
-+   u32 reg_value;
-+} 
-+*/
-+
-+static int s2imac_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
-+{
-+	struct net_local *lp = (struct net_local *) netdev_priv(dev);
-+
-+	//struct register_dword *data = (struct register_dword *) &rq->ifr_data;
-+typedef struct
-+{
-+   // register address
-+   u32 reg_address;
-+   // value
-+   u32 reg_value;
-+} REGISTER_DWORD;
-+
-+	int ret;
-+	REGISTER_DWORD reg_dword;
++		if (gen_content.address > (lp->regmem_end - lp->regmem_start + 1))
++			return -EINVAL;
++	}
 +
 +	switch (cmd) {
-+//	case SIOCETHTOOL:
-+		// DEPRECATED 
-+//		return xenet_do_ethtool_ioctl(dev, rq);
-+	case SIOCDEVPRIVATE:	// read register 
++	case SIOS2IGENRD:	/* core read */
 +
-+		if (copy_from_user(&reg_dword, rq->ifr_data, sizeof(reg_dword)))
-+			return -EFAULT;
++		gen_content.data =
++		    in_be32 ((u32 *) (lp->base_addr[S2IMAC_NETMAP] + gen_content.address));
 +
-+		reg_dword.reg_value = in_be32((u32 *)(lp->base_addr + reg_dword.reg_address));
-+
-+		if (copy_to_user(rq->ifr_data, &reg_dword, sizeof(reg_dword))) 
++		if (copy_to_user
++		    (rq->ifr_data, &gen_content, sizeof (gen_content)))
 +			return -EFAULT;
 +
 +		return 0;
 +
-+	case SIOCDEVPRIVATE + 1:	// write register 
++	case SIOS2IGENWR:	/* core write */
 +
-+		if (copy_from_user(&reg_dword, rq->ifr_data, sizeof(reg_dword)))
++		out_be32 ((u32 *) (lp->base_addr[S2IMAC_NETMAP] + gen_content.address),
++			  gen_content.data);
++
++		return 0;
++
++	case SIOS2IREGRD:	/* register read */
++
++		gen_content.data =
++		    in_be32 ((u32 *) (lp->base_addr[S2IMAC_REGMAP] + gen_content.address));
++
++		if (copy_to_user
++		    (rq->ifr_data, &gen_content, sizeof (gen_content)))
 +			return -EFAULT;
 +
-+		out_be32((u32 *)(lp->base_addr + reg_dword.reg_address), reg_dword.reg_value);
++		return 0;
++
++	case SIOS2IREGWR:	/* register write */
++
++		out_be32 ((u32 *) (lp->base_addr[S2IMAC_REGMAP] + gen_content.address),
++			  gen_content.data);
 +
 +		return 0;
 +
@@ -1300,28 +1489,31 @@ index 0000000..d6af739
 +}
 +
 +static struct net_device_ops s2imac_netdev_ops = {
-+	.ndo_open		= s2imac_open,
-+	.ndo_stop		= s2imac_close,
-+	.ndo_start_xmit		= s2imac_send,
-+	.ndo_do_ioctl	= s2imac_ioctl,
-+	.ndo_change_mtu	= s2imac_change_mtu,
-+	.ndo_set_mac_address	= s2imac_set_mac_address,
-+	.ndo_tx_timeout		= s2imac_tx_timeout,
-+	.ndo_get_stats		= s2imac_get_stats,
++	.ndo_open = s2imac_open,
++	.ndo_stop = s2imac_close,
++	.ndo_start_xmit = s2imac_send,
++	.ndo_do_ioctl = s2imac_ioctl,
++	.ndo_change_mtu = s2imac_change_mtu,
++	.ndo_set_mac_address = s2imac_set_mac_address,
++	.ndo_tx_timeout = s2imac_tx_timeout,
++	.ndo_get_stats = s2imac_get_stats,
 +};
 +
 +/* Match table for OF platform binding */
 +static struct of_device_id s2imac_of_match[] __devinitdata = {
-+	{ .compatible = "xlnx,s2imac-1.00.a", },
++	{ .compatible = "s2i,s2imac-1.00.a", },
++	{ .compatible = "xlnx,s2imac-epc-1.02.a", },
++	{ .compatible = "s2i,s2imac-epc", .type = "network", },
 +	{ /* end of list */ },
 +};
-+MODULE_DEVICE_TABLE(of, s2imac_of_match);
++
++MODULE_DEVICE_TABLE (of, s2imac_of_match);
 +
 +static struct of_platform_driver s2imac_of_driver = {
-+	.name		= DRIVER_NAME,
-+	.match_table	= s2imac_of_match,
-+	.probe		= s2imac_of_probe,
-+	.remove		= __devexit_p(s2imac_of_remove),
++	.name = DRIVER_NAME,
++	.match_table = s2imac_of_match,
++	.probe = s2imac_of_probe,
++	.remove = __devexit_p (s2imac_of_remove),
 +};
 +
 +/**
@@ -1329,26 +1521,60 @@ index 0000000..d6af739
 + *
 + * Return:	0 upon success, or a negative error upon failure.
 + */
-+static int __init s2imac_init(void)
++static int __init s2imac_init (void)
 +{
 +	/* No kernel boot options used, we just need to register the driver */
-+	return of_register_platform_driver(&s2imac_of_driver);
++	return of_register_platform_driver (&s2imac_of_driver);
 +}
 +
 +/**
 + * s2imac_cleanup - Driver un-registration call
 + */
-+static void __exit s2imac_cleanup(void)
++static void __exit s2imac_cleanup (void)
 +{
-+	of_unregister_platform_driver(&s2imac_of_driver);
++	of_unregister_platform_driver (&s2imac_of_driver);
 +}
 +
-+module_init(s2imac_init);
-+module_exit(s2imac_cleanup);
++module_init (s2imac_init);
++module_exit (s2imac_cleanup);
 +
-+MODULE_AUTHOR("Sensor to Image GmbH.");
-+MODULE_DESCRIPTION("S2I Ethernet MAC driver");
-+MODULE_LICENSE("GPL");
++MODULE_AUTHOR ("Sensor to Image GmbH.");
++MODULE_DESCRIPTION ("S2I Ethernet MAC driver");
++MODULE_VERSION (DRIVER_VERS);
++MODULE_LICENSE ("GPL");
+diff --git a/include/linux/if_s2i.h b/include/linux/if_s2i.h
+new file mode 100644
+index 0000000..f71921a
+--- /dev/null
++++ b/include/linux/if_s2i.h
+@@ -0,0 +1,27 @@
++/*
++ * Author: Stephan Linz <linz@li-pro.net>
++ *
++ * Copyright (C) 2011 Li-Pro.Net, Stephan Linz <linz@li-pro.net>
++ * Copyright (C) 2010 Sensor to image GmbH
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ */
++#ifndef _LINUX_S2I_H_
++#define _LINUX_S2I_H_
++
++/* some useful structs and typedefs for s2imac.c */
++typedef struct {
++	__u32	address;
++	__u32	data;
++} s2igen_content_t;
++
++/* some useful defines for s2imac.c */
++#define SIOS2IGENRD		SIOCDEVPRIVATE+0	/* generic read */
++#define SIOS2IGENWR		SIOCDEVPRIVATE+1	/* generic write */
++#define SIOS2IREGRD		SIOCDEVPRIVATE+2	/* register read */
++#define SIOS2IREGWR		SIOCDEVPRIVATE+3	/* register write */
++
++#endif /* _LINUX_S2I_H_ */
 -- 
 1.6.0.4
 

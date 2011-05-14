@@ -7,6 +7,7 @@
 	* ptxconfig: expand devnodes for Xilinx SystemACE device files
 	* ptxconfig: expand devnodes for ramdisk and loop device files
 	* ptxconfig: remove non-udev configuration (use mdev instead)
+	* common: adapt latest patch sets to linux-2.6.31.13
 	* common: stay on dbus-glib-0.82 (from ptxdist-2010.08.0)
 	* common: stay on glib-2.22.1 (from ptxdist-2010.08.0)
 	* common: stay on dbus-1.2.24 (from ptxdist-2010.08.0)

@@ -1,10 +1,7 @@
 From c56b6ee9a44cdc3c7911ce07e36369c640c56310 Mon Sep 17 00:00:00 2001
-Message-Id: <c56b6ee9a44cdc3c7911ce07e36369c640c56310.1295168975.git.linz@li-pro.net>
-In-Reply-To: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
-References: <b5d4f7edf1b54be6aaf43aea9b75c57f39e8db7f.1295168975.git.linz@li-pro.net>
 From: =?utf-8?q?Richard=20R=C3=B6jfors?= <richard.rojfors@pelagicore.com>
 Date: Tue, 9 Mar 2010 09:17:36 +0100
-Subject: [PATCH 2/7] Add the platform data include for the Xilinx XPS IIC Bus Interface
+Subject: [PATCH 2/9] Add the platform data include for the Xilinx XPS IIC Bus Interface
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
