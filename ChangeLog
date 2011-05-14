@@ -1,5 +1,6 @@
 2011-05-14	Stephan Linz <linz@li-pro.net>
 
+	* ptxconfig: upgarde to busybox-1.17.1
 	* ptxconfig: expand devnodes for Xilinx SystemACE device files
 	* ptxconfig: expand devnodes for ramdisk and loop device files
 	* ptxconfig: remove non-udev configuration (use mdev instead)
