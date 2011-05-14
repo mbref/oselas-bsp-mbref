@@ -1,5 +1,6 @@
 2011-05-14	Stephan Linz <linz@li-pro.net>
 
+	* ptxconfig: migrate to ptxdist-2011.05.0
 	* ptxconfig: add mdev startup script and configuration
 	* ptxconfig: upgrade to libuio-0.2.1
 	* ptxconfig: upgarde to busybox-1.17.1
