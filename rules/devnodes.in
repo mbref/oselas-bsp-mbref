@@ -139,6 +139,29 @@ config DEVNODES_BLK_SD
 	tristate
 	prompt "SCSI disks"
 
+config DEVNODES_BLK_XSA
+	tristate
+	prompt "Xilinx SystemACE (XSA)"
+
+if DEVNODES_BLK_XSA
+
+config DEVNODES_BLK_XSA_MAJOR
+	int
+	default 254
+	range 240 254
+	prompt "XSA device file major number"
+	help
+	  You have to predefine the major number as it will be used later
+	  in the target. The XSA frame work will be used dynamically one of
+	  the reserved major numbers for misc block devices.
+
+	  The counting is from 254 down to 240 beginning with 254. Have a
+	  lock to your specific system integration on runtime to determine
+	  the right major number, example if you have load succesful the
+	  XSA kernel module.
+
+endif # DEVNODES_BLK_XSA
+
 endif # DEVNODES_BLK
 
 config DEVNODES_ICAP
