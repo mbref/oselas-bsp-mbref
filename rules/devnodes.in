@@ -123,6 +123,14 @@ config DEVNODES_BLK
 
 if DEVNODES_BLK
 
+config DEVNODES_RAMDISK
+	tristate
+	prompt "RAM disks"
+
+config DEVNODES_LOOP
+	tristate
+	prompt "loop devices"
+
 config DEVNODES_BLK_IDE
 	tristate
 	prompt "IDE (obsolete)"

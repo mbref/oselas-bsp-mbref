@@ -222,6 +222,23 @@ DEVNODES_DEVICES	+= $(DEVNODES_SYSTEM)					\
 	c,$(PTXCONF_DEVNODES_UIO_MAJOR),7,/dev/uio7
 endif
 
+ifneq ($(PTXCONF_DEVNODES_RAMDISK),)
+DEVNODES_DEVICES	+= $(DEVNODES_DISK)					\
+	b,1,0,/dev/ram0		b,1,1,/dev/ram1		b,1,2,/dev/ram2		\
+	b,1,3,/dev/ram3		b,1,4,/dev/ram4		b,1,5,/dev/ram5		\
+	b,1,6,/dev/ram6		b,1,7,/dev/ram7		b,1,8,/dev/ram8		\
+	b,1,9,/dev/ram9		b,1,10,/dev/ram10	b,1,11,/dev/ram11	\
+	b,1,12,/dev/ram12	b,1,13,/dev/ram13	b,1,14,/dev/ram14	\
+	b,1,15,/dev/ram15
+endif
+
+ifneq ($(PTXCONF_DEVNODES_LOOP),)
+DEVNODES_DEVICES	+= $(DEVNODES_DISK)					\
+	b,1,0,/dev/loop0	b,1,1,/dev/loop1	b,1,2,/dev/loop2	\
+	b,1,3,/dev/loop3	b,1,4,/dev/loop4	b,1,5,/dev/loop5	\
+	b,1,6,/dev/loop6	b,1,7,/dev/loop7
+endif
+
 ifneq ($(PTXCONF_DEVNODES_BLK_IDE),)
 DEVNODES_DEVICES	+= $(DEVNODES_DISK)					\
 	b,3,0,/dev/hda		b,3,1,/dev/hda1		b,3,2,/dev/hda2		\
