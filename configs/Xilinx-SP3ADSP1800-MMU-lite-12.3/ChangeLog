@@ -1,6 +1,7 @@
 2011-05-14	Stephan Linz <linz@li-pro.net>
 
 	* xlbsp: migrate to ptxdist-2011.05.0: mv xlbsp to platforms/xlbsp
+	* kernelconfig: enable block layer and more filesystems
 
 2011-01-16	Stephan Linz <linz@li-pro.net>
 
