@@ -1,3 +1,7 @@
+2011-05-14	Stephan Linz <linz@li-pro.net>
+
+	* ptxconfig: remove non-udev configuration (use mdev instead)
+
 2011-01-25	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: enable iperf
