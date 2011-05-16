@@ -2,7 +2,7 @@
 # (C) Copyright 2007-2009 Michal Simek
 # Michal SIMEK <monstr@monstr.eu>
 #
-# (C) Copyright 2010 Li-Pro.Net
+# (C) Copyright 2010-2011 Li-Pro.Net
 # Stephan Linz <linz@li-pro.net>
 #
 # This program is free software; you can redistribute it and/or
@@ -28,15 +28,8 @@
 # Project description at http://www.monstr.eu/
 #
 
+# PTXdist section key: this is part of the Xilinx BSP for a SoftCPU
 ## SECTION=xlbsp_softcpu
-
-# Project name
-comment "Project name"
-
-config PROJECT_NAME
-	string "Project name"
-	default "Xilinx-SP3ADSP1800-MMU-lite-11.4"
-
 
 # Microblaze is microblaze_0
 comment "Microblaze is microblaze_0"
@@ -59,7 +52,7 @@ config XILINX_MICROBLAZE0_USE_BARREL
 
 config XILINX_MICROBLAZE0_USE_DIV
 	int "USE_DIV range (0:1)"
-	default 0
+	default 1
 
 config XILINX_MICROBLAZE0_USE_HW_MUL
 	int "USE_HW_MUL values (0=NONE, 1=MUL32, 2=MUL64)"
@@ -67,7 +60,7 @@ config XILINX_MICROBLAZE0_USE_HW_MUL
 
 config XILINX_MICROBLAZE0_USE_FPU
 	int "USE_FPU values (0=NONE, 1=BASIC, 2=EXTENDED)"
-	default 0
+	default 1
 
 config XILINX_MICROBLAZE0_HW_VER
 	string "Core version number"

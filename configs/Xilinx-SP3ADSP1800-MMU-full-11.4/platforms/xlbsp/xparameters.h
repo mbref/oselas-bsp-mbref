@@ -2,7 +2,7 @@
  * (C) Copyright 2007-2009 Michal Simek
  * Michal SIMEK <monstr@monstr.eu>
  *
- * (C) Copyright 2010 Li-Pro.Net
+ * (C) Copyright 2010-2011 Li-Pro.Net
  * Stephan Linz <linz@li-pro.net>
  *
  * This program is free software; you can redistribute it and/or
@@ -29,7 +29,7 @@
  */
 
 /* Project name */
-#define XILINX_BOARD_NAME	"Xilinx-SP3ADSP1800-MMU-lite-11.4"
+#define XILINX_BOARD_NAME	"Xilinx-SP3ADSP1800-MMU-full-11.4"
 
 /* System Clock Frequency */
 #define XILINX_CLOCK_FREQ                        62500000
@@ -40,13 +40,15 @@
 #define XILINX_FSL_NUMBER                        0
 #define XILINX_USE_ICACHE                        1
 #define XILINX_USE_DCACHE                        1
-#define XILINX_DCACHE_BYTE_SIZE                  2048
+#define XILINX_DCACHE_BYTE_SIZE                  16384
 
 /* Interrupt controller is xps_intc_0 */
 #define XILINX_INTC_BASEADDR                     0x8AFF0000
-#define XILINX_INTC_NUM_INTR_INPUTS              3
-/* xps_uart_0_Interrupt */
-/* xps_ether_0_IP2INTC_Irpt */
+#define XILINX_INTC_NUM_INTR_INPUTS              5
+/* xps_uart_0_IP2INTC_Irpt */
+/* xps_ether_0_TemacIntc0_Irpt */
+/* mpmc_0_SDMA1_Tx_IntOut */
+/* mpmc_0_SDMA1_Rx_IntOut */
 /* xps_timer_0_Interrupt */
 
 /* Timer is xps_timer_0 */
@@ -61,10 +63,10 @@
 #define XILINX_FLASH_START                       0xaf000000
 #define XILINX_FLASH_SIZE                        0x01000000
 
-/* Uart controller UARTLITE is xps_uart_0 */
-#define XILINX_UARTLITE                         
-#define XILINX_UARTLITE_BASEADDR                 0x89FF0000
-#define XILINX_UARTLITE_BAUDRATE                 115200
+/* Uart controller UART16550 is xps_uart_0 */
+#define XILINX_UART16550                        
+#define XILINX_UART16550_BASEADDR                0x89ff0000
+#define XILINX_UART16550_CLOCK_HZ                62500000
 
 /* I2C controller not defined */
 
@@ -73,7 +75,8 @@
 
 /* Sysace CF controller not defined */
 
-/* Ethernet MAC controller EMACLITE is xps_ether_0 */
-#define XILINX_EMACLITE                         
-#define XILINX_EMACLITE_BASEADDR                 0x88F00000
+/* Ethernet MAC controller LLTEMAC is xps_ether_0 */
+#define XILINX_LLTEMAC                          
+#define XILINX_LLTEMAC_BASEADDR                  0x88F00000
+#define XILINX_LLTEMAC_SDMA_CTRL_BASEADDR        0x8adf0080
 

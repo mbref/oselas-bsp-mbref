@@ -2,7 +2,7 @@
 # (C) Copyright 2007-2009 Michal Simek
 # Michal SIMEK <monstr@monstr.eu>
 #
-# (C) Copyright 2010 Li-Pro.Net
+# (C) Copyright 2010-2011 Li-Pro.Net
 # Stephan Linz <linz@li-pro.net>
 #
 # This program is free software; you can redistribute it and/or
@@ -31,7 +31,9 @@
 # Platform compiler flags
 PLATFORM_CPPFLAGS += -mxl-pattern-compare
 PLATFORM_CPPFLAGS += -mxl-barrel-shift
+PLATFORM_CPPFLAGS += -mno-xl-soft-div
 PLATFORM_CPPFLAGS += -mno-xl-soft-mul
+PLATFORM_CPPFLAGS += -mhard-float
 PLATFORM_CPPFLAGS += -mcpu=v7.20.d
 
 # Automatic U-Boot position at 0x27f00000
