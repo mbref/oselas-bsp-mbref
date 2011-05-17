@@ -1,3 +1,7 @@
+2011-05-18	Stephan Linz <linz@li-pro.net>
+
+	* platform: remove depricated option PTXCONF_PROJECT_NAME
+
 2011-05-14	Stephan Linz <linz@li-pro.net>
 
 	* xlbsp: change eram size to real size

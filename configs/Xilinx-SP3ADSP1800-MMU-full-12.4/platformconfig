@@ -54,11 +54,6 @@ PTXCONF_ARCH_MICROBLAZE_HAVE_XLBSP=y
 #
 
 #
-# Project name
-#
-PTXCONF_PROJECT_NAME="Xilinx-SP3ADSP1800-MMU-full-12.4"
-
-#
 # Microblaze is microblaze_0
 #
 PTXCONF_XILINX_MICROBLAZE0_FAMILY="spartan3adsp"
