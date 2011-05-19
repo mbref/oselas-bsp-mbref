@@ -2,7 +2,7 @@
  * (C) Copyright 2007-2009 Michal Simek
  * Michal SIMEK <monstr@monstr.eu>
  *
- * (C) Copyright 2010 Li-Pro.Net
+ * (C) Copyright 2010-2011 Li-Pro.Net
  * Stephan Linz <linz@li-pro.net>
  *
  * This program is free software; you can redistribute it and/or
@@ -88,6 +88,4 @@
 /* Ethernet MAC controller EMACLITE is xps_ether_0 */
 #define XILINX_EMACLITE                         
 #define XILINX_EMACLITE_BASEADDR                 0x88F00000
-
-/* S2I GigE Vision Ethernet MAC not defined */
 
