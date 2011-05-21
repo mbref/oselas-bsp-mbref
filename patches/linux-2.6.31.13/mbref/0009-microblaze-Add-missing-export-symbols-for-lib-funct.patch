@@ -1,7 +1,7 @@
 From 82bfb5a3503c701bf485e80347d7d22fa2e0da1c Mon Sep 17 00:00:00 2001
 From: Michal Simek <monstr@monstr.eu>
 Date: Thu, 24 Feb 2011 15:36:49 +0100
-Subject: [PATCH 9/9] microblaze: Add missing export symbols for lib functions
+Subject: [PATCH 09/10] microblaze: Add missing export symbols for lib functions
 
 Adding missing export symbols for loadable modules.
 

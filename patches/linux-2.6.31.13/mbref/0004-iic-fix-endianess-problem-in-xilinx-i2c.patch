@@ -1,7 +1,7 @@
 From 261bdccf88df9b86e83a881e31b87557c5d3beb5 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Mon, 13 Dec 2010 15:32:05 +0100
-Subject: [PATCH 4/9] iic: fix endianess problem in xilinx i2c
+Subject: [PATCH 04/10] iic: fix endianess problem in xilinx i2c
 
 Fast fix to get mailine i2c driver to work on BE systems.
 The problem is the mailine i2c driver was written for a

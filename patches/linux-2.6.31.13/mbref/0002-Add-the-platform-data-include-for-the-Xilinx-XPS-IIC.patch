@@ -1,7 +1,7 @@
 From c56b6ee9a44cdc3c7911ce07e36369c640c56310 Mon Sep 17 00:00:00 2001
 From: =?utf-8?q?Richard=20R=C3=B6jfors?= <richard.rojfors@pelagicore.com>
 Date: Tue, 9 Mar 2010 09:17:36 +0100
-Subject: [PATCH 2/9] Add the platform data include for the Xilinx XPS IIC Bus Interface
+Subject: [PATCH 02/10] Add the platform data include for the Xilinx XPS IIC Bus Interface
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit

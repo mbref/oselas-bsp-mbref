@@ -1,7 +1,7 @@
 From e9b9560f0842d45deb30cb6cd8a330a0b638ab06 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Mon, 29 Nov 2010 14:31:47 +0100
-Subject: [PATCH 5/9] iic: OF Support for xilinx i2c
+Subject: [PATCH 05/10] iic: OF Support for xilinx i2c
 
 Fast fix to get mailine i2c driver to work on microblaze.
 

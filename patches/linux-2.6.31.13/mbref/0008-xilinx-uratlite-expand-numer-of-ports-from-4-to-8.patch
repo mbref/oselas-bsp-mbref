@@ -1,7 +1,7 @@
 From 5cd0e00215e722567db77c72b0797dca0baa40f0 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Fri, 18 Feb 2011 22:21:41 +0100
-Subject: [PATCH 8/9] xilinx uratlite: expand numer of ports from 4 to 8
+Subject: [PATCH 08/10] xilinx uratlite: expand numer of ports from 4 to 8
 
 avoid prope error like:
 [    0.804000] uartlite 84000000.serial: ttyUL4 too large

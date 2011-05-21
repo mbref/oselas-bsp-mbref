@@ -1,7 +1,7 @@
 From 6922e527cb8e106ce5b705ef62c6de2a5e19febf Mon Sep 17 00:00:00 2001
 From: Randy Dunlap <randy.dunlap@oracle.com>
 Date: Thu, 4 Feb 2010 12:11:09 -0800
-Subject: [PATCH 3/9] Add include to i2c-xii.c to fix build error
+Subject: [PATCH 03/10] Add include to i2c-xii.c to fix build error
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit

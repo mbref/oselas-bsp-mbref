@@ -1,7 +1,7 @@
 From 27e66d7da858bc012ea390685ab3be2373dc347a Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Sun, 16 Jan 2011 08:51:33 +0100
-Subject: [PATCH 6/9] uio_of_genirq: fix incompatible pointer type
+Subject: [PATCH 06/10] uio_of_genirq: fix incompatible pointer type
 
 drivers/uio/uio_of_genirq.c:41: warning: passing argument 3 of '__uio_pdrv_genirq_probe' from incompatible pointer type
 
