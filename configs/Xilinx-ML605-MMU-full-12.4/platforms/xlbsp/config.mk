@@ -2,7 +2,7 @@
 # (C) Copyright 2007-2009 Michal Simek
 # Michal SIMEK <monstr@monstr.eu>
 #
-# (C) Copyright 2010 Li-Pro.Net
+# (C) Copyright 2010-2011 Li-Pro.Net
 # Stephan Linz <linz@li-pro.net>
 #
 # This program is free software; you can redistribute it and/or
@@ -38,6 +38,4 @@ PLATFORM_CPPFLAGS += -mcpu=v8.00.b
 
 # Automatic U-Boot position at 0x2ff00000
 CONFIG_SYS_TEXT_BASE = 0x2ff00000
-
-# S2I GigE Vision Ethernet MAC not defined
 
