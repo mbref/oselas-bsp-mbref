@@ -47,112 +47,136 @@ t.b.d.
 Image recompilation for Xilinx-ML605-MMU-full-12.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-12.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-ML605-MMU-full-12.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-12.3/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-ML605-MMU-full-12.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-12.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-ML605-MMU-lite-12.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-12.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-ML605-MMU-lite-12.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-12.3/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-ML605-MMU-lite-12.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-12.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-12.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-12.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-xilinx-v2.0/microblaze-unknown-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-12.3:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-12.3/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-12.2:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-12.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
-ptxdist collection configs/startup.collection
-ptxdist images
-
-Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.4:
----------------------------------------------------------
-ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.4/platformconfig
-ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
-ptxdist collection configs/startup.collection
-ptxdist images
-
-Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.3:
----------------------------------------------------------
-ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.3/platformconfig
-ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
-ptxdist collection configs/startup.collection
-ptxdist images
-
-Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.2:
----------------------------------------------------------
-ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.2/platformconfig
-ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-11.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-11.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.4:
+---------------------------------------------------------
+ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.3:
+---------------------------------------------------------
+ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.3/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.2:
+---------------------------------------------------------
+ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
 Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-11.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-11.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
 ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
-ptxdist select configs/ptxconfig-noudev
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for S2I-ML505-MMU-gige-11.5:
+------------------------------------------------
+ptxdist platform configs/S2I-ML505-MMU-gige-11.5/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+ptxdist toolchain /opt/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
@@ -163,8 +187,140 @@ ptxdist select configs/ptxconfig
 
 alternative toolchain for PTXdist:
 ----------------------------------
-PTXCONF_CROSSCHAIN_VENDOR="PetaLogix MicroBlaze Tools v1.0 (20101201.011750)"
+PTXCONF_CROSSCHAIN_VENDOR="PetaLogix MicroBlaze Tools v2.0 (20110406.101551)"
 ptxdist toolchain /opt/tools-4.1.2-mb-petalogix/linux-i386/microblaze-unknown-linux-gnu/bin
+
+
+Shortcuts: Xilinx-ML605-MMU
+---------------------------
+
+Shortcut: boot with external FDT-Support:
+-----------------------------------------
+dhcp 0x20880000 /ml605/oftree
+fdt addr 0x20880000
+fdt list /
+fdt print /
+dcache off
+dhcp 0x20900000 /ml605/linuximage.ub
+bootm 0x20900000 - 0x20880000
+
+Shortcut: boot without external FDT-Support:
+--------------------------------------------
+dhcp 0x20900000 /ml605/linuximage.ub
+
+bootm 0x20900000
+
+Shortcut: write FPGA configuration into Flash:
+----------------------------------------------
+dhcp 0x20900000 /ml605/download.bin
+
+era AE000000 AEFFFFFF
+cp.b 0x20900000 AE000000 $filesize
+
+Shortcut: write U-Boot XLBLOB into Flash:
+-----------------------------------------
+dhcp 0x20900000 /ml605/u-boot-xl.bin
+
+era AFF80000 AFFDFFFF
+cp.b 0x20900000 AFF80000 $filesize
+
+Shortcut: write FDT-BLOB into Flash:
+------------------------------------
+dhcp 0x20880000 /ml605/oftree
+FIXME: era <fdt_start> <fdt_end>
+
+FIXME: cp.b 0x20880000 <fdt_start> $filesize
+FIXME: fdt addr <fdt_start>
+fdt list /
+
+Shortcut: write RootFS into Flash:
+----------------------------------
+dhcp 0x20900000 /ml605/root.squashfs
+or
+dhcp 0x20900000 /ml605/root.jffs2
+
+era AF400000 AFF7FFFF
+cp.b 0x20900000 AF400000 $filesize
+
+Shortcut: write Linux kernel into Flash:
+----------------------------------------
+dhcp 0x20900000 /ml605/linuximage.ub
+
+era AF000000 AFF7FFFF
+or
+era AF000000 AF3FFFFF
+
+cp.b 0x20900000 AF000000 $filesize
+imi AF000000
+bootm AF000000
+
+Shortcuts: Xilinx-ML505-MMU
+---------------------------
+
+Shortcut: boot with external FDT-Support:
+-----------------------------------------
+dhcp 0x20880000 /ml505/oftree
+fdt addr 0x20880000
+fdt list /
+fdt print /
+dcache off
+dhcp 0x20900000 /ml505/linuximage.ub
+bootm 0x20900000 - 0x20880000
+
+Shortcut: boot without external FDT-Support:
+--------------------------------------------
+dhcp 0x20900000 /ml505/linuximage.ub
+
+bootm 0x20900000
+
+Shortcut: write FPGA configuration into Flash:
+----------------------------------------------
+dhcp 0x20900000 /ml505/download.bin
+
+era AE000000 AEFFFFFF
+cp.b 0x20900000 AE000000 $filesize
+
+Shortcut: write U-Boot XLBLOB into Flash:
+-----------------------------------------
+dhcp 0x20900000 /ml505/u-boot-xl.bin
+
+era AFF80000 AFFDFFFF
+cp.b 0x20900000 AFF80000 $filesize
+
+Shortcut: write FDT-BLOB into Flash:
+------------------------------------
+dhcp 0x20880000 /ml505/oftree
+FIXME: era <fdt_start> <fdt_end>
+
+FIXME: cp.b 0x20880000 <fdt_start> $filesize
+FIXME: fdt addr <fdt_start>
+fdt list /
+
+Shortcut: write RootFS into Flash:
+----------------------------------
+dhcp 0x20900000 /ml505/root.squashfs
+or
+dhcp 0x20900000 /ml505/root.jffs2
+
+era AF400000 AFF7FFFF
+cp.b 0x20900000 AF400000 $filesize
+
+Shortcut: write Linux kernel into Flash:
+----------------------------------------
+dhcp 0x20900000 /ml505/linuximage.ub
+
+era AF000000 AFF7FFFF
+or
+era AF000000 AF3FFFFF
+
+cp.b 0x20900000 AF000000 $filesize
+imi AF000000
+bootm AF000000
+
+
+
+Shortcuts: Xilinx-SP3ADSP1800
+-----------------------------
 
 Shortcut: boot with external FDT-Support:
 -----------------------------------------
@@ -176,19 +332,22 @@ dcache off
 dhcp 0x20900000 /sp3adsp1800/linuximage.ub
 bootm 0x20900000 - 0x20880000
 
-bootm AF0A0000 - AF080000
-
 Shortcut: boot without external FDT-Support:
 --------------------------------------------
-dhcp 0x20900000 /ml605/linuximage.ub
 dhcp 0x20900000 /sp3adsp1800/linuximage.ub
 
 bootm 0x20900000
 
+Shortcut: write FPGA configuration into Flash:
+----------------------------------------------
+dhcp 0x20900000 /sp3adsp1800/download.bin
+
+era AF000000 AF1FFFFF
+cp.b 0x20900000 AF000000 $filesize
+
 Shortcut: write U-Boot XLBLOB into Flash:
 -----------------------------------------
-dhcp 0x20900000 /ml605/u-boot-fs.bin
-dhcp 0x20900000 /sp3adsp1800/u-boot-fs.bin
+dhcp 0x20900000 /sp3adsp1800/u-boot-xl.bin
 
 era AFF80000 AFFDFFFF
 cp.b 0x20900000 AFF80000 $filesize
@@ -202,13 +361,26 @@ FIXME: cp.b 0x20880000 <fdt_start> $filesize
 FIXME: fdt addr <fdt_start>
 fdt list /
 
+Shortcut: write RootFS into Flash:
+----------------------------------
+dhcp 0x20900000 /sp3adsp1800/root.squashfs
+or
+dhcp 0x20900000 /sp3adsp1800/root.jffs2
+
+era AF600000 AFF7FFFF
+cp.b 0x20900000 AF600000 $filesize
+
 Shortcut: write Linux kernel into Flash:
 ----------------------------------------
 dhcp 0x20900000 /sp3adsp1800/linuximage.ub
-era AF000000 AF1FFFFF
 
-cp.b 0x20900000 AF000000 $filesize
-imi AF000000
+era AF200000 AFF7FFFF
+or
+era AF200000 AF5FFFFF
+
+cp.b 0x20900000 AF200000 $filesize
+imi AF200000
+bootm AF200000
 
 
 ______________________________________________________________________________
@@ -373,6 +545,63 @@ Linear ROM Mapping (top-down):
 						|		|
   0xAC00.0000 ----      -      ---      -      -+---------------+
 
+
+OS Kernel/Runtime image store:
+------------------------------
+
+						       64MB
+
+						+- 0x03F8.0000 -|
+						|		|
+						|		|
+						|		|
+				       32MB	|		|
+						|		|
+				+- 0x01F8.0000 -|		|
+				|		:		|
+				|		:		|
+				|		:		|
+		       16MB	|		:		|
+				|		:		|
+		+- 0x00F8.0000 -|		:		|
+		|		:		:		|
+		|     9,5MB	:     11,5MB	:      29,5MB	|
+		|		:		:		|
+		|	Runtime filesystem image store		|
+		|		:		:		|
+		|		:		|- 0x0220.0000 --
+		|		:		:		|
+		|		:		:      6MB	|
+		|		:		: reserved for 	|
+		|		:		: simple image	|
+		|- 0x0060.0000 -|- 0x0140.0000 -|- - - - - - - -|
+		| :		     128KB		      : |
+		| :	      oftree for FDT support	      : |
+		| `-------------------------------------------´ |
+		|						|
+		|			4MB			|
+		|		Linux kernel image		|
+		|						|
+   after BPI: --|- 0x0020.0000 -|- 0x0100.0000 -|- 0x0180.0000 --
+		:		:		:		:
+
+
+MTD partitioning (16MB):
+------------------------
+mtdparts=af000000.flash:2048k(bpi),13824k(simpleimage),384k(u-boot-xl)ro,128k(env)
+mtdparts=af000000.flash:2048k(bpi),4096k(kernel),9728k(rootfs),384k(u-boot-xl)ro,128k(env)
+
+MTD partitioning (32MB):
+------------------------
+mtdparts=ae000000.flash:16384k(bpi),15872k(simpleimage),384k(u-boot-xl)ro,128k(env)
+mtdparts=ae000000.flash:16384k(bpi),4096k(kernel),11776k(rootfs),384k(u-boot-xl)ro,128k(env)
+
+RootFS kernel bootargs:
+-----------------------
+Simpleimage:		root=/dev/ram0 rdinit=/sbin/init
+Kernel+SquashFS:	root=/dev/mtdblock2
+Kernel+JFFS2:		root=/dev/mtdblock2 rw rootfstype=jffs2
+Kernel+NFSROOT:		root=/dev/nfs rw nfsroot=/exports/ml505-rootfs,v3,tcp
 
 Memory Mapping (general for all platforms)
 ------------------------------------------
