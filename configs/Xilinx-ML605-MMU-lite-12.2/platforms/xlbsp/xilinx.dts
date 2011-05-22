@@ -43,7 +43,7 @@
 		serial0 = &xps_uart_0;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0,115200 debug";
+		bootargs = "console=ttyUL0,115200 root=/dev/mtdblock2 rw rootfstype=jffs2 mtdparts=ae000000.flash:16384k(bpi),4096k(kernel),11776k(rootfs),384k(u-boot-xl)ro,128k(env) debugg";
 		linux,stdout-path = "/plb@0/serial@89ff0000";
 	} ;
 	cpus {
