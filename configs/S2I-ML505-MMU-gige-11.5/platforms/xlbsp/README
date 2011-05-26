@@ -13,4 +13,4 @@ Linux:
 	auto-config.in
 
 Renew ptxdist project:
-  - run the upgrade script in ptxdist project root (./xlbsp2ptxdist.sh)
+  - run the upgrade script in ptxdist project root (./scripts/xlbsp2ptxdist)

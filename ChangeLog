@@ -1,5 +1,6 @@
 2011-05-22	Stephan Linz <linz@li-pro.net>
 
+	* common: move xlbsp-to-ptxdist to scripts
 	* common: introduce the build_all.mk make script
 
 2011-05-22	Stephan Linz <linz@li-pro.net>

@@ -12,4 +12,5 @@ Linux:
 	Kconfig.auto
 	auto-config.in
 
-  - add PTXdist section key in Kconfig.auto:	## SECTION=xlbsp_softcpu
+Renew ptxdist project:
+  - run the upgrade script in ptxdist project root (./scripts/xlbsp2ptxdist)
