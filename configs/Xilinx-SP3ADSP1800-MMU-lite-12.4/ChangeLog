@@ -1,3 +1,7 @@
+2011-05-25	Stephan Linz <linz@li-pro.net>
+
+	* common: change to Xilinx MicroBlaze Tools v2.0 (20110211.154242)
+
 2011-05-14	Stephan Linz <linz@li-pro.net>
 
 	* xlbsp: change eram size to real size

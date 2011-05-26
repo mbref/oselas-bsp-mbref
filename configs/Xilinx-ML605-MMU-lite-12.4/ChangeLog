@@ -1,3 +1,7 @@
+2011-05-25	Stephan Linz <linz@li-pro.net>
+
+	* common: change to Xilinx MicroBlaze Tools v2.0 (20110211.154242)
+
 2011-05-21      Stephan Linz <linz@li-pro.net>
 
 	* kernelconfig: enable block layer and more filesystems
