@@ -175,6 +175,7 @@ PTXCONF_CROSSCHAIN_VENDOR="PetaLogix MicroBlaze Tools v2.0 (20110406.101551)"
 ptxdist toolchain /opt/tools-4.1.2-mb-petalogix-v2.1/linux-i386/microblaze-unknown-linux-gnu/bin
 
 
+______________________________________________________________________________
 Shortcuts: Xilinx-ML605-MMU
 ---------------------------
 
@@ -238,6 +239,8 @@ cp.b 0x20900000 AF000000 $filesize
 imi AF000000
 bootm AF000000
 
+
+______________________________________________________________________________
 Shortcuts: Xilinx-ML505-MMU
 ---------------------------
 
@@ -302,7 +305,7 @@ imi AF000000
 bootm AF000000
 
 
-
+______________________________________________________________________________
 Shortcuts: Xilinx-SP3ADSP1800
 -----------------------------
 
