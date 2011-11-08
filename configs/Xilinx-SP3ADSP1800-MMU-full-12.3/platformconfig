@@ -80,7 +80,7 @@ PTXCONF_SYSROOT_CROSS="${PTXDIST_PLATFORMDIR}/sysroot-cross"
 #
 # toolchain                     
 #
-PTXCONF_CROSSCHAIN_VENDOR="Xilinx MicroBlaze Tools v2.0 (20110211.154242)"
+PTXCONF_CROSSCHAIN_VENDOR="MicroBlaze Tools v1.1 (crosstool-1.4.1)"
 PTXCONF_CROSSCHAIN_CHECK="4.1.2"
 PTXCONF_LIBC_GLIBC=y
 # PTXCONF_LIBC_UCLIBC is not set

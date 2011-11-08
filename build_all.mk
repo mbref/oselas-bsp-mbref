@@ -2,6 +2,7 @@
 
 BENICE		:= false
 PETALOGIX	:= false
+XILINX		:= false
 
 #
 # Makefile to build all platform images, borrowed in parts from the
@@ -26,8 +27,13 @@ ifeq ($(PETALOGIX),true)
 # use the Petalogix Microblaze toolchain preperated for ptxdist
 TOOLCHAIN	:= /opt/tools-4.1.2-mb-petalogix-v2.1/linux-i386/microblaze-unknown-linux-gnu/bin
 else
+ifeq ($(XILINX),true)
 # use the Xilinx Microblaze toolchain preperated for ptxdist
 TOOLCHAIN	:= /opt/tools-4.1.2-mb-xilinx-v2.0/microblaze-unknown-linux-gnu/bin
+else
+# use the Crosstool-NG Microblaze toolchain preperated for ptxdist
+TOOLCHAIN	:= /opt/tools-4.1.2-mb-ctng-v1.1/microblaze-unknown-linux-gnu/bin
+endif
 endif
 
 CONFIGDIR	:= configs
