@@ -1,6 +1,7 @@
 2011-11-11	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: prepare mbref-uio-trunk for kernel 2.6.37.4
+	* common: adapt latest patch sets to linux-2.6.37.4
 
 2011-05-22	Stephan Linz <linz@li-pro.net>
 
