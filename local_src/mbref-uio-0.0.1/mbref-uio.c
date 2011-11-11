@@ -21,11 +21,10 @@
 #include <linux/spinlock.h>
 #include <linux/bitops.h>
 #include <linux/interrupt.h>
-#include <linux/slab.h>
-#include <linux/of_platform.h>
-#include <linux/of_address.h>
-#include <linux/of_irq.h>
+#include <linux/platform_device.h>
 #include <linux/uio_driver.h>
+#include <linux/of_device.h>
+#include <linux/of_platform.h>
 
 struct mbref_uio_platdata {
 	struct uio_info *uioinfo;
@@ -34,7 +33,7 @@ struct mbref_uio_platdata {
 };
 
 #define DRIVER_NAME "mbref-uio"
-#define DRIVER_VERS "0.0.2"
+#define DRIVER_VERS "0.0.1"
 
 static irqreturn_t mbref_uio_handler(int irq, struct uio_info *dev_info)
 {
@@ -148,7 +147,7 @@ int __mbref_uio_pdrv_probe(struct device *dev, struct uio_info *uioinfo,
 	return ret;
 }
 
-static int __devinit mbref_uio_of_probe(struct platform_device *op,
+static int __devinit mbref_uio_of_probe(struct of_device *op,
 		const struct of_device_id *match)
 {
 	struct uio_info *uioinfo;
@@ -158,32 +157,32 @@ static int __devinit mbref_uio_of_probe(struct platform_device *op,
 	uioinfo = kzalloc(sizeof(*uioinfo), GFP_KERNEL);
 	if (!uioinfo) {
 		pr_err("%s: %s: unable to kmalloc uioinfo\n",
-				DRIVER_NAME, op->dev.of_node->full_name);
+				DRIVER_NAME, op->node->full_name);
 		return -ENOMEM;
 	}
 
-	uioinfo->name = DRIVER_NAME; /* alternetive: op->dev.of_node->name */
+	uioinfo->name = DRIVER_NAME; /* alternetive: op->node->name */
 	uioinfo->version = DRIVER_VERS;
-	uioinfo->irq = irq_of_parse_and_map(op->dev.of_node, 0);
+	uioinfo->irq = irq_of_parse_and_map(op->node, 0);
 	if (!uioinfo->irq)
 		uioinfo->irq = UIO_IRQ_NONE;
 	else
 		pr_info("%s: %s: IRQ%li\n", uioinfo->name,
-				op->dev.of_node->full_name, uioinfo->irq);
+				op->node->full_name, uioinfo->irq);
 
 	for (i = 0; i < MAX_UIO_MAPS; ++i)
-		if (of_address_to_resource(op->dev.of_node, i, &resources[i]))
+		if (of_address_to_resource(op->node, i, &resources[i]))
 			break;
 		else
 			pr_info("%s: %s: 0x%08X-0x%08X\n",
-					uioinfo->name, op->dev.of_node->full_name,
+					uioinfo->name, op->node->full_name,
 					resources[i].start, resources[i].end);
 
 	ret = __mbref_uio_pdrv_probe(&op->dev, uioinfo, resources, i);
 	if (ret)
 		goto err_cleanup;
 
-	pr_info("%s: %s: registered\n", uioinfo->name, op->dev.of_node->full_name);
+	pr_info("%s: %s: registered\n", uioinfo->name, op->node->full_name);
 	return 0;
 
 err_cleanup:
@@ -194,7 +193,7 @@ err_cleanup:
 	return ret;
 }
 
-static int __devexit mbref_uio_of_remove(struct platform_device *op)
+static int __devexit mbref_uio_of_remove(struct of_device *op)
 {
 	struct mbref_uio_platdata *priv = dev_get_drvdata(&op->dev);
 
@@ -211,25 +210,20 @@ static int __devexit mbref_uio_of_remove(struct platform_device *op)
 /* work with hotplug and coldplug */
 MODULE_ALIAS("platform:"DRIVER_NAME);
 
-#ifdef CONFIG_OF
-/* Match table for of_platform binding */
-static const struct of_device_id mbref_uio_of_match[] __devinitdata = {
+static const struct of_device_id mbref_uio_of_match[] = {
 	{ .compatible = "xlnx,plbv46-mbref-reg-1.00.a", },
 	{ .compatible = "xlnx,plbv46-mbref-mio-1.00.a", },
 	{ /* end of list */ },
 };
 MODULE_DEVICE_TABLE(of, mbref_uio_of_match);
-#endif
 
 static struct of_platform_driver mbref_uio_driver = {
+	.match_table	= mbref_uio_of_match,
 	.probe		= mbref_uio_of_probe,
 	.remove		= __devexit_p(mbref_uio_of_remove),
 	.driver		= {
-		.name		= DRIVER_NAME,
-		.owner		= THIS_MODULE,
-#ifdef CONFIG_OF
-		.of_match_table	= mbref_uio_of_match,
-#endif
+		.owner	= THIS_MODULE,
+		.name	= DRIVER_NAME,
 	},
 };
 

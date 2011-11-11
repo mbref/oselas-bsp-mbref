@@ -16,7 +16,11 @@ PACKAGES-$(PTXCONF_MBREF_UIO) += mbref-uio
 #
 # Paths and names and versions
 #
+ifeq ($(KERNEL_VERSION),2.6.31.13)
+MBREF_UIO_VERSION	:= 0.0.1
+else
 MBREF_UIO_VERSION	:= trunk
+endif
 MBREF_UIO		:= mbref-uio-$(MBREF_UIO_VERSION)
 MBREF_UIO_SRCDIR	:= $(PTXDIST_WORKSPACE)/local_src/$(MBREF_UIO)
 MBREF_UIO_DIR		:= $(BUILDDIR)/$(MBREF_UIO)
