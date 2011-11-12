@@ -43,7 +43,7 @@
 		serial0 = &xps_uart_0;
 	} ;
 	chosen {
-		bootargs = "console=ttyS0,115200 root=/dev/nfs rw nfsroot=/exports/ml605-rootfs,v3,tcp ip=dhcp mtdparts=ae000000.flash:16384k(bpi),4096k(kernel),11776k(rootfs),384k(u-boot-xl)ro,128k(env) debug";
+		bootargs = "console=ttyS0,115200 root=/dev/mtdblock2 rw rootfstype=jffs2 mtdparts=ae000000.flash:16384k(bpi),4096k(kernel),11776k(rootfs),384k(u-boot-xl)ro,128k(env) debug";
 		linux,stdout-path = "/plb@0/serial@89ff0000";
 	} ;
 	cpus {
