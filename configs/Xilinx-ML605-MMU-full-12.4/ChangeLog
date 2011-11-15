@@ -1,3 +1,7 @@
+2011-11-13	Stephan Linz <linz@li-pro.net>
+
+	* common: change to MicroBlaze Tools v1.2 (crosstool-1.4.1)
+
 2011-11-11	Stephan Linz <linz@li-pro.net>
 
 	* platform: upgarde to linux-2.6.37.4
