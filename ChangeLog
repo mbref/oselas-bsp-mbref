@@ -1,6 +1,7 @@
 2011-11-16	Stephan Linz <linz@li-pro.net>
 
 	* common: adapt latest patch sets to linux-2.6.37.4
+	* common: HOWTO: add reference note ti the right GNU toolchain
 
 2011-11-11	Stephan Linz <linz@li-pro.net>
 
