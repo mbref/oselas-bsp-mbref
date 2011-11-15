@@ -81,3 +81,4 @@ petalinux-v2.1/0080-spi-m25p80-Change-s25fl064k-sector-size-from-4KB-to-.patch
 mbref/0001-uio_pdrv_genirq-extensive-interrupt-search.patch
 mbref/0002-uartlite-Make-the-number-of-UARTs-registered-configu.patch
 mbref/0004-Xilinx-fix-section-mismatch.patch
+mbref/0005-enable-debugger-functionality-for-the-Microblaze.patch
