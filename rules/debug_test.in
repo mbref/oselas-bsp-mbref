@@ -1,0 +1,7 @@
+## SECTION=project_specific
+
+config DEBUG_TEST
+	tristate
+	prompt "debug_test"
+	help
+	  FIXME

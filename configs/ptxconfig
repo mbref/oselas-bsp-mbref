@@ -13,6 +13,7 @@ PTXCONF_PROJECT_VERSION="-0.00"
 #
 # Project Specific Configuration   
 #
+PTXCONF_DEBUG_TEST=m
 PTXCONF_DEVMEM2=m
 # PTXCONF_DEVNODES is not set
 PTXCONF_LIBUIO=m

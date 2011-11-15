@@ -3,6 +3,7 @@
 	* common: adapt latest patch sets to linux-2.6.37.4
 	* common: HOWTO: add reference note ti the right GNU toolchain
 	* ptxconfig: enable gdb-7.2 (native debugging)
+	* ptxconfig: include and enable new local source debug_test-trunk
 
 2011-11-11	Stephan Linz <linz@li-pro.net>
 
