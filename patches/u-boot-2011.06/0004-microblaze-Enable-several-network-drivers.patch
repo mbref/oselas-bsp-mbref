@@ -1,0 +1,32 @@
+From 439e6e5fb222ea68c530e54368669dea34d133c2 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 17 Nov 2010 11:29:18 +0100
+Subject: [PATCH] microblaze: Enable several network drivers
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ .../xilinx/microblaze-generic/microblaze-generic.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/board/xilinx/microblaze-generic/microblaze-generic.c b/board/xilinx/microblaze-generic/microblaze-generic.c
+index 5c71da8..b73b759 100644
+--- a/board/xilinx/microblaze-generic/microblaze-generic.c
++++ b/board/xilinx/microblaze-generic/microblaze-generic.c
+@@ -71,10 +71,12 @@ int fsl_init2 (void) {
+ 
+ int board_eth_init(bd_t *bis)
+ {
++	int ret = 0;
+ #ifdef CONFIG_XILINX_EMACLITE
+-	return xilinx_emaclite_initialize(bis, XILINX_EMACLITE_BASEADDR);
++	ret |= xilinx_emaclite_initialize(bis, XILINX_EMACLITE_BASEADDR);
+ #endif
+ #ifdef CONFIG_XILINX_LL_TEMAC
+-	return xilinx_ll_temac_initialize(bis, XILINX_LLTEMAC_BASEADDR);
++	ret |= xilinx_ll_temac_initialize(bis, XILINX_LLTEMAC_BASEADDR);
+ #endif
++	return ret;
+ }
+-- 
+1.7.0.4
+
