@@ -1,0 +1,29 @@
+From b3265f390caf594d8e03d1f4a1bed4c1b2d78837 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Fri, 21 Aug 2009 10:15:19 +0200
+Subject: [PATCH] microblaze: Remove bad eth board description - C&P fault
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ .../xilinx/microblaze-generic/microblaze-generic.c |    5 -----
+ 1 files changed, 0 insertions(+), 5 deletions(-)
+
+diff --git a/board/xilinx/microblaze-generic/microblaze-generic.c b/board/xilinx/microblaze-generic/microblaze-generic.c
+index 472783e..5c71da8 100644
+--- a/board/xilinx/microblaze-generic/microblaze-generic.c
++++ b/board/xilinx/microblaze-generic/microblaze-generic.c
+@@ -71,11 +71,6 @@ int fsl_init2 (void) {
+ 
+ int board_eth_init(bd_t *bis)
+ {
+-	/*
+-	 * This board either has PCI NICs or uses the CPU's TSECs
+-	 * pci_eth_init() will return 0 if no NICs found, so in that case
+-	 * returning -1 will force cpu_eth_init() to be called.
+-	 */
+ #ifdef CONFIG_XILINX_EMACLITE
+ 	return xilinx_emaclite_initialize(bis, XILINX_EMACLITE_BASEADDR);
+ #endif
+-- 
+1.7.0.4
+
