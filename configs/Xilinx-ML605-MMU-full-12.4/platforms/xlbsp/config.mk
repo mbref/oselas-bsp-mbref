@@ -36,6 +36,6 @@ PLATFORM_CPPFLAGS += -mno-xl-soft-mul
 PLATFORM_CPPFLAGS += -mhard-float
 PLATFORM_CPPFLAGS += -mcpu=v8.00.b
 
-# Automatic U-Boot position at 0x2ff00000
-CONFIG_SYS_TEXT_BASE = 0x2ff00000
+# Automatic U-Boot position at 0x2fe00000
+CONFIG_SYS_TEXT_BASE = 0x2fe00000
 

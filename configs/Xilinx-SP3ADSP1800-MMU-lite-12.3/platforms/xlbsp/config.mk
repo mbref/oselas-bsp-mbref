@@ -34,8 +34,8 @@ PLATFORM_CPPFLAGS += -mxl-barrel-shift
 PLATFORM_CPPFLAGS += -mno-xl-soft-mul
 PLATFORM_CPPFLAGS += -mcpu=v8.00.a
 
-# Automatic U-Boot position at 0x27f00000
-CONFIG_SYS_TEXT_BASE = 0x27f00000
+# Automatic U-Boot position at 0x27e00000
+CONFIG_SYS_TEXT_BASE = 0x27e00000
 
 # I2C controller not defined
 
