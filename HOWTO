@@ -604,7 +604,7 @@ RootFS kernel bootargs:
 Simpleimage:		root=/dev/ram0 rdinit=/sbin/init
 Kernel+SquashFS:	root=/dev/mtdblock2
 Kernel+JFFS2:		root=/dev/mtdblock2 rw rootfstype=jffs2
-Kernel+NFSROOT:		root=/dev/nfs rw nfsroot=/exports/ml505-rootfs,v3,tcp
+Kernel+NFSROOT:		root=/dev/nfs rw nfsroot=/exports/ml505-rootfs,v3,tcp ip=dhcp
 
 Memory Mapping (general for all platforms)
 ------------------------------------------
