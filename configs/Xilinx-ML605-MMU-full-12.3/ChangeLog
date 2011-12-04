@@ -1,6 +1,10 @@
+2011-12-04	Stephan Linz <linz@li-pro.net>
+
+	* platform: migrate to ptxdist-2011.12.0
+
 2011-11-18	Stephan Linz <linz@li-pro.net>
 
-	* platform: upgrade to u-boot-2011.06
+	* platform: upgrade to u-boot-2011.09
 
 2011-11-13	Stephan Linz <linz@li-pro.net>
 
