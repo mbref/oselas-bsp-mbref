@@ -1,10 +1,25 @@
 #
 # Automatically generated make config: don't edit
-# ptxdist version: 2010.08.0
+# PTXdist 2011.12.0
 #
 PTXCONF__collectionconfig_MAGIC__=y
-PTXCONF_COLLECTION=y
-# PTXCONF_DEVMEM2 is not set
-PTXCONF_IPKG=y
-PTXCONF_UDEV=y
+# PTXCONF_COLLECTION_NONE is not set
+PTXCONF_COLLECTION_MANUAL=y
 # PTXCONF_COLLECTION_ALL is not set
+# PTXCONF_BONNIEXX is not set
+# PTXCONF_DBUS is not set
+# PTXCONF_DBUS_GLIB is not set
+# PTXCONF_DEBUG_TEST is not set
+# PTXCONF_DEVMEM2 is not set
+# PTXCONF_DOSFSTOOLS is not set
+# PTXCONF_EXPAT is not set
+# PTXCONF_GDB is not set
+# PTXCONF_GLIB is not set
+# PTXCONF_I2C_TOOLS is not set
+# PTXCONF_IPERF is not set
+PTXCONF_IPKG=y
+# PTXCONF_LIBUIO is not set
+# PTXCONF_MBREF_UIO is not set
+# PTXCONF_NCURSES is not set
+# PTXCONF_RC_ONCE is not set
+# PTXCONF_ZLIB is not set

@@ -17,6 +17,7 @@ PACKAGES-$(PTXCONF_LIBUIO) += libuio
 # Paths and names
 #
 LIBUIO_VERSION	:= 0.2.1
+LIBUIO_MD5	:= 0d798c4fd8649b3524ab19d2b1151bf7
 LIBUIO		:= libuio-$(LIBUIO_VERSION)
 LIBUIO_SUFFIX	:= tar.bz2
 LIBUIO_URL	:= http://download.sourceforge.net/libuio//$(LIBUIO).$(LIBUIO_SUFFIX)
