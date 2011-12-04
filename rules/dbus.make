@@ -19,6 +19,7 @@ PACKAGES-$(PTXCONF_DBUS) += dbus
 # Paths and names
 #
 DBUS_VERSION	:= 1.2.24
+DBUS_MD5	:= 565346cecd9cfecf1463540c6086cc2c
 DBUS		:= dbus-$(DBUS_VERSION)
 DBUS_SUFFIX	:= tar.gz
 DBUS_URL	:= http://dbus.freedesktop.org/releases/dbus/$(DBUS).$(DBUS_SUFFIX)
@@ -46,16 +47,20 @@ DBUS_ENV := $(CROSS_ENV)
 #
 DBUS_AUTOCONF := \
 	$(CROSS_AUTOCONF_USR) \
+	--enable-silent-rules \
+	--disable-ansi \
+	--disable-verbose-mode \
+	--disable-asserts \
+	--disable-checks \
+	--disable-xml-docs \
+	--disable-doxygen-docs \
+	--enable-abstract-sockets=yes \
+	--disable-libaudit \
 	--disable-dnotify \
 	--disable-inotify \
-	--disable-doxygen-docs \
-	--disable-gcov \
 	--disable-kqueue \
-	--disable-libaudit \
-	--disable-tests \
-	--disable-xml-docs \
-	--enable-abstract-sockets=yes \
-	--localstatedir=/var \
+	--disable-console-owner-file \
+	--disable-userdb-cache \
 	--with-dbus-user=$(PTXCONF_DBUS_USER)
 
 ifdef PTXCONF_DBUS_XML_EXPAT
@@ -77,7 +82,6 @@ else
 DBUS_AUTOCONF += --without-x
 endif
 
-
 # ----------------------------------------------------------------------------
 # Target-Install
 # ----------------------------------------------------------------------------
@@ -86,10 +90,10 @@ $(STATEDIR)/dbus.targetinstall:
 	@$(call targetinfo)
 
 	@$(call install_init, dbus)
-	@$(call install_fixup,dbus,PRIORITY,optional)
-	@$(call install_fixup,dbus,SECTION,base)
-	@$(call install_fixup,dbus,AUTHOR,"Roland Hostettler <r.hostettler@gmx.ch>")
-	@$(call install_fixup,dbus,DESCRIPTION,missing)
+	@$(call install_fixup, dbus,PRIORITY,optional)
+	@$(call install_fixup, dbus,SECTION,base)
+	@$(call install_fixup, dbus,AUTHOR,"Roland Hostettler <r.hostettler@gmx.ch>")
+	@$(call install_fixup, dbus,DESCRIPTION,missing)
 
 	@$(call install_copy, dbus, 0, 0, 0755, -, \
 		/usr/bin/dbus-daemon)
@@ -106,10 +110,10 @@ $(STATEDIR)/dbus.targetinstall:
 	@$(call install_copy, dbus, 0, 104, 4754, -, \
 		/usr/libexec/dbus-daemon-launch-helper)
 
-	@$(call install_copy, dbus, 0, 0, 0644, -, \
-		/usr/lib/libdbus-1.so.3.4.0)
-	@$(call install_link, dbus, libdbus-1.so.3.4.0, /usr/lib/libdbus-1.so.3)
-	@$(call install_link, dbus, libdbus-1.so.3.4.0, /usr/lib/libdbus-1.so)
+	@$(call install_lib, dbus, 0, 0, 0644, libdbus-1)
+
+	@$(call install_alternative, dbus, 0, 0, 0755, \
+		/etc/rc.once.d/dbus)
 
 #	#
 #	# create system.d and event.d directories, which are used by the configuration and startup files
@@ -152,6 +156,19 @@ ifneq ($(call remove_quotes,$(PTXCONF_DBUS_BBINIT_LINK)),)
 endif
 endif
 endif
+ifdef PTXCONF_DBUS_SYSTEMD_UNIT
+	@$(call install_copy, dbus, 0, 0, 0644, -, \
+		/lib/systemd/system/dbus.socket)
+	@$(call install_link, dbus, ../dbus.socket, \
+		/lib/systemd/system/sockets.target.wants/dbus.socket)
+	@$(call install_link, dbus, ../dbus.socket, \
+		/lib/systemd/system/dbus.target.wants/dbus.socket)
+
+	@$(call install_copy, dbus, 0, 0, 0644, -, \
+		/lib/systemd/system/dbus.service)
+	@$(call install_link, dbus, ../dbus.service, \
+		/lib/systemd/system/multi-user.target.wants/dbus.service)
+endif
 
 ifdef PTXCONF_INITMETHOD_UPSTART
 ifdef PTXCONF_DBUS_STARTSCRIPT
@@ -159,7 +176,7 @@ ifdef PTXCONF_DBUS_STARTSCRIPT
 endif
 endif
 
-	@$(call install_finish,dbus)
+	@$(call install_finish, dbus)
 
 	@$(call touch)
 
