@@ -1,5 +1,6 @@
 2011-12-04	Stephan Linz <linz@li-pro.net>
 
+	* common: stay on glib-2.22.1 (from ptxdist-2010.08.0)
 	* common: remove rules for glibmm-2.22.1 (from ptxdist-2010.08.0)
 
 2011-11-18	Stephan Linz <linz@li-pro.net>

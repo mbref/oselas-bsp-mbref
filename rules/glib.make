@@ -17,22 +17,22 @@ PACKAGES-$(PTXCONF_GLIB) += glib
 #
 # Paths and names
 #
-ifdef PTXCONF_GLIB_EXPERIMENTAL
-GLIB_VERSION	:= 2.25.10
-else
+#ifdef PTXCONF_GLIB_EXPERIMENTAL
+#GLIB_VERSION	:= 2.27.93
+#GLIB_MD5	:=
+#else
 GLIB_VERSION	:= 2.22.2
-endif
+GLIB_MD5	:= 846a86c74b74d5b16826aa5508940f9b
+#endif
 
 GLIB		:= glib-$(GLIB_VERSION)
 GLIB_SUFFIX	:= tar.bz2
 GLIB_SOURCE	:= $(SRCDIR)/$(GLIB).$(GLIB_SUFFIX)
 GLIB_DIR	:= $(BUILDDIR)/$(GLIB)
 
-ifdef PTXCONF_GLIB_EXPERIMENTAL
-GLIB_URL	:= http://ftp.gtk.org/pub/glib/2.25/glib-$(GLIB_VERSION).$(GLIB_SUFFIX)
-else
-GLIB_URL	:= http://ftp.gtk.org/pub/glib/2.22/glib-$(GLIB_VERSION).$(GLIB_SUFFIX)
-endif
+GLIB_URL	:= http://ftp.gnome.org/pub/GNOME/sources/glib/$(basename $(GLIB_VERSION))/glib-$(GLIB_VERSION).$(GLIB_SUFFIX)
+
+GLIB_LICENSE	:= LGPLv2+
 
 # ----------------------------------------------------------------------------
 # Get
@@ -60,12 +60,13 @@ GLIB_ENV 	:= \
 # is the right choice for no locales and locales-via-libc
 #
 
-ifdef PTXCONF_GLIB_EXPERIMENTAL
 GLIB_AUTOCONF := \
 	$(CROSS_AUTOCONF_USR) \
 	--enable-silent-rules \
 	--enable-debug=minimum \
 	--disable-gc-friendly \
+	--disable-fast-install \
+	--disable-libtool-lock \
 	--enable-mem-pools \
 	--enable-threads \
 	--with-threads=posix \
@@ -76,50 +77,24 @@ GLIB_AUTOCONF := \
 	--disable-xattr \
 	--disable-gtk-doc \
 	--disable-man \
-	--with-pcre=internal \
-	--enable-static \
-	--enable-shared \
-	--with-libiconv=no \
-	--disable-gcov
-else
-GLIB_AUTOCONF := \
-	$(CROSS_AUTOCONF_USR) \
-	--enable-threads \
-	--with-threads=posix \
-	--enable-static \
-	--enable-shared \
-	--disable-selinux \
-	--disable-gtk-doc \
-	--disable-man \
-	--disable-gc-friendly \
-	--disable-fast-install \
-	--disable-libtool-lock \
-	--disable-included-printf \
-	--disable-fam \
-	--disable-xattr \
 	--with-gnu-ld \
 	--with-pcre=internal \
+	--enable-static \
+	--enable-shared \
 	--with-libiconv=no
-endif
 
 # ----------------------------------------------------------------------------
 # Target-Install
 # ----------------------------------------------------------------------------
 
-ifdef PTXCONF_GLIB_EXPERIMENTAL
-GLIB_LIB_VERSION := 0.2510.0
-else
-GLIB_LIB_VERSION := 0.2200.2
-endif
-
 $(STATEDIR)/glib.targetinstall:
 	@$(call targetinfo)
 
 	@$(call install_init, glib)
-	@$(call install_fixup,glib,PRIORITY,optional)
-	@$(call install_fixup,glib,SECTION,base)
-	@$(call install_fixup,glib,AUTHOR,"Robert Schwebel <r.schwebel@pengutronix.de>")
-	@$(call install_fixup,glib,DESCRIPTION,missing)
+	@$(call install_fixup, glib,PRIORITY,optional)
+	@$(call install_fixup, glib,SECTION,base)
+	@$(call install_fixup, glib,AUTHOR,"Robert Schwebel <r.schwebel@pengutronix.de>")
+	@$(call install_fixup, glib,DESCRIPTION,missing)
 
 #	# /usr/bin/gtester-report
 #	# /usr/bin/glib-genmarshal
@@ -130,13 +105,11 @@ $(STATEDIR)/glib.targetinstall:
 
 	@$(call install_copy, glib, 0, 0, 0755, /usr/lib/gio/modules)
 
-	@for i in libgio libglib libgmodule libgobject libgthread; do \
-		$(call install_copy, glib, 0, 0, 0644, -, /usr/lib/$$i-2.0.so.$(GLIB_LIB_VERSION)); \
-		$(call install_link, glib, $$i-2.0.so.$(GLIB_LIB_VERSION), /usr/lib/$$i-2.0.so.0); \
-		$(call install_link, glib, $$i-2.0.so.$(GLIB_LIB_VERSION), /usr/lib/$$i-2.0.so); \
+	@for i in libgio-2.0 libglib-2.0 libgmodule-2.0 libgobject-2.0 libgthread-2.0; do \
+		$(call install_lib, glib, 0, 0, 0644, $$i); \
 	done
 
-	@$(call install_finish,glib)
+	@$(call install_finish, glib)
 
 	@$(call touch)
 
