@@ -1,5 +1,7 @@
 2011-12-10	Stephan Linz <linz@li-pro.net>
 
+	* common: remove dbus-glib-0.82 (from ptxdist-2010.08.0) and upgrade
+		  to default version from global ptxdist rule set
 	* common: remove dbus-1.2.24 (from ptxdist-2010.08.0) and upgrade
 		  to default version from global ptxdist rule set
 	* common: remove glib-2.22.1 (from ptxdist-2010.08.0) and upgrade
