@@ -1,3 +1,8 @@
+2011-12-10	Stephan Linz <linz@li-pro.net>
+
+	* common: remove glib-2.22.1 (from ptxdist-2010.08.0) and upgrade
+		  to default version from global ptxdist rule set
+
 2011-12-04	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: migrate to ptxdist-2011.12.0
