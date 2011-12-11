@@ -14,7 +14,7 @@ XILINX		:= false
 #
 
 SHELL		:= /bin/bash
-PTXDIST		:= /usr/bin/ptxdist-2011.05.0
+PTXDIST		:= /usr/bin/ptxdist-2011.12.0
 
 BUILDDATE	:= $(shell date +%y%m%d-%H%M)
 VERSION		:= $(shell ./scripts/setlocalversion ./.tarball-version)
@@ -32,7 +32,7 @@ ifeq ($(XILINX),true)
 TOOLCHAIN	:= /opt/tools-4.1.2-mb-xilinx-v2.0/microblaze-unknown-linux-gnu/bin
 else
 # use the Crosstool-NG Microblaze toolchain preperated for ptxdist
-TOOLCHAIN	:= /opt/tools-4.1.2-mb-ctng-v1.2/microblaze-unknown-linux-gnu/bin
+TOOLCHAIN	:= /opt/tools-4.1.2-mb-ctng-v1.3/microblaze-unknown-linux-gnu/bin
 endif
 endif
 
