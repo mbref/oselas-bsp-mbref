@@ -15,9 +15,11 @@ PTXCONF_COLLECTION_MANUAL=y
 # PTXCONF_EXPAT is not set
 # PTXCONF_GDB is not set
 # PTXCONF_GLIB is not set
+# PTXCONF_GLIBMM is not set
 # PTXCONF_I2C_TOOLS is not set
 # PTXCONF_IPERF is not set
 PTXCONF_IPKG=y
+# PTXCONF_LIBSIGCPP is not set
 # PTXCONF_LIBUIO is not set
 # PTXCONF_MBREF_UIO is not set
 # PTXCONF_NCURSES is not set
