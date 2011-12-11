@@ -1,5 +1,6 @@
 2011-12-11	Stephan Linz <linz@li-pro.net>
 
+	* common: HOWTO: add reference note to the right GNU toolchain
 	* ptxconfig: enable glibmm
 
 2011-12-10	Stephan Linz <linz@li-pro.net>
