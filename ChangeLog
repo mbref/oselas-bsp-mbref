@@ -1,3 +1,8 @@
+2011-12-17	Stephan Linz <linz@li-pro.net>
+
+	* common: remove patch sets for obsolete packages dbus-1.2.24,
+		  glib-2.22.2, and glib-2.25.10
+
 2011-12-11	Stephan Linz <linz@li-pro.net>
 
 	* common: HOWTO: add reference note to the right GNU toolchain
