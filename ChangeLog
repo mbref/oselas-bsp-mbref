@@ -1,6 +1,7 @@
 2011-12-18	Stephan Linz <linz@li-pro.net>
 
 	* common: adapt latest patch sets to linux-2.6.37.6
+	* ptxconfig: include and enable new local source iwatcher-trunk
 
 2011-12-17	Stephan Linz <linz@li-pro.net>
 

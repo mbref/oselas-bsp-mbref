@@ -1,0 +1,17 @@
+## SECTION=project_specific
+
+config IWATCHER
+	tristate
+	prompt "iwatcher"
+	help
+	  FIXME
+
+if IWATCHER
+
+config IWATCHER_TRUNK
+	bool
+	prompt "use trunk"
+	help
+	  Build trunk instead of latest release.
+
+endif
