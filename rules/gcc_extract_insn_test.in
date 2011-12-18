@@ -1,0 +1,39 @@
+## SECTION=project_specific
+
+config GCC_EXTRACT_INSN_TEST
+	tristate
+	prompt "gcc_extract_insn_test"
+	help
+	  FIXME
+
+if GCC_EXTRACT_INSN_TEST
+
+config GCC_EXTRACT_INSN_TEST_TRUNK
+	bool
+	prompt "use trunk"
+	help
+	  Build trunk instead of latest release.
+
+config GCC_EXTRACT_INSN_TEST_FORCE_ERROR
+	bool
+	prompt "force internal compiler error"
+	help
+	  Build with optimization level to force the internal
+	  compiler error:
+
+	  gcc_extract_insn_test.c: In function 'main':
+	  gcc_extract_insn_test.c:15: error: unrecognizable insn:
+	  (call_insn 8 7 9 1 gcc_extract_insn_test.c:13 (parallel [
+	              (call (mem:SI (const_int 5242880 [0x500000]) [0 S4 A32])
+	                  (const_int 24 [0x18]))
+	              (clobber (reg:SI 15 r15))
+	          ]) -1 (nil)
+	      (nil)
+	      (nil))
+	  gcc_extract_insn_test.c:15: internal compiler error: in extract_insn, at recog.c:2084
+	  Please submit a full bug report,
+	  with preprocessed source if appropriate.
+	  See <URL:http://gcc.gnu.org/bugs.html> for instructions.
+	  make[1]: *** [gcc_extract_insn_test.o] Error 1
+
+endif
