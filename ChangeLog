@@ -1,5 +1,6 @@
 2011-12-20	Stephan Linz <linz@li-pro.net>
 
+	* common: remove patch sets for obsolete u-boot-2011.03
 	* common: remove patch sets for obsolete u-boot-2010.12-rc1
 	* common: remove patch sets for obsolete u-boot-2010.06
 
