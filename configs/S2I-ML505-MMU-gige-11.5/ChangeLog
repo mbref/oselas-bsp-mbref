@@ -1,3 +1,7 @@
+2011-12-20	Stephan Linz <linz@li-pro.net>
+
+	* common: change to MicroBlaze Tools v1.4 (crosstool-1.4.1)
+
 2011-12-11	Stephan Linz <linz@li-pro.net>
 
 	* common: change to MicroBlaze Tools v1.3 (crosstool-1.4.1)

@@ -32,7 +32,7 @@ ifeq ($(XILINX),true)
 TOOLCHAIN	:= /opt/tools-4.1.2-mb-xilinx-v2.0/microblaze-unknown-linux-gnu/bin
 else
 # use the Crosstool-NG Microblaze toolchain preperated for ptxdist
-TOOLCHAIN	:= /opt/tools-4.1.2-mb-ctng-v1.3/microblaze-unknown-linux-gnu/bin
+TOOLCHAIN	:= /opt/tools-4.1.2-mb-ctng-v1.4/microblaze-unknown-linux-gnu/bin
 endif
 endif
 
