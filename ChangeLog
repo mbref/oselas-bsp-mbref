@@ -1,5 +1,6 @@
 2011-12-20	Stephan Linz <linz@li-pro.net>
 
+	* common: remove rules artefacts of host-glib
 	* common: remove patch sets for obsolete u-boot-2011.06
 	* common: remove patch sets for obsolete u-boot-2011.03
 	* common: remove patch sets for obsolete u-boot-2010.12-rc1
