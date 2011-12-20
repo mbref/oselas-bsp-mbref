@@ -1,0 +1,12 @@
+*.m4
+*.guess
+*.sub
+configure
+config.h.in
+depcomp
+install-sh
+ltmain.sh
+missing
+Makefile.in
+autom4te.cache/
+m4/
