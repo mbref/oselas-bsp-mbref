@@ -1,3 +1,7 @@
+2011-12-20	Stephan Linz <linz@li-pro.net>
+
+	* common: remove patch sets for obsolete u-boot-2010.06
+
 2011-12-18	Stephan Linz <linz@li-pro.net>
 
 	* common: adapt latest patch sets to linux-2.6.37.6
