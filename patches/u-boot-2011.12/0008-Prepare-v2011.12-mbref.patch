@@ -1,0 +1,26 @@
+From c3ab6a50c759928674d642f130d214c7f4f8d851 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Mon, 26 Dec 2011 17:58:40 +0100
+Subject: [PATCH] Prepare v2011.12-mbref
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 6f59082..822f214 100644
+--- a/Makefile
++++ b/Makefile
+@@ -24,7 +24,7 @@
+ VERSION = 2011
+ PATCHLEVEL = 12
+ SUBLEVEL =
+-EXTRAVERSION =
++EXTRAVERSION = -mbref
+ ifneq "$(SUBLEVEL)" ""
+ U_BOOT_VERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
+ else
+-- 
+1.7.0.4
+

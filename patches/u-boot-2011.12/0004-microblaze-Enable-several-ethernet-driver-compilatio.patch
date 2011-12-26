@@ -1,0 +1,39 @@
+From 059ec8c491ee280c87b48cd5d9816eb0d3f1f5fa Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 31 Aug 2011 12:57:54 +0200
+Subject: [PATCH] microblaze: Enable several ethernet driver compilation
+
+NET_MULTI enables to use several ethernet drivers but
+microblaze-generic platform config file select only
+one driver.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index dc3266e..547df42 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -76,11 +76,12 @@
+ 
+ /* ethernet */
+ #undef CONFIG_SYS_ENET
+-#ifdef XILINX_EMACLITE_BASEADDR
+-# define CONFIG_XILINX_EMACLITE		1
++#if defined(XILINX_EMACLITE_BASEADDR)
++# define CONFIG_XILINX_EMACLITE	1
+ # define CONFIG_SYS_ENET
+-#elif XILINX_LLTEMAC_BASEADDR
+-# define CONFIG_XILINX_LL_TEMAC		1
++#endif
++#if defined(XILINX_LLTEMAC_BASEADDR)
++# define CONFIG_XILINX_LL_TEMAC	1
+ # define CONFIG_SYS_ENET
+ #endif
+ #if defined(XILINX_AXIEMAC_BASEADDR)
+-- 
+1.7.0.4
+

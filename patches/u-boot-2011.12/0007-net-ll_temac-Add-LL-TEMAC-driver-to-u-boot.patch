@@ -1,0 +1,1689 @@
+From f3c0d340a54795568c6e41c6a105dad4b1180328 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Mon, 28 Nov 2011 21:44:07 +0100
+Subject: [PATCH] net: ll_temac: Add LL TEMAC driver to u-boot
+
+Xilinx LocalLink Tri-Mode Ether MAC driver can be
+used by Xilinx Microblaze or Xilinx ppc405/440 in
+SDMA and FIFO mode. DCR or XPS bus can be used.
+
+The driver uses and requires MII and PHYLIB.
+
+CP: 4 warnings: 'Use of volatile is usually wrong'
+I won't fix this, because it depends on the network
+driver subsystem.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/net/Makefile               |    2 +
+ drivers/net/xilinx_ll_temac.c      |  459 ++++++++++++++++++++++++++++++++++++
+ drivers/net/xilinx_ll_temac.h      |  313 ++++++++++++++++++++++++
+ drivers/net/xilinx_ll_temac_fifo.c |   99 ++++++++
+ drivers/net/xilinx_ll_temac_fifo.h |  116 +++++++++
+ drivers/net/xilinx_ll_temac_sdma.c |  318 +++++++++++++++++++++++++
+ drivers/net/xilinx_ll_temac_sdma.h |  286 ++++++++++++++++++++++
+ include/netdev.h                   |    2 +
+ 8 files changed, 1595 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/net/xilinx_ll_temac.c
+ create mode 100644 drivers/net/xilinx_ll_temac.h
+ create mode 100644 drivers/net/xilinx_ll_temac_fifo.c
+ create mode 100644 drivers/net/xilinx_ll_temac_fifo.h
+ create mode 100644 drivers/net/xilinx_ll_temac_sdma.c
+ create mode 100644 drivers/net/xilinx_ll_temac_sdma.h
+
+diff --git a/drivers/net/Makefile b/drivers/net/Makefile
+index d3df82e..14d71a7 100644
+--- a/drivers/net/Makefile
++++ b/drivers/net/Makefile
+@@ -76,6 +76,8 @@ COBJS-$(CONFIG_ULI526X) += uli526x.o
+ COBJS-$(CONFIG_VSC7385_ENET) += vsc7385.o
+ COBJS-$(CONFIG_XILINX_AXIEMAC) += xilinx_axi_emac.o
+ COBJS-$(CONFIG_XILINX_EMACLITE) += xilinx_emaclite.o
++COBJS-$(CONFIG_XILINX_LL_TEMAC) += xilinx_ll_temac.o \
++		xilinx_ll_temac_fifo.o xilinx_ll_temac_sdma.o
+ 
+ COBJS	:= $(sort $(COBJS-y))
+ SRCS	:= $(COBJS:.o=.c)
+diff --git a/drivers/net/xilinx_ll_temac.c b/drivers/net/xilinx_ll_temac.c
+new file mode 100644
+index 0000000..756014a
+--- /dev/null
++++ b/drivers/net/xilinx_ll_temac.c
+@@ -0,0 +1,459 @@
++/*
++ * Xilinx xps_ll_temac ethernet driver for u-boot
++ *
++ * supports SDMA or FIFO access
++ *
++ * Copyright (C) 2008 - 2011 Michal Simek <monstr@monstr.eu>
++ * Copyright (C) 2008 - 2011 PetaLogix
++ *
++ * Copyright (C) 2011 Stephan Linz <linz@li-pro.net>
++ *
++ * Based on Yoshio Kashiwagi kashiwagi@co-nss.co.jp driver
++ * Copyright (C) 2008 Nissin Systems Co.,Ltd.
++ * March 2008 created
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ */
++
++#include <config.h>
++#include <common.h>
++#include <net.h>
++#include <malloc.h>
++#include <asm/io.h>
++#include <phy.h>
++#include <miiphy.h>
++
++#include "xilinx_ll_temac.h"
++
++#if !defined(CONFIG_MII) || !defined(CONFIG_CMD_MII)
++# error "LL_TEMAC requires MII -- missing CONFIG_MII or CONFIG_CMD_MII"
++#endif
++
++#if !defined(CONFIG_PHYLIB)
++# error "LL_TEMAC requires PHYLIB -- missing CONFIG_PHYLIB"
++#endif
++
++#if !defined(CONFIG_PHY_ADDR)
++#define CONFIG_PHY_ADDR -1
++#endif
++
++/*
++ * Prior to PHY access, the MDIO clock must be setup. This driver will set a
++ * safe default that should work with PLB bus speeds of up to 150 MHz and keep
++ * the MDIO clock below 2.5 MHz. If the user wishes faster access to the PHY
++ * then the clock divisor can be set to a different value by setting the
++ * correct bus speed value with CONFIG_XILINX_LL_TEMAC_CLK.
++ */
++#if !defined(CONFIG_XILINX_LL_TEMAC_CLK)
++#define MDIO_CLOCK_DIV		MC_CLKDIV_10(150000000)
++#else
++#define MDIO_CLOCK_DIV		MC_CLKDIV_25(CONFIG_XILINX_LL_TEMAC_CLK)
++#endif
++
++/* Use MII register 1 (MII status register) to detect PHY */
++#define PHY_DETECT_REG		1
++
++/*
++ * Mask used to verify certain PHY features (or register contents)
++ * in the register above:
++ *  0x1000: 10Mbps full duplex support
++ *  0x0800: 10Mbps half duplex support
++ *  0x0008: Auto-negotiation support
++ */
++#define PHY_DETECT_MASK		0x1808
++
++/* Data buffer for LL TEMAC Rx and Tx direction */
++static unsigned char rx_buffer[PKTSIZE_ALIGN] __attribute((aligned(DMAALIGN)));
++static unsigned char tx_buffer[PKTSIZE_ALIGN] __attribute((aligned(DMAALIGN)));
++
++/* CDMAC buffer descriptor for LL TEMAC Rx and Tx buffer handling */
++static struct cdmac_bd rx_descr __attribute((aligned(DMAALIGN)));
++static struct cdmac_bd tx_descr __attribute((aligned(DMAALIGN)));
++
++/* Ethernet interface ready status */
++static int check_status(struct temac_reg *regs, u32 mask)
++{
++	unsigned timeout = 50;	/* 1usec * 50 = 50usec */
++
++	/*
++	 * Quote from LL TEMAC documentation: The bits in the RDY
++	 * register are asserted when there is no access in progress.
++	 * When an access is in progress, a bit corresponding to the
++	 * type of access is automatically de-asserted. The bit is
++	 * automatically re-asserted when the access is complete.
++	 */
++	while (timeout && (!(in_be32(&regs->rdy) & mask))) {
++		timeout--;
++		udelay(1);
++	}
++
++	if (!timeout) {
++		printf("%s: Timeout on 0x%08x @%p\n", __func__,
++				mask, &regs->rdy);
++		return 1;
++	}
++
++	return 0;
++}
++
++/*
++ * Indirect MII PHY write via ll_temac.
++ *
++ * http://www.xilinx.com/support/documentation/ip_documentation/xps_ll_temac.pdf
++ * page 67, Using the MII Management to Access PHY Registers
++ */
++static int phywrite(struct eth_device *dev, u8 phy_addr,
++					u8 reg_addr, u16 phy_data)
++{
++	struct temac_reg *regs = (struct temac_reg *)dev->iobase;
++
++	out_be32(&regs->lsw, (phy_data & LSW_REGDAT_MASK));
++	out_be32(&regs->ctl, CTL_WEN | TEMAC_MIIMWD);
++
++	out_be32(&regs->lsw,
++		((phy_addr << LSW_PHYAD_POS) & LSW_PHYAD_MASK) |
++		(reg_addr & LSW_REGAD_MASK));
++	out_be32(&regs->ctl, CTL_WEN | TEMAC_MIIMAI);
++
++	if (check_status(regs, RSE_MIIM_WR))
++		return 1;
++
++	return 0;
++}
++
++/*
++ * Indirect MII PHY read via ll_temac.
++ *
++ * http://www.xilinx.com/support/documentation/ip_documentation/xps_ll_temac.pdf
++ * page 67, Using the MII Management to Access PHY Registers
++ */
++static int phyread(struct eth_device *dev, u8 phy_addr,
++					u8 reg_addr, u16 *value)
++{
++	struct temac_reg *regs = (struct temac_reg *)dev->iobase;
++
++	out_be32(&regs->lsw,
++		((phy_addr << LSW_PHYAD_POS) & LSW_PHYAD_MASK) |
++		(reg_addr & LSW_REGAD_MASK));
++	out_be32(&regs->ctl, TEMAC_MIIMAI);
++
++	if (check_status(regs, RSE_MIIM_RR))
++		return 1;
++
++	*value = in_be32(&regs->lsw) & LSW_REGDAT_MASK;
++	return 0;
++}
++
++#ifdef DEBUG
++static inline void read_phy_reg(struct eth_device *dev, u8 phy_addr)
++{
++	int reg_addr, ret;
++	unsigned short value;
++
++	debug("phy%d   ", phy_addr);
++	for (reg_addr = 0; reg_addr < 32; reg_addr++) {
++		ret = phyread(dev, phy_addr, reg_addr, &value);
++		debug("%d: 0x%04x ", reg_addr, value);
++	}
++	debug("\n");
++}
++#endif
++
++/*
++ * Indirect write to ll_temac.
++ *
++ * http://www.xilinx.com/support/documentation/ip_documentation/xps_ll_temac.pdf
++ * page 23, second paragraph, The use of CTL0 register or CTL1 register
++ */
++static int indirect_set(struct eth_device *dev, u16 regn, u32 reg_data)
++{
++	struct temac_reg *regs = (struct temac_reg *)dev->iobase;
++
++	out_be32(&regs->lsw, (reg_data & MLSW_MASK));
++	out_be32(&regs->ctl, CTL_WEN | (regn & CTL_ADDR_MASK));
++
++	if (check_status(regs, RSE_CFG_WR))
++		return 0;
++
++	return 1;
++}
++
++/*
++ * Indirect read from ll_temac.
++ *
++ * http://www.xilinx.com/support/documentation/ip_documentation/xps_ll_temac.pdf
++ * page 23, second paragraph, The use of CTL0 register or CTL1 register
++ */
++static int indirect_get(struct eth_device *dev, u16 regn, u32* reg_data)
++{
++	struct temac_reg *regs = (struct temac_reg *)dev->iobase;
++
++	out_be32(&regs->ctl, (regn & CTL_ADDR_MASK));
++
++	if (check_status(regs, RSE_CFG_RR))
++		return 0;
++
++	*reg_data = in_be32(&regs->lsw) & MLSW_MASK;
++	return 1;
++}
++
++/* setting sub-controller and ll_temac to proper setting */
++static int setup_ctrl(struct eth_device *dev)
++{
++	struct ll_temac *ll_temac = dev->priv;
++
++	if (ll_temac->ctrlreset) {
++
++		if (ll_temac->ctrlreset(dev))
++			return 0;
++
++	}
++
++	if (ll_temac->ctrlinit) {
++
++		if (ll_temac->ctrlinit(dev))
++			return 0;
++
++	}
++
++	if (!indirect_set(dev, TEMAC_MC,
++			MC_MDIOEN | (MDIO_CLOCK_DIV & MC_CLKDIV_MASK)))
++		return 0;
++
++	/* Promiscuous mode disable */
++	if (!indirect_set(dev, TEMAC_AFM, 0))
++		return 0;
++
++	/* Enable Receiver - RX bit */
++	if (!indirect_set(dev, TEMAC_RCW1, RCW1_RX))
++		return 0;
++
++	/* Enable Transmitter - TX bit */
++	if (!indirect_set(dev, TEMAC_TC, TC_TX))
++		return 0;
++
++	return 1;
++}
++
++/* setting ll_temac and phy to proper setting */
++static int setup_phy(struct eth_device *dev)
++{
++	unsigned short phyreg;
++	unsigned int i, speed, emmc_reg, ret;
++	struct ll_temac *ll_temac = dev->priv;
++	struct phy_device *phydev;
++
++	unsigned int supported = SUPPORTED_10baseT_Half |
++			SUPPORTED_10baseT_Full |
++			SUPPORTED_100baseT_Half |
++			SUPPORTED_100baseT_Full |
++			SUPPORTED_1000baseT_Half |
++			SUPPORTED_1000baseT_Full;
++
++	if (ll_temac->phyaddr == -1) {
++		for (i = 31; i >= 0; i--) {
++			ret = phyread(dev, i, PHY_DETECT_REG, &phyreg);
++			if (!ret && (phyreg != 0xFFFF) &&
++			((phyreg & PHY_DETECT_MASK) == PHY_DETECT_MASK)) {
++				/* Found a valid PHY address */
++				ll_temac->phyaddr = i;
++				debug("phy %x result %x\n", i, phyreg);
++				break;
++			}
++		}
++	}
++
++	/* interface - look at tsec */
++	phydev = phy_connect(ll_temac->bus, ll_temac->phyaddr, dev, 0);
++
++	phydev->supported &= supported;
++	phydev->advertising = phydev->supported;
++	ll_temac->phydev = phydev;
++	phy_config(phydev);
++	phy_startup(phydev);
++
++	switch (phydev->speed) {
++	case 1000:
++		speed = EMMC_LSPD_1000;
++		break;
++	case 100:
++		speed = EMMC_LSPD_100;
++		break;
++	case 10:
++		speed = EMMC_LSPD_10;
++		break;
++	default:
++		return 0;
++	}
++
++	if (!indirect_get(dev, TEMAC_EMMC, &emmc_reg))
++		return 0;
++
++	emmc_reg &= ~EMMC_LSPD_MASK;
++	emmc_reg |= speed;
++
++	if (!indirect_set(dev, TEMAC_EMMC, emmc_reg))
++		return 0;
++
++	return 1;
++}
++
++/* setup mac addr */
++static int ll_temac_addr_setup(struct eth_device *dev)
++{
++	u32 val;
++
++	/* set up unicast MAC address filter */
++	val = ((dev->enetaddr[3] << 24) | (dev->enetaddr[2] << 16) |
++			(dev->enetaddr[1] << 8) | (dev->enetaddr[0]));
++	val &= UAW0_UADDR_MASK;
++
++	if (!indirect_set(dev, TEMAC_UAW0, val))
++		return 1;
++
++	val = ((dev->enetaddr[5] << 8) | dev->enetaddr[4]);
++	val &= UAW1_UADDR_MASK;
++
++	if (!indirect_set(dev, TEMAC_UAW1, val))
++		return 1;
++
++	return 0;
++}
++
++/* halt device */
++static void ll_temac_halt(struct eth_device *dev)
++{
++	struct ll_temac *ll_temac = dev->priv;
++
++	/* Disable Receiver */
++	indirect_set(dev, TEMAC_RCW0, 0);
++
++	/* Disable Transmitter */
++	indirect_set(dev, TEMAC_TC, 0);
++
++	if (ll_temac->ctrlhalt)
++		ll_temac->ctrlhalt(dev);
++}
++
++static int ll_temac_init(struct eth_device *dev, bd_t *bis)
++{
++#if DEBUG
++	int i;
++#endif
++
++	printf("%s: Xilinx XPS LocalLink Tri-Mode Ether MAC #%d at 0x%08X.\n",
++		dev->name, 0, dev->iobase);
++
++	if (!setup_ctrl(dev))
++		return -1;
++
++#if DEBUG
++	for (i = 0; i < 32; i++)
++		read_phy_reg(dev, i);
++#endif
++
++	if (!setup_phy(dev)) {
++		ll_temac_halt(dev);
++		return -1;
++	}
++
++	return 0;
++}
++
++static int ll_temac_miiphy_read(const char *devname, unsigned char addr,
++				unsigned char reg, unsigned short *value)
++{
++	int ret;
++	struct eth_device *dev = eth_get_dev();
++
++	ret = phyread(dev, addr, reg, value);
++	debug("%s 0x%x, 0x%x, 0x%x\n", __func__, addr, reg, *value);
++	return ret;
++}
++
++static int ll_temac_miiphy_write(const char *devname, unsigned char addr,
++				unsigned char reg, unsigned short value)
++{
++	struct eth_device *dev = eth_get_dev();
++
++	debug("%s 0x%x, 0x%x, 0x%x\n", __func__, addr, reg, value);
++	return phywrite(dev, addr, reg, value);
++}
++
++/*
++ * bis:		board information
++ * base_addr:	LL TEMAC register bank
++ * ctrl_addr:	LL TEMAC sub-controller register bank (FIFO or SDMA)
++ * mode:	driver mode bit flags (see xilinx_ll_temac.h)
++ */
++int xilinx_ll_temac_initialize(bd_t *bis, unsigned long base_addr,
++				int mode, unsigned long ctrl_addr)
++{
++	struct eth_device *dev;
++	struct ll_temac *ll_temac;
++
++	dev = calloc(1, sizeof(*dev));
++	if (dev == NULL)
++		return -1;
++
++	dev->priv = calloc(1, sizeof(struct ll_temac));
++	if (dev->priv == NULL) {
++		free(dev);
++		return -1;
++	}
++
++	ll_temac = dev->priv;
++
++	sprintf(dev->name, "Xlltem.%lx", base_addr);
++
++	dev->iobase = base_addr;
++	ll_temac->ctrladdr = ctrl_addr;
++	ll_temac->rx_bp = rx_buffer;
++	ll_temac->tx_bp = tx_buffer;
++	ll_temac->rx_dp = &rx_descr;
++	ll_temac->tx_dp = &tx_descr;
++	ll_temac->phyaddr = CONFIG_PHY_ADDR;
++
++	dev->init = ll_temac_init;
++	dev->halt = ll_temac_halt;
++	dev->write_hwaddr = ll_temac_addr_setup;
++
++	if (mode & M_SDMA) {
++#if defined(CONFIG_XILINX_440) || defined(CONFIG_XILINX_405)
++		if (mode & M_DCR) {
++			ll_temac_collect_xldcr_sdma_reg_addr(dev);
++			ll_temac->in32 = ll_temac_xldcr_in32;
++			ll_temac->out32 = ll_temac_xldcr_out32;
++		} else
++#endif
++		{
++			ll_temac_collect_xlplb_sdma_reg_addr(dev);
++			ll_temac->in32 = ll_temac_xlplb_in32;
++			ll_temac->out32 = ll_temac_xlplb_out32;
++		}
++		ll_temac->ctrlinit = ll_temac_init_sdma;
++		ll_temac->ctrlhalt = ll_temac_halt_sdma;
++		ll_temac->ctrlreset = ll_temac_reset_sdma;
++		dev->recv = ll_temac_recv_sdma;
++		dev->send = ll_temac_send_sdma;
++	} else {
++		ll_temac->in32 = NULL;
++		ll_temac->out32 = NULL;
++		ll_temac->ctrlinit = NULL;
++		ll_temac->ctrlhalt = NULL;
++		ll_temac->ctrlreset = ll_temac_reset_fifo;
++		dev->recv = ll_temac_recv_fifo;
++		dev->send = ll_temac_send_fifo;
++	}
++
++	eth_register(dev);
++
++	miiphy_register(dev->name, ll_temac_miiphy_read, ll_temac_miiphy_write);
++	ll_temac->bus = miiphy_get_dev_by_name(dev->name);
++	ll_temac->bus->reset = NULL;
++
++	return 1;
++}
+diff --git a/drivers/net/xilinx_ll_temac.h b/drivers/net/xilinx_ll_temac.h
+new file mode 100644
+index 0000000..d0502a1
+--- /dev/null
++++ b/drivers/net/xilinx_ll_temac.h
+@@ -0,0 +1,313 @@
++/*
++ * Xilinx xps_ll_temac ethernet driver for u-boot
++ *
++ * private interface
++ *
++ * Copyright (C) 2008 - 2011 Michal Simek <monstr@monstr.eu>
++ * Copyright (C) 2008 - 2011 PetaLogix
++ *
++ * Copyright (C) 2011 Stephan Linz <linz@li-pro.net>
++ *
++ * Based on Yoshio Kashiwagi kashiwagi@co-nss.co.jp driver
++ * Copyright (C) 2008 Nissin Systems Co.,Ltd.
++ * March 2008 created
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ */
++#ifndef _XILINX_LL_TEMAC_
++#define _XILINX_LL_TEMAC_
++
++#include <net.h>
++#include <phy.h>
++#include <miiphy.h>
++
++#include <asm/types.h>
++#include <asm/byteorder.h>
++
++#include "xilinx_ll_temac_fifo.h"
++#include "xilinx_ll_temac_sdma.h"
++
++#if !defined(__BIG_ENDIAN)
++# error LL_TEMAC requires big endianess
++#endif
++
++struct ll_temac {
++	phys_addr_t	ctrladdr;
++	phys_addr_t	sdma_reg_addr[SDMA_CTRL_REGNUMS];
++
++	unsigned	(*in32)(phys_addr_t);
++	void		(*out32)(phys_addr_t, unsigned);
++
++	int		(*ctrlinit) (struct eth_device *);
++	int		(*ctrlhalt) (struct eth_device *);
++	int		(*ctrlreset) (struct eth_device *);
++
++	unsigned char		*rx_bp;
++	unsigned char		*tx_bp;
++
++	struct cdmac_bd		*rx_dp;
++	struct cdmac_bd		*tx_dp;
++
++	int			phyaddr;
++	struct phy_device	*phydev;
++	struct mii_dev		*bus;
++};
++
++/*
++ * Driver mode bit flags
++ *
++ * FIXME: this should going up to include -- but where?
++ */
++#define M_FIFO		0		/* use FIFO Ctrl */
++#define M_SDMA		(1 << 0)	/* use SDMA Ctrl */
++#define M_DCR		(1 << 1)	/* use DCR Bus */
++
++/*
++ * TEMAC Memory and Register Definition
++ *
++ * [0]: http://www.xilinx.com/support/documentation
++ *
++ * [1]:	[0]/ip_documentation/xps_ll_temac.pdf
++ *	page 19, Memory and Register Descriptions
++ */
++struct temac_reg {
++	/* direct soft registers (low part) */
++	u32 raf;	/* Reset and Address Filter */
++	u32 tpf;	/* Transmit Pause Frame */
++	u32 ifgp;	/* Transmit Inter Frame Gap Adjustment */
++	u32 is;		/* Interrupt Status */
++	u32 ip;		/* Interrupt Pending */
++	u32 ie;		/* Interrupt Enable */
++	u32 ttag;	/* Transmit VLAN Tag */
++	u32 rtag;	/* Receive VLAN Tag */
++	/* hard TEMAC registers */
++	u32 msw;	/* Most Significant Word Data */
++	u32 lsw;	/* Least Significant Word Data */
++	u32 ctl;	/* Control */
++	u32 rdy;	/* Ready Status */
++	/* direct soft registers (high part) */
++	u32 uawl;	/* Unicast Address Word Lower */
++	u32 uawu;	/* Unicast Address Word Upper */
++	u32 tpid0;	/* VLAN TPID Word 0 */
++	u32 tpid1;	/* VLAN TPID Word 1 */
++};
++
++/* Reset and Address Filter Registers (raf), [1] p25 */
++#define RAF_SR		(1 << 13)
++#define RAF_EMFE	(1 << 12)
++#define RAF_NFE		(1 << 11)
++#define RAF_RVSTM_POS	9
++#define RAF_RVSTM_MASK	(3 << RAF_RVSTM_POS)
++#define RAF_TVSTM_POS	7
++#define RAF_TVSTM_MASK	(3 << RAF_TVSTM_POS)
++#define RAF_RVTM_POS	5
++#define RAF_RVTM_MASK	(3 << RAF_RVTM_POS)
++#define RAF_TVTM_POS	3
++#define RAF_TVTM_MASK	(3 << RAF_TVTM_POS)
++#define RAF_BCREJ	(1 << 2)
++#define RAF_MCREJ	(1 << 1)
++#define RAF_HTRST	(1 << 0)
++
++/* Transmit Pause Frame Registers (tpf), [1] p28 */
++#define TPF_TPFV_POS	0
++#define TPF_TPFV_MASK	(0xFFFF << TPF_TPFV_POS)
++
++/* Transmit Inter Frame Gap Adjustment Registers (ifgp), [1] p28 */
++#define IFGP_POS	0
++#define IFGP_MASK	(0xFF << IFGP_POS)
++
++/* Interrupt Status, Pending, Enable Registers (is, ip, ie), [1] p29-33 */
++#define ISPE_MR		(1 << 7)
++#define ISPE_RDL	(1 << 6)
++#define ISPE_TC		(1 << 5)
++#define ISPE_RFO	(1 << 4)
++#define ISPE_RR		(1 << 3)
++#define ISPE_RC		(1 << 2)
++#define ISPE_AN		(1 << 1)
++#define ISPE_HAC	(1 << 0)
++
++/* Transmit, Receive VLAN Tag Registers (ttag, rtag), [1] p34-35 */
++#define TRTAG_TPID_POS	16
++#define TRTAG_TPID_MASK	(0xFFFF << TRTAG_TPID_POS)
++#define TRTAG_PRIO_POS	13
++#define TRTAG_PRIO_MASK	(7 << TRTAG_PRIO_POS)
++#define TRTAG_CFI	(1 << 12)
++#define TRTAG_VID_POS	0
++#define TRTAG_VID_MASK	(0xFFF << TRTAG_VID_POS)
++
++/* Most, Least Significant Word Data Register (msw, lsw), [1] p46 */
++#define MLSW_POS	0
++#define MLSW_MASK	(~0UL << MLSW_POS)
++
++/* LSW Data Register for PHY addresses (lsw), [1] p66 */
++#define LSW_REGAD_POS	0
++#define LSW_REGAD_MASK	(0x1F << LSW_REGAD_POS)
++#define LSW_PHYAD_POS	5
++#define LSW_PHYAD_MASK	(0x1F << LSW_PHYAD_POS)
++
++/* LSW Data Register for PHY data (lsw), [1] p66 */
++#define LSW_REGDAT_POS	0
++#define LSW_REGDAT_MASK	(0xFFFF << LSW_REGDAT_POS)
++
++/* Control Register (ctl), [1] p47 */
++#define CTL_WEN		(1 << 15)
++#define CTL_ADDR_POS	0
++#define CTL_ADDR_MASK	(0x3FF << CTL_ADDR_POS)
++
++/* Ready Status Register Ethernet (rdy), [1] p48 */
++#define RSE_HACS_RDY	(1 << 14)
++#define RSE_CFG_WR	(1 << 6)
++#define RSE_CFG_RR	(1 << 5)
++#define RSE_AF_WR	(1 << 4)
++#define RSE_AF_RR	(1 << 3)
++#define RSE_MIIM_WR	(1 << 2)
++#define RSE_MIIM_RR	(1 << 1)
++#define RSE_FABR_RR	(1 << 0)
++
++/* Unicast Address Word Lower, Upper Registers (uawl, uawu), [1] p35-36 */
++#define UAWL_UADDR_POS	0
++#define UAWL_UADDR_MASK	(~0UL << UAWL_UADDR_POS)
++#define UAWU_UADDR_POS	0
++#define UAWU_UADDR_MASK	(0xFFFF << UAWU_UADDR_POS)
++
++/* VLAN TPID Word 0, 1 Registers (tpid0, tpid1), [1] p37 */
++#define TPID0_V0_POS	0
++#define TPID0_V0_MASK	(0xFFFF << TPID0_V0_POS)
++#define TPID0_V1_POS	16
++#define TPID0_V1_MASK	(0xFFFF << TPID0_V1_POS)
++#define TPID1_V2_POS	0
++#define TPID1_V2_MASK	(0xFFFF << TPID1_V2_POS)
++#define TPID1_V3_POS	16
++#define TPID1_V3_MASK	(0xFFFF << TPID1_V3_POS)
++
++/*
++ * TEMAC Indirectly Addressable Register Index Enumeration
++ *
++ * [0]: http://www.xilinx.com/support/documentation
++ *
++ * [1]:	[0]/ip_documentation/xps_ll_temac.pdf
++ *	page 23, PLB Indirectly Addressable TEMAC Registers
++ */
++enum temac_ctrl {
++	TEMAC_RCW0	= 0x200,
++	TEMAC_RCW1	= 0x240,
++	TEMAC_TC	= 0x280,
++	TEMAC_FCC	= 0x2C0,
++	TEMAC_EMMC	= 0x300,
++	TEMAC_PHYC	= 0x320,
++	TEMAC_MC	= 0x340,
++	TEMAC_UAW0	= 0x380,
++	TEMAC_UAW1	= 0x384,
++	TEMAC_MAW0	= 0x388,
++	TEMAC_MAW1	= 0x38C,
++	TEMAC_AFM	= 0x390,
++	TEMAC_TIS	= 0x3A0,
++	TEMAC_TIE	= 0x3A4,
++	TEMAC_MIIMWD	= 0x3B0,
++	TEMAC_MIIMAI	= 0x3B4
++};
++
++/* Receive Configuration Word 0, 1 Registers (RCW0, RCW1), [1] p50-51 */
++#define RCW0_PADDR_POS	0
++#define RCW0_PADDR_MASK	(~0UL << RCW_PADDR_POS)
++#define RCW1_RST	(1 << 31)
++#define RCW1_JUM	(1 << 30)
++#define RCW1_FCS	(1 << 29)
++#define RCW1_RX		(1 << 28)
++#define RCW1_VLAN	(1 << 27)
++#define RCW1_HD		(1 << 26)
++#define RCW1_LT_DIS	(1 << 25)
++#define RCW1_PADDR_POS	0
++#define RCW1_PADDR_MASK	(0xFFFF << RCW_PADDR_POS)
++
++/* Transmit Configuration Registers (TC), [1] p52 */
++#define TC_RST		(1 << 31)
++#define TC_JUM		(1 << 30)
++#define TC_FCS		(1 << 29)
++#define TC_TX		(1 << 28)
++#define TC_VLAN		(1 << 27)
++#define TC_HD		(1 << 26)
++#define TC_IFG		(1 << 25)
++
++/* Flow Control Configuration Registers (FCC), [1] p54 */
++#define FCC_FCTX	(1 << 30)
++#define FCC_FCRX	(1 << 29)
++
++/* Ethernet MAC Mode Configuration Registers (EMMC), [1] p54 */
++#define EMMC_LSPD_POS	30
++#define EMMC_LSPD_MASK	(3 << EMMC_LSPD_POS)
++#define EMMC_LSPD_1000	(2 << EMMC_LSPD_POS)
++#define EMMC_LSPD_100	(1 << EMMC_LSPD_POS)
++#define EMMC_LSPD_10	0
++#define EMMC_RGMII	(1 << 29)
++#define EMMC_SGMII	(1 << 28)
++#define EMMC_GPCS	(1 << 27)
++#define EMMC_HOST	(1 << 26)
++#define EMMC_TX16	(1 << 25)
++#define EMMC_RX16	(1 << 24)
++
++/* RGMII/SGMII Configuration Registers (PHYC), [1] p56 */
++#define PHYC_SLSPD_POS	30
++#define PHYC_SLSPD_MASK	(3 << EMMC_SLSPD_POS)
++#define PHYC_SLSPD_1000	(2 << EMMC_SLSPD_POS)
++#define PHYC_SLSPD_100	(1 << EMMC_SLSPD_POS)
++#define PHYC_SLSPD_10	0
++#define PHYC_RLSPD_POS	2
++#define PHYC_RLSPD_MASK	(3 << EMMC_RLSPD_POS)
++#define PHYC_RLSPD_1000	(2 << EMMC_RLSPD_POS)
++#define PHYC_RLSPD_100	(1 << EMMC_RLSPD_POS)
++#define PHYC_RLSPD_10	0
++#define PHYC_RGMII_HD	(1 << 1)
++#define PHYC_RGMII_LINK	(1 << 0)
++
++/* Management Configuration Registers (MC), [1] p57 */
++#define MC_MDIOEN	(1 << 6)
++#define MC_CLKDIV_POS	0
++#define MC_CLKDIV_MASK	(0x3F << MC_CLKDIV_POS)
++
++/*
++ *             fHOSTCLK          fMDC =                  fHOSTCLK
++ * fMDC = -------------------   --------->   MC_CLKDIV = -------- - 1
++ *        (1 + MC_CLKDIV) * 2    2.5 MHz                   5MHz
++ */
++#define MC_CLKDIV(f, m)	((f / (2 * m)) - 1)
++#define MC_CLKDIV_25(f) MC_CLKDIV(f, 2500000)
++#define MC_CLKDIV_20(f) MC_CLKDIV(f, 2000000)
++#define MC_CLKDIV_15(f) MC_CLKDIV(f, 1500000)
++#define MC_CLKDIV_10(f) MC_CLKDIV(f, 1000000)
++
++/* Unicast Address Word 0, 1 Registers (UAW0, UAW1), [1] p58-59 */
++#define UAW0_UADDR_POS	0
++#define UAW0_UADDR_MASK	(~0UL << UAW0_UADDR_POS)
++#define UAW1_UADDR_POS	0
++#define UAW1_UADDR_MASK	(0xFFFF << UAW1_UADDR_POS)
++
++/* Multicast Address Word 0, 1 Registers (MAW0, MAW1), [1] p60 */
++#define MAW0_MADDR_POS	0
++#define MAW0_MADDR_MASK	(~0UL << MAW0_MADDR_POS)
++#define MAW1_RNW	(1 << 23)
++#define MAW1_MAIDX_POS	16
++#define MAW1_MAIDX_MASK	(3 << MAW1_MAIDX_POS)
++#define MAW1_MADDR_POS	0
++#define MAW1_MADDR_MASK	(0xFFFF << MAW1_MADDR_POS)
++
++/* Address Filter Mode Registers (AFM), [1] p63 */
++#define AFM_PM		(1 << 31)
++
++/* Interrupt Status, Enable Registers (TIS, TIE), [1] p63-65 */
++#define TISE_CFG_W	(1 << 6)
++#define TISE_CFG_R	(1 << 5)
++#define TISE_AF_W	(1 << 4)
++#define TISE_AF_R	(1 << 3)
++#define TISE_MIIM_W	(1 << 2)
++#define TISE_MIIM_R	(1 << 1)
++#define TISE_FABR_R	(1 << 0)
++
++/* MII Management Write Data Registers (MIIMWD), [1] p66 */
++#define MIIMWD_DATA_POS	0
++#define MIIMWD_DATA_MASK (0xFFFF << MIIMWD_DATA_POS)
++
++#endif /* _XILINX_LL_TEMAC_ */
+diff --git a/drivers/net/xilinx_ll_temac_fifo.c b/drivers/net/xilinx_ll_temac_fifo.c
+new file mode 100644
+index 0000000..3ffe5fc
+--- /dev/null
++++ b/drivers/net/xilinx_ll_temac_fifo.c
+@@ -0,0 +1,99 @@
++/*
++ * Xilinx xps_ll_temac ethernet driver for u-boot
++ *
++ * FIFO interface
++ *
++ * Copyright (C) 2008 - 2011 Michal Simek <monstr@monstr.eu>
++ * Copyright (C) 2008 - 2011 PetaLogix
++ *
++ * Copyright (C) 2011 Stephan Linz <linz@li-pro.net>
++ *
++ * Based on Yoshio Kashiwagi kashiwagi@co-nss.co.jp driver
++ * Copyright (C) 2008 Nissin Systems Co.,Ltd.
++ * March 2008 created
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ */
++
++#include <config.h>
++#include <common.h>
++#include <net.h>
++
++#include <asm/types.h>
++#include <asm/io.h>
++
++#include "xilinx_ll_temac.h"
++
++#ifdef DEBUG
++static void debugll(struct eth_device *dev, int count)
++{
++	struct ll_temac *ll_temac = dev->priv;
++	struct fifo_ctrl *fifo_ctrl = (void *)ll_temac->ctrladdr;
++
++	printf("FIFO: %d isr 0x%08x, ier 0x%08x, rdfr 0x%08x, "
++		"rdfo 0x%08x rlr 0x%08x\n", count,
++		in_be32(&fifo_ctrl->isr), in_be32(&fifo_ctrl->ier),
++		in_be32(&fifo_ctrl->rdfr), in_be32(&fifo_ctrl->rdfo),
++		in_be32(&fifo_ctrl->rlf));
++}
++#endif
++
++int ll_temac_reset_fifo(struct eth_device *dev)
++{
++	struct ll_temac *ll_temac = dev->priv;
++	struct fifo_ctrl *fifo_ctrl = (void *)ll_temac->ctrladdr;
++
++	out_be32(&fifo_ctrl->tdfr, LL_FIFO_TDFR_KEY);
++	out_be32(&fifo_ctrl->rdfr, LL_FIFO_RDFR_KEY);
++	out_be32(&fifo_ctrl->isr, ~0UL);
++	out_be32(&fifo_ctrl->ier, 0);
++
++	return 0;
++}
++
++int ll_temac_recv_fifo(struct eth_device *dev)
++{
++	struct ll_temac *ll_temac = dev->priv;
++	struct fifo_ctrl *fifo_ctrl = (void *)ll_temac->ctrladdr;
++	uchar *rx_bp = ll_temac->rx_bp;
++	u32 *buf = (u32 *)rx_bp;
++	u32 i, len = 0;
++
++	if (in_be32(&fifo_ctrl->isr) & LL_FIFO_ISR_RC) {
++
++		/* reset isr */
++		out_be32(&fifo_ctrl->isr, ~0UL);
++
++		/* while (fifo_ctrl->isr); */
++		len = in_be32(&fifo_ctrl->rlf) & LL_FIFO_RLF_MASK;
++
++		for (i = 0; i < len; i += 4)
++			*buf++ = in_be32(&fifo_ctrl->rdfd);
++
++#ifdef DEBUG
++		debugll(dev, 1);
++#endif
++
++		NetReceive((uchar *)rx_bp, len);
++	}
++
++	return len;
++}
++
++int ll_temac_send_fifo(struct eth_device *dev,
++			volatile void *buffer, int length)
++{
++	struct ll_temac *ll_temac = dev->priv;
++	struct fifo_ctrl *fifo_ctrl = (void *)ll_temac->ctrladdr;
++	u32 *buf = (u32 *)buffer;
++	u32 i;
++
++	for (i = 0; i < length; i += 4)
++		out_be32(&fifo_ctrl->tdfd, *buf++);
++
++	out_be32(&fifo_ctrl->tlf, length);
++	return 0;
++}
+diff --git a/drivers/net/xilinx_ll_temac_fifo.h b/drivers/net/xilinx_ll_temac_fifo.h
+new file mode 100644
+index 0000000..a872f93
+--- /dev/null
++++ b/drivers/net/xilinx_ll_temac_fifo.h
+@@ -0,0 +1,116 @@
++/*
++ * Xilinx xps_ll_temac ethernet driver for u-boot
++ *
++ * FIFO interface
++ *
++ * Copyright (C) 2008 - 2011 Michal Simek <monstr@monstr.eu>
++ * Copyright (C) 2008 - 2011 PetaLogix
++ *
++ * Copyright (C) 2011 Stephan Linz <linz@li-pro.net>
++ *
++ * Based on Yoshio Kashiwagi kashiwagi@co-nss.co.jp driver
++ * Copyright (C) 2008 Nissin Systems Co.,Ltd.
++ * March 2008 created
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ */
++#ifndef _XILINX_LL_TEMAC_FIFO_
++#define _XILINX_LL_TEMAC_FIFO_
++
++#include <net.h>
++
++#include <asm/types.h>
++#include <asm/byteorder.h>
++
++#if !defined(__BIG_ENDIAN)
++# error LL_TEMAC requires big endianess
++#endif
++
++/*
++ * FIFO Register Definition
++ *
++ * Used for memory mapped access from and to (Rd/Td) the LocalLink (LL)
++ * Tri-Mode Ether MAC (TEMAC) via the 2 kb full duplex FIFO Controller,
++ * one for each.
++ *
++ * [0]: http://www.xilinx.com/support/documentation
++ *
++ * [1]: [0]/ip_documentation/xps_ll_fifo.pdf
++ *      page 10, Registers Definition
++ */
++struct fifo_ctrl {
++	u32 isr;	/* Interrupt Status Register (RW) */
++	u32 ier;	/* Interrupt Enable Register (RW) */
++	u32 tdfr;	/* Transmit Data FIFO Reset (WO) */
++	u32 tdfv;	/* Transmit Data FIFO Vacancy (RO) */
++	u32 tdfd;	/* Transmit Data FIFO 32bit wide Data write port (WO) */
++	u32 tlf;	/* Transmit Length FIFO (WO) */
++	u32 rdfr;	/* Receive Data FIFO Reset (WO) */
++	u32 rdfo;	/* Receive Data FIFO Occupancy (RO) */
++	u32 rdfd;	/* Receive Data FIFO 32bit wide Data read port (RO) */
++	u32 rlf;	/* Receive Length FIFO (RO) */
++	u32 llr;	/* LocalLink Reset (WO) */
++};
++
++/* Interrupt Status Register (ISR), [1] p11 */
++#define LL_FIFO_ISR_RPURE	(1 << 31) /* Receive Packet Underrun Read Err */
++#define LL_FIFO_ISR_RPORE	(1 << 30) /* Receive Packet Overrun Read Err */
++#define LL_FIFO_ISR_RPUE	(1 << 29) /* Receive Packet Underrun Error */
++#define LL_FIFO_ISR_TPOE	(1 << 28) /* Transmit Packet Overrun Error */
++#define LL_FIFO_ISR_TC		(1 << 27) /* Transmit Complete */
++#define LL_FIFO_ISR_RC		(1 << 26) /* Receive Complete */
++#define LL_FIFO_ISR_TSE		(1 << 25) /* Transmit Size Error */
++#define LL_FIFO_ISR_TRC		(1 << 24) /* Transmit Reset Complete */
++#define LL_FIFO_ISR_RRC		(1 << 23) /* Receive Reset Complete */
++
++/* Interrupt Enable Register (IER), [1] p12/p13 */
++#define LL_FIFO_IER_RPURE	(1 << 31) /* Receive Packet Underrun Read Err */
++#define LL_FIFO_IER_RPORE	(1 << 30) /* Receive Packet Overrun Read Err */
++#define LL_FIFO_IER_RPUE	(1 << 29) /* Receive Packet Underrun Error */
++#define LL_FIFO_IER_TPOE	(1 << 28) /* Transmit Packet Overrun Error */
++#define LL_FIFO_IER_TC		(1 << 27) /* Transmit Complete */
++#define LL_FIFO_IER_RC		(1 << 26) /* Receive Complete */
++#define LL_FIFO_IER_TSE		(1 << 25) /* Transmit Size Error */
++#define LL_FIFO_IER_TRC		(1 << 24) /* Transmit Reset Complete */
++#define LL_FIFO_IER_RRC		(1 << 23) /* Receive Reset Complete */
++
++/* Transmit Data FIFO Reset (TDFR), [1] p13/p14 */
++#define LL_FIFO_TDFR_KEY	0x000000A5UL
++
++/* Transmit Data FIFO Vacancy (TDFV), [1] p14 */
++#define LL_FIFO_TDFV_POS	0
++#define LL_FIFO_TDFV_MASK	(0x000001FFUL << LL_FIFO_TDFV_POS)
++
++/* Transmit Length FIFO (TLF), [1] p16/p17 */
++#define LL_FIFO_TLF_POS		0
++#define LL_FIFO_TLF_MASK	(0x000007FFUL << LL_FIFO_TLF_POS)
++
++/* Receive Data FIFO Reset (RDFR), [1] p15 */
++#define LL_FIFO_RDFR_KEY	0x000000A5UL
++
++/* Receive Data FIFO Occupancy (RDFO), [1] p16 */
++#define LL_FIFO_RDFO_POS	0
++#define LL_FIFO_RDFO_MASK	(0x000001FFUL << LL_FIFO_RDFO_POS)
++
++/* Receive Length FIFO (TLF), [1] p17/p18 */
++#define LL_FIFO_RLF_POS		0
++#define LL_FIFO_RLF_MASK	(0x000007FFUL << LL_FIFO_RLF_POS)
++
++/* LocalLink Reset (LLR), [1] p18 */
++#define LL_FIFO_LLR_KEY		0x000000A5UL
++
++
++/* reset FIFO and IRQ, disable interrupts */
++int ll_temac_reset_fifo(struct eth_device *dev);
++
++/* receive buffered data from FIFO (polling ISR) */
++int ll_temac_recv_fifo(struct eth_device *dev);
++
++/* send buffered data to FIFO */
++int ll_temac_send_fifo(struct eth_device *dev, volatile void *buffer,
++							int length);
++
++#endif /* _XILINX_LL_TEMAC_FIFO_ */
+diff --git a/drivers/net/xilinx_ll_temac_sdma.c b/drivers/net/xilinx_ll_temac_sdma.c
+new file mode 100644
+index 0000000..02ed461
+--- /dev/null
++++ b/drivers/net/xilinx_ll_temac_sdma.c
+@@ -0,0 +1,318 @@
++/*
++ * Xilinx xps_ll_temac ethernet driver for u-boot
++ *
++ * SDMA interface
++ *
++ * Copyright (C) 2008 - 2011 Michal Simek <monstr@monstr.eu>
++ * Copyright (C) 2008 - 2011 PetaLogix
++ *
++ * Copyright (C) 2011 Stephan Linz <linz@li-pro.net>
++ *
++ * Based on Yoshio Kashiwagi kashiwagi@co-nss.co.jp driver
++ * Copyright (C) 2008 Nissin Systems Co.,Ltd.
++ * March 2008 created
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ */
++
++#include <config.h>
++#include <common.h>
++#include <net.h>
++
++#include <asm/types.h>
++#include <asm/io.h>
++
++#include "xilinx_ll_temac.h"
++
++#if defined(CONFIG_XILINX_440) || defined(CONFIG_XILINX_405)
++
++/*
++ * Indirect DCR access operations mi{ft}dcr_xilinx() espacialy
++ * for Xilinx PowerPC implementations on FPGA.
++ *
++ * FIXME: This part should go up to arch/powerpc -- but where?
++ */
++#include <asm/processor.h>
++#define XILINX_INDIRECT_DCR_ADDRESS_REG	0
++#define XILINX_INDIRECT_DCR_ACCESS_REG	1
++inline unsigned mifdcr_xilinx(const unsigned dcrn)
++{
++	mtdcr(XILINX_INDIRECT_DCR_ADDRESS_REG, dcrn);
++	return mfdcr(XILINX_INDIRECT_DCR_ACCESS_REG);
++}
++inline void mitdcr_xilinx(const unsigned dcrn, int val)
++{
++	mtdcr(XILINX_INDIRECT_DCR_ADDRESS_REG, dcrn);
++	mtdcr(XILINX_INDIRECT_DCR_ACCESS_REG, val);
++}
++
++/* Xilinx Device Control Register (DCR) in/out accessors */
++inline unsigned ll_temac_xldcr_in32(phys_addr_t addr)
++{
++	return mifdcr_xilinx((const unsigned)addr);
++}
++inline void ll_temac_xldcr_out32(phys_addr_t addr, unsigned value)
++{
++	mitdcr_xilinx((const unsigned)addr, value);
++}
++
++void ll_temac_collect_xldcr_sdma_reg_addr(struct eth_device *dev)
++{
++	struct ll_temac *ll_temac = dev->priv;
++	phys_addr_t dmac_ctrl = ll_temac->ctrladdr;
++	phys_addr_t *ra = ll_temac->sdma_reg_addr;
++
++	ra[TX_NXTDESC_PTR]   = dmac_ctrl + TX_NXTDESC_PTR;
++	ra[TX_CURBUF_ADDR]   = dmac_ctrl + TX_CURBUF_ADDR;
++	ra[TX_CURBUF_LENGTH] = dmac_ctrl + TX_CURBUF_LENGTH;
++	ra[TX_CURDESC_PTR]   = dmac_ctrl + TX_CURDESC_PTR;
++	ra[TX_TAILDESC_PTR]  = dmac_ctrl + TX_TAILDESC_PTR;
++	ra[TX_CHNL_CTRL]     = dmac_ctrl + TX_CHNL_CTRL;
++	ra[TX_IRQ_REG]       = dmac_ctrl + TX_IRQ_REG;
++	ra[TX_CHNL_STS]      = dmac_ctrl + TX_CHNL_STS;
++	ra[RX_NXTDESC_PTR]   = dmac_ctrl + RX_NXTDESC_PTR;
++	ra[RX_CURBUF_ADDR]   = dmac_ctrl + RX_CURBUF_ADDR;
++	ra[RX_CURBUF_LENGTH] = dmac_ctrl + RX_CURBUF_LENGTH;
++	ra[RX_CURDESC_PTR]   = dmac_ctrl + RX_CURDESC_PTR;
++	ra[RX_TAILDESC_PTR]  = dmac_ctrl + RX_TAILDESC_PTR;
++	ra[RX_CHNL_CTRL]     = dmac_ctrl + RX_CHNL_CTRL;
++	ra[RX_IRQ_REG]       = dmac_ctrl + RX_IRQ_REG;
++	ra[RX_CHNL_STS]      = dmac_ctrl + RX_CHNL_STS;
++	ra[DMA_CONTROL_REG]  = dmac_ctrl + DMA_CONTROL_REG;
++}
++
++#endif /* CONFIG_XILINX_440 || ONFIG_XILINX_405 */
++
++/* Xilinx Processor Local Bus (PLB) in/out accessors */
++inline unsigned ll_temac_xlplb_in32(phys_addr_t addr)
++{
++	return in_be32((void *)addr);
++}
++inline void ll_temac_xlplb_out32(phys_addr_t addr, unsigned value)
++{
++	out_be32((void *)addr, value);
++}
++
++/* collect all register addresses for Xilinx PLB in/out accessors */
++void ll_temac_collect_xlplb_sdma_reg_addr(struct eth_device *dev)
++{
++	struct ll_temac *ll_temac = dev->priv;
++	struct sdma_ctrl *sdma_ctrl = (void *)ll_temac->ctrladdr;
++	phys_addr_t *ra = ll_temac->sdma_reg_addr;
++
++	ra[TX_NXTDESC_PTR]   = (phys_addr_t)&sdma_ctrl->tx_nxtdesc_ptr;
++	ra[TX_CURBUF_ADDR]   = (phys_addr_t)&sdma_ctrl->tx_curbuf_addr;
++	ra[TX_CURBUF_LENGTH] = (phys_addr_t)&sdma_ctrl->tx_curbuf_length;
++	ra[TX_CURDESC_PTR]   = (phys_addr_t)&sdma_ctrl->tx_curdesc_ptr;
++	ra[TX_TAILDESC_PTR]  = (phys_addr_t)&sdma_ctrl->tx_taildesc_ptr;
++	ra[TX_CHNL_CTRL]     = (phys_addr_t)&sdma_ctrl->tx_chnl_ctrl;
++	ra[TX_IRQ_REG]       = (phys_addr_t)&sdma_ctrl->tx_irq_reg;
++	ra[TX_CHNL_STS]      = (phys_addr_t)&sdma_ctrl->tx_chnl_sts;
++	ra[RX_NXTDESC_PTR]   = (phys_addr_t)&sdma_ctrl->rx_nxtdesc_ptr;
++	ra[RX_CURBUF_ADDR]   = (phys_addr_t)&sdma_ctrl->rx_curbuf_addr;
++	ra[RX_CURBUF_LENGTH] = (phys_addr_t)&sdma_ctrl->rx_curbuf_length;
++	ra[RX_CURDESC_PTR]   = (phys_addr_t)&sdma_ctrl->rx_curdesc_ptr;
++	ra[RX_TAILDESC_PTR]  = (phys_addr_t)&sdma_ctrl->rx_taildesc_ptr;
++	ra[RX_CHNL_CTRL]     = (phys_addr_t)&sdma_ctrl->rx_chnl_ctrl;
++	ra[RX_IRQ_REG]       = (phys_addr_t)&sdma_ctrl->rx_irq_reg;
++	ra[RX_CHNL_STS]      = (phys_addr_t)&sdma_ctrl->rx_chnl_sts;
++	ra[DMA_CONTROL_REG]  = (phys_addr_t)&sdma_ctrl->dma_control_reg;
++}
++
++/* Check for TX and RX channel errors. */
++static inline int ll_temac_sdma_error(struct eth_device *dev)
++{
++	int err;
++	struct ll_temac *ll_temac = dev->priv;
++	phys_addr_t *ra = ll_temac->sdma_reg_addr;
++
++	err = ll_temac->in32(ra[TX_CHNL_STS]) & CHNL_STS_ERROR;
++	err |= ll_temac->in32(ra[TX_CHNL_STS]) & CHNL_STS_ERROR;
++
++	return err;
++}
++
++int ll_temac_init_sdma(struct eth_device *dev)
++{
++	struct ll_temac *ll_temac = dev->priv;
++	struct cdmac_bd *rx_dp = ll_temac->rx_dp;
++	struct cdmac_bd *tx_dp = ll_temac->tx_dp;
++	phys_addr_t *ra = ll_temac->sdma_reg_addr;
++
++	memset(tx_dp, 0, sizeof(*tx_dp));
++	memset(rx_dp, 0, sizeof(*rx_dp));
++
++	/* from LL TEMAC (Rx) */
++	rx_dp->phys_buf_p = ll_temac->rx_bp;
++
++	rx_dp->next_p = rx_dp;
++	rx_dp->buf_len = PKTSIZE_ALIGN;
++	flush_cache((u32)rx_dp, sizeof(*tx_dp));
++	flush_cache((u32)rx_dp->phys_buf_p, PKTSIZE_ALIGN);
++
++	/* setup first fd */
++	ll_temac->out32(ra[RX_CURDESC_PTR], (int)rx_dp);
++	ll_temac->out32(ra[RX_TAILDESC_PTR], (int)rx_dp);
++	ll_temac->out32(ra[RX_NXTDESC_PTR], (int)rx_dp);
++
++	/* to LL TEMAC (Tx) */
++	tx_dp->phys_buf_p = ll_temac->tx_bp;
++	tx_dp->next_p = tx_dp;
++
++	flush_cache((u32)tx_dp, sizeof(*tx_dp));
++	ll_temac->out32(ra[TX_CURDESC_PTR], (int)tx_dp);
++
++	return 0;
++}
++
++int ll_temac_halt_sdma(struct eth_device *dev)
++{
++	unsigned timeout = 50;	/* 1usec * 50 = 50usec */
++	struct ll_temac *ll_temac = dev->priv;
++	phys_addr_t *ra = ll_temac->sdma_reg_addr;
++
++	/*
++	 * Soft reset the DMA
++	 *
++	 * Quote from MPMC documentation: Writing a 1 to this field
++	 * forces the DMA engine to shutdown and reset itself. After
++	 * setting this bit, software must poll it until the bit is
++	 * cleared by the DMA. This indicates that the reset process
++	 * is done and the pipeline has been flushed.
++	 */
++	ll_temac->out32(ra[DMA_CONTROL_REG], DMA_CONTROL_RESET);
++	while (timeout && (ll_temac->in32(ra[DMA_CONTROL_REG])
++					& DMA_CONTROL_RESET)) {
++		timeout--;
++		udelay(1);
++	}
++
++	if (!timeout) {
++		printf("%s: Timeout\n", __func__);
++		return -1;
++	}
++
++	return 0;
++}
++
++int ll_temac_reset_sdma(struct eth_device *dev)
++{
++	u32 r;
++	struct ll_temac *ll_temac = dev->priv;
++	phys_addr_t *ra = ll_temac->sdma_reg_addr;
++
++	/* Soft reset the DMA.  */
++	if (ll_temac_halt_sdma(dev))
++		return -1;
++
++	/* Now clear the interrupts.  */
++	r = ll_temac->in32(ra[TX_CHNL_CTRL]);
++	r &= ~CHNL_CTRL_IRQ_MASK;
++	ll_temac->out32(ra[TX_CHNL_CTRL], r);
++
++	r = ll_temac->in32(ra[RX_CHNL_CTRL]);
++	r &= ~CHNL_CTRL_IRQ_MASK;
++	ll_temac->out32(ra[RX_CHNL_CTRL], r);
++
++	/* Now ACK pending IRQs.  */
++	ll_temac->out32(ra[TX_IRQ_REG], IRQ_REG_IRQ_MASK);
++	ll_temac->out32(ra[RX_IRQ_REG], IRQ_REG_IRQ_MASK);
++
++	/* Set tail-ptr mode, disable errors for both channels.  */
++	ll_temac->out32(ra[DMA_CONTROL_REG],
++			/* Enable use of tail pointer register */
++			DMA_CONTROL_TPE |
++			/* Disable error when 2 or 4 bit coalesce cnt overfl */
++			DMA_CONTROL_RXOCEID |
++			/* Disable error when 2 or 4 bit coalesce cnt overfl */
++			DMA_CONTROL_TXOCEID);
++
++	return 0;
++}
++
++int ll_temac_recv_sdma(struct eth_device *dev)
++{
++	int length;
++	struct ll_temac *ll_temac = dev->priv;
++	struct cdmac_bd *rx_dp = ll_temac->rx_dp;
++	phys_addr_t *ra = ll_temac->sdma_reg_addr;
++
++	if (ll_temac_sdma_error(dev)) {
++
++		if (ll_temac_reset_sdma(dev))
++			return -1;
++
++		ll_temac_init_sdma(dev);
++	}
++
++	flush_cache((u32)rx_dp, sizeof(*rx_dp));
++
++	if (!(rx_dp->sca.stctrl & CDMAC_BD_STCTRL_COMPLETED))
++		return 0;
++
++	/*
++	 * Read out the packet info and start the DMA
++	 * onto the second buffer to enable the ethernet rx
++	 * path to run in parallel with sw processing
++	 * packets.
++	 */
++	length = rx_dp->sca.app[4] & CDMAC_BD_APP4_RXBYTECNT_MASK;
++	if (length > 0)
++		NetReceive(rx_dp->phys_buf_p, length);
++
++	/* flip the buffer and re-enable the DMA.  */
++	flush_cache((u32)rx_dp->phys_buf_p, length);
++
++	rx_dp->buf_len = PKTSIZE_ALIGN;
++	rx_dp->sca.stctrl = 0;
++	rx_dp->sca.app[4] = 0;
++
++	flush_cache((u32)rx_dp, sizeof(*rx_dp));
++	ll_temac->out32(ra[RX_TAILDESC_PTR], (int)rx_dp);
++
++	return length;
++}
++
++int ll_temac_send_sdma(struct eth_device *dev, volatile void *buffer,
++							int length)
++{
++	unsigned timeout = 50;	/* 1usec * 50 = 50usec */
++	struct ll_temac *ll_temac = dev->priv;
++	struct cdmac_bd *tx_dp = ll_temac->tx_dp;
++	phys_addr_t *ra = ll_temac->sdma_reg_addr;
++
++	if (ll_temac_sdma_error(dev)) {
++
++		if (ll_temac_reset_sdma(dev))
++			return -1;
++
++		ll_temac_init_sdma(dev);
++	}
++
++	memcpy(ll_temac->tx_bp, (void *)buffer, length);
++	flush_cache((u32)ll_temac->tx_bp, length);
++
++	tx_dp->sca.stctrl = CDMAC_BD_STCTRL_SOP | CDMAC_BD_STCTRL_EOP |
++			CDMAC_BD_STCTRL_STOP_ON_END;
++	tx_dp->buf_len = length;
++	flush_cache((u32)tx_dp, sizeof(*tx_dp));
++
++	/* DMA start */
++	ll_temac->out32(ra[TX_CURDESC_PTR], (int)tx_dp);
++	ll_temac->out32(ra[TX_TAILDESC_PTR], (int)tx_dp);
++
++	do {
++		flush_cache((u32)tx_dp, sizeof(*tx_dp));
++		udelay(1);
++	} while (timeout-- && !(tx_dp->sca.stctrl & CDMAC_BD_STCTRL_COMPLETED));
++
++	if (!timeout) {
++		printf("%s: Timeout\n", __func__);
++		return -1;
++	}
++
++	return 0;
++}
+diff --git a/drivers/net/xilinx_ll_temac_sdma.h b/drivers/net/xilinx_ll_temac_sdma.h
+new file mode 100644
+index 0000000..d5e5ee4
+--- /dev/null
++++ b/drivers/net/xilinx_ll_temac_sdma.h
+@@ -0,0 +1,286 @@
++/*
++ * Xilinx xps_ll_temac ethernet driver for u-boot
++ *
++ * SDMA interface
++ *
++ * Copyright (C) 2008 - 2011 Michal Simek <monstr@monstr.eu>
++ * Copyright (C) 2008 - 2011 PetaLogix
++ *
++ * Copyright (C) 2011 Stephan Linz <linz@li-pro.net>
++ *
++ * Based on Yoshio Kashiwagi kashiwagi@co-nss.co.jp driver
++ * Copyright (C) 2008 Nissin Systems Co.,Ltd.
++ * March 2008 created
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ */
++#ifndef _XILINX_LL_TEMAC_SDMA_
++#define _XILINX_LL_TEMAC_SDMA_
++
++#include <net.h>
++
++#include <asm/types.h>
++#include <asm/byteorder.h>
++
++#include <linux/compiler.h>
++
++#if !defined(__BIG_ENDIAN)
++# error LL_TEMAC requires big endianess
++#endif
++
++#if defined(CONFIG_SYS_CACHELINE_SIZE)
++#define DMAALIGN CONFIG_SYS_CACHELINE_SIZE
++#else
++/* we expact to live in a 32 bit processor environment */
++#define DMAALIGN 32
++#endif
++
++/*
++ * DMA Buffer Descriptor for CDMAC
++ *
++ * Used for data connection from and to (Rx/Tx) the LocalLink (LL) TEMAC via
++ * the Communications Direct Memory Access Controller (CDMAC) -- one for each.
++ *
++ * overview:
++ *      ftp://ftp.xilinx.com/pub/documentation/misc/mpmc_getting_started.pdf
++ *
++ * [0]: http://www.xilinx.com/support/documentation
++ *
++ * [1]: [0]/ip_documentation/mpmc.pdf
++ *      page 140, DMA Operation Descriptors
++ *
++ * [2]:	[0]/user_guides/ug200.pdf
++ *	page 229, DMA Controller -- Descriptor Format
++ *
++ * [3]:	[0]/ip_documentation/xps_ll_temac.pdf
++ *	page 72, Transmit LocalLink Frame Format
++ *	page 73, Receive LocalLink Frame Format
++ */
++struct cdmac_bd {
++	struct cdmac_bd *next_p;	/* Next Descriptor Pointer */
++	u8 *phys_buf_p;			/* Buffer Address */
++	u32 buf_len;			/* Buffer Length */
++	union {
++		u8 stctrl;		/* Status/Control the DMA transfer */
++		u32 app[5];		/* application specific data */
++	} __packed __aligned(1) sca;
++};
++
++/* CDMAC Descriptor Status and Control (stctrl), [1] p140, [2] p230 */
++#define CDMAC_BD_STCTRL_ERROR		(1 << 7)
++#define CDMAC_BD_STCTRL_IRQ_ON_END	(1 << 6)
++#define CDMAC_BD_STCTRL_STOP_ON_END	(1 << 5)
++#define CDMAC_BD_STCTRL_COMPLETED	(1 << 4)
++#define CDMAC_BD_STCTRL_SOP		(1 << 3)
++#define CDMAC_BD_STCTRL_EOP		(1 << 2)
++#define CDMAC_BD_STCTRL_DMACHBUSY	(1 << 1)
++
++/* CDMAC Descriptor APP0: Transmit LocalLink Footer Word 3, [3] p72 */
++#define CDMAC_BD_APP0_TXCSCNTRL		(1 << 0)
++
++/* CDMAC Descriptor APP1: Transmit LocalLink Footer Word 4, [3] p73 */
++#define CDMAC_BD_APP1_TXCSBEGIN_POS	16
++#define CDMAC_BD_APP1_TXCSBEGIN_MASK	(0xFFFF << CDMAC_BD_APP1_TXCSBEGIN_POS)
++#define CDMAC_BD_APP1_TXCSINSERT_POS	0
++#define CDMAC_BD_APP1_TXCSINSERT_MASK	(0xFFFF << CDMAC_BD_APP1_TXCSINSERT_POS)
++
++/* CDMAC Descriptor APP2: Transmit LocalLink Footer Word 5, [3] p73 */
++#define CDMAC_BD_APP2_TXCSINIT_POS	0
++#define CDMAC_BD_APP2_TXCSINIT_MASK	(0xFFFF << CDMAC_BD_APP2_TXCSINIT_POS)
++
++/* CDMAC Descriptor APP0: Receive LocalLink Footer Word 3, [3] p73 */
++#define CDMAC_BD_APP0_MADDRU_POS	0
++#define CDMAC_BD_APP0_MADDRU_MASK	(0xFFFF << CDMAC_BD_APP0_MADDRU_POS)
++
++/* CDMAC Descriptor APP1: Receive LocalLink Footer Word 4, [3] p74 */
++#define CDMAC_BD_APP1_MADDRL_POS	0
++#define CDMAC_BD_APP1_MADDRL_MASK	(~0UL << CDMAC_BD_APP1_MADDRL_POS)
++
++/* CDMAC Descriptor APP2: Receive LocalLink Footer Word 5, [3] p74 */
++#define CDMAC_BD_APP2_BCAST_FRAME	(1 << 2)
++#define CDMAC_BD_APP2_IPC_MCAST_FRAME	(1 << 1)
++#define CDMAC_BD_APP2_MAC_MCAST_FRAME	(1 << 0)
++
++/* CDMAC Descriptor APP3: Receive LocalLink Footer Word 6, [3] p74 */
++#define CDMAC_BD_APP3_TLTPID_POS	16
++#define CDMAC_BD_APP3_TLTPID_MASK	(0xFFFF << CDMAC_BD_APP3_TLTPID_POS)
++#define CDMAC_BD_APP3_RXCSRAW_POS	0
++#define CDMAC_BD_APP3_RXCSRAW_MASK	(0xFFFF << CDMAC_BD_APP3_RXCSRAW_POS)
++
++/* CDMAC Descriptor APP4: Receive LocalLink Footer Word 7, [3] p74 */
++#define CDMAC_BD_APP4_VLANTAG_POS	16
++#define CDMAC_BD_APP4_VLANTAG_MASK	(0xFFFF << CDMAC_BD_APP4_VLANTAG_POS)
++#define CDMAC_BD_APP4_RXBYTECNT_POS	0
++#define CDMAC_BD_APP4_RXBYTECNT_MASK	(0x3FFF << CDMAC_BD_APP4_RXBYTECNT_POS)
++
++/*
++ * SDMA Register Definition
++ *
++ * [0]: http://www.xilinx.com/support/documentation
++ *
++ * [1]:	[0]/ip_documentation/mpmc.pdf
++ *	page 54, SDMA Register Summary
++ *	page 160, SDMA Registers
++ *
++ * [2]:	[0]/user_guides/ug200.pdf
++ *	page 244, DMA Controller -- Programming Interface and Registers
++ */
++#define SDMA_CTRL_REGTYPE	u32
++#define SDMA_CTRL_REGSIZE	sizeof(SDMA_CTRL_REGTYPE)
++struct sdma_ctrl {
++	/* Transmit Registers */
++	SDMA_CTRL_REGTYPE tx_nxtdesc_ptr;   /* TX Next Description Pointer */
++	SDMA_CTRL_REGTYPE tx_curbuf_addr;   /* TX Current Buffer Address */
++	SDMA_CTRL_REGTYPE tx_curbuf_length; /* TX Current Buffer Length */
++	SDMA_CTRL_REGTYPE tx_curdesc_ptr;   /* TX Current Descriptor Pointer */
++	SDMA_CTRL_REGTYPE tx_taildesc_ptr;  /* TX Tail Descriptor Pointer */
++	SDMA_CTRL_REGTYPE tx_chnl_ctrl;     /* TX Channel Control */
++	SDMA_CTRL_REGTYPE tx_irq_reg;       /* TX Interrupt Register */
++	SDMA_CTRL_REGTYPE tx_chnl_sts;      /* TX Status Register */
++	/* Receive Registers */
++	SDMA_CTRL_REGTYPE rx_nxtdesc_ptr;   /* RX Next Descriptor Pointer */
++	SDMA_CTRL_REGTYPE rx_curbuf_addr;   /* RX Current Buffer Address */
++	SDMA_CTRL_REGTYPE rx_curbuf_length; /* RX Current Buffer Length */
++	SDMA_CTRL_REGTYPE rx_curdesc_ptr;   /* RX Current Descriptor Pointer */
++	SDMA_CTRL_REGTYPE rx_taildesc_ptr;  /* RX Tail Descriptor Pointer */
++	SDMA_CTRL_REGTYPE rx_chnl_ctrl;     /* RX Channel Control */
++	SDMA_CTRL_REGTYPE rx_irq_reg;       /* RX Interrupt Register */
++	SDMA_CTRL_REGTYPE rx_chnl_sts;      /* RX Status Register */
++	/* Control Registers */
++	SDMA_CTRL_REGTYPE dma_control_reg;  /* DMA Control Register */
++};
++
++#define SDMA_CTRL_REGNUMS	sizeof(struct sdma_ctrl)/SDMA_CTRL_REGSIZE
++
++/*
++ * DMAC Register Index Enumeration
++ *
++ * [2]:	http://www.xilinx.com/support/documentation/user_guides/ug200.pdf
++ *	page 244, DMA Controller -- Programming Interface and Registers
++ */
++enum dmac_ctrl {
++	/* Transmit Registers */
++	TX_NXTDESC_PTR = 0,	/* TX Next Description Pointer */
++	TX_CURBUF_ADDR,		/* TX Current Buffer Address */
++	TX_CURBUF_LENGTH,	/* TX Current Buffer Length */
++	TX_CURDESC_PTR,		/* TX Current Descriptor Pointer */
++	TX_TAILDESC_PTR,	/* TX Tail Descriptor Pointer */
++	TX_CHNL_CTRL,		/* TX Channel Control */
++	TX_IRQ_REG,		/* TX Interrupt Register */
++	TX_CHNL_STS,		/* TX Status Register */
++	/* Receive Registers */
++	RX_NXTDESC_PTR,		/* RX Next Descriptor Pointer */
++	RX_CURBUF_ADDR,		/* RX Current Buffer Address */
++	RX_CURBUF_LENGTH,	/* RX Current Buffer Length */
++	RX_CURDESC_PTR,		/* RX Current Descriptor Pointer */
++	RX_TAILDESC_PTR,	/* RX Tail Descriptor Pointer */
++	RX_CHNL_CTRL,		/* RX Channel Control */
++	RX_IRQ_REG,		/* RX Interrupt Register */
++	RX_CHNL_STS,		/* RX Status Register */
++	/* Control Registers */
++	DMA_CONTROL_REG		/* DMA Control Register */
++};
++
++/* Rx/Tx Channel Control Register (*_chnl_ctrl), [1] p163, [2] p246/p252 */
++#define CHNL_CTRL_ITO_POS	24
++#define CHNL_CTRL_ITO_MASK	(0xFF << CHNL_CTRL_ITO_POS)
++#define CHNL_CTRL_IC_POS	16
++#define CHNL_CTRL_IC_MASK	(0xFF << CHNL_CTRL_IC_POS)
++#define CHNL_CTRL_MSBADDR_POS	12
++#define CHNL_CTRL_MSBADDR_MASK	(0xF << CHNL_CTRL_MSBADDR_POS)
++#define CHNL_CTRL_AME		(1 << 11)
++#define CHNL_CTRL_OBWC		(1 << 10)
++#define CHNL_CTRL_IOE		(1 << 9)
++#define CHNL_CTRL_LIC		(1 << 8)
++#define CHNL_CTRL_IE		(1 << 7)
++#define CHNL_CTRL_IEE		(1 << 2)
++#define CHNL_CTRL_IDE		(1 << 1)
++#define CHNL_CTRL_ICE		(1 << 0)
++
++/* All interrupt enable bits */
++#define CHNL_CTRL_IRQ_MASK	(CHNL_CTRL_IE | \
++				 CHNL_CTRL_IEE | \
++				 CHNL_CTRL_IDE | \
++				 CHNL_CTRL_ICE)
++
++/* Rx/Tx Interrupt Status Register (*_irq_reg), [1] p164, [2] p247/p253 */
++#define IRQ_REG_DTV_POS		24
++#define IRQ_REG_DTV_MASK	(0xFF << IRQ_REG_DTV_POS)
++#define IRQ_REG_CCV_POS		16
++#define IRQ_REG_CCV_MASK	(0xFF << IRQ_REG_CCV_POS)
++#define IRQ_REG_WRCQ_EMPTY	(1 << 14)
++#define IRQ_REG_CIC_POS		10
++#define IRQ_REG_CIC_MASK	(0xF << IRQ_REG_CIC_POS)
++#define IRQ_REG_DIC_POS		8
++#define IRQ_REG_DIC_MASK	(3 << 8)
++#define IRQ_REG_PLB_RD_NMI	(1 << 4)
++#define IRQ_REG_PLB_WR_NMI	(1 << 3)
++#define IRQ_REG_EI		(1 << 2)
++#define IRQ_REG_DI		(1 << 1)
++#define IRQ_REG_CI		(1 << 0)
++
++/* All interrupt bits */
++#define IRQ_REG_IRQ_MASK	(IRQ_REG_PLB_RD_NMI | \
++				 IRQ_REG_PLB_WR_NMI | \
++				 IRQ_REG_EI | IRQ_REG_DI | IRQ_REG_CI)
++
++/* Rx/Tx Channel Status Register (*_chnl_sts), [1] p165, [2] p249/p255 */
++#define CHNL_STS_ERROR_TAIL	(1 << 21)
++#define CHNL_STS_ERROR_CMP	(1 << 20)
++#define CHNL_STS_ERROR_ADDR	(1 << 19)
++#define CHNL_STS_ERROR_NXTP	(1 << 18)
++#define CHNL_STS_ERROR_CURP	(1 << 17)
++#define CHNL_STS_ERROR_BSYWR	(1 << 16)
++#define CHNL_STS_ERROR		(1 << 7)
++#define CHNL_STS_IOE		(1 << 6)
++#define CHNL_STS_SOE		(1 << 5)
++#define CHNL_STS_CMPLT		(1 << 4)
++#define CHNL_STS_SOP		(1 << 3)
++#define CHNL_STS_EOP		(1 << 2)
++#define CHNL_STS_EBUSY		(1 << 1)
++
++/* DMA Control Register (dma_control_reg), [1] p166, [2] p256 */
++#define DMA_CONTROL_PLBED	(1 << 5)
++#define DMA_CONTROL_RXOCEID	(1 << 4)
++#define DMA_CONTROL_TXOCEID	(1 << 3)
++#define DMA_CONTROL_TPE		(1 << 2)
++#define DMA_CONTROL_RESET	(1 << 0)
++
++#if defined(CONFIG_XILINX_440) || defined(CONFIG_XILINX_405)
++
++/* Xilinx Device Control Register (DCR) in/out accessors */
++unsigned ll_temac_xldcr_in32(phys_addr_t addr);
++void ll_temac_xldcr_out32(phys_addr_t addr, unsigned value);
++
++/* collect all register addresses for Xilinx DCR in/out accessors */
++void ll_temac_collect_xldcr_sdma_reg_addr(struct eth_device *dev);
++
++#endif /* CONFIG_XILINX_440 || CONFIG_XILINX_405 */
++
++/* Xilinx Processor Local Bus (PLB) in/out accessors */
++unsigned ll_temac_xlplb_in32(phys_addr_t base);
++void ll_temac_xlplb_out32(phys_addr_t base, unsigned value);
++
++/* collect all register addresses for Xilinx PLB in/out accessors */
++void ll_temac_collect_xlplb_sdma_reg_addr(struct eth_device *dev);
++
++/* initialize both Rx/Tx buffer descriptors */
++int ll_temac_init_sdma(struct eth_device *dev);
++
++/* halt both Rx/Tx transfers */
++int ll_temac_halt_sdma(struct eth_device *dev);
++
++/* reset SDMA and IRQ, disable interrupts and errors */
++int ll_temac_reset_sdma(struct eth_device *dev);
++
++/* receive buffered data from SDMA (polling ISR) */
++int ll_temac_recv_sdma(struct eth_device *dev);
++
++/* send buffered data to SDMA */
++int ll_temac_send_sdma(struct eth_device *dev, volatile void *buffer,
++							int length);
++
++#endif /* _XILINX_LL_TEMAC_SDMA_ */
+diff --git a/include/netdev.h b/include/netdev.h
+index 150fa8e..816b704 100644
+--- a/include/netdev.h
++++ b/include/netdev.h
+@@ -101,6 +101,8 @@ int xilinx_axiemac_initialize(bd_t *bis, unsigned long base_addr,
+ 							unsigned long dma_addr);
+ int xilinx_emaclite_initialize(bd_t *bis, unsigned long base_addr,
+ 							int txpp, int rxpp);
++int xilinx_ll_temac_initialize(bd_t *bis, unsigned long base_addr,
++						int mode, unsigned long ctrl);
+ 
+ /* Boards with PCI network controllers can call this from their board_eth_init()
+  * function to initialize whatever's on board.
+-- 
+1.7.0.4
+

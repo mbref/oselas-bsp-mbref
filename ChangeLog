@@ -1,3 +1,7 @@
+2011-12-26	Stephan Linz <linz@li-pro.net>
+
+	* common: upgarde patch sets to u-boot-2011.12
+
 2011-12-20	Stephan Linz <linz@li-pro.net>
 
 	* common: HOWTO: add reference note to the right GNU toolchain

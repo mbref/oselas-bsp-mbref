@@ -1,0 +1,44 @@
+From 4a97f19e79ad27a71199beed8c3a4314bd64350f Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 31 Aug 2011 12:57:56 +0200
+Subject: [PATCH] microblaze: Enable phylib and mii support
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |   21 +++++++++++++++++++++
+ 1 files changed, 21 insertions(+), 0 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 547df42..7481d86 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -351,4 +351,25 @@
+ #define CONFIG_FIT		1
+ #define CONFIG_OF_LIBFDT	1
+ 
++#if defined(CONFIG_XILINX_LL_TEMAC) || defined(CONFIG_XILINX_AXIEMAC)
++# define CONFIG_MII		1
++# define CONFIG_CMD_MII		1
++# define CONFIG_PHY_GIGE	1
++# define CONFIG_SYS_FAULT_ECHO_LINK_DOWN	1
++# define CONFIG_PHYLIB		1
++# define CONFIG_PHY_ATHEROS	1
++# define CONFIG_PHY_BROADCOM	1
++# define CONFIG_PHY_DAVICOM	1
++# define CONFIG_PHY_LXT		1
++# define CONFIG_PHY_MARVELL	1
++# define CONFIG_PHY_MICREL	1
++# define CONFIG_PHY_NATSEMI	1
++# define CONFIG_PHY_REALTEK	1
++# define CONFIG_PHY_VITESSE	1
++#else
++# undef CONFIG_MII
++# undef CONFIG_CMD_MII
++# undef CONFIG_PHYLIB
++#endif
++
+ #endif	/* __CONFIG_H */
+-- 
+1.7.0.4
+
