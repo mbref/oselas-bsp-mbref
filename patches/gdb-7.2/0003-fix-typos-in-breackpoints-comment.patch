@@ -1,0 +1,40 @@
+From f8c0ca0acc14c025df74b7d51c4a8b68da2adf1d Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sun, 12 Feb 2012 13:59:15 +0100
+Subject: [PATCH] fix typos in breackpoints comment
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ gdb/microblaze-linux-tdep.c       |    2 +-
+ gdb/microblaze-linux-tdep.c.debug |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gdb/microblaze-linux-tdep.c b/gdb/microblaze-linux-tdep.c
+index 044c11c..d87426f 100644
+--- a/gdb/microblaze-linux-tdep.c
++++ b/gdb/microblaze-linux-tdep.c
+@@ -147,7 +147,7 @@ static struct tramp_frame microblaze_linux_sighandler_tramp_frame =
+   4,
+   {
+     { 0x31800077, -1 }, /* addik R12,R0,119.  */
+-    { 0xb9cc0008, -1 }, /* /rki R14,8.  */
++    { 0xb9cc0008, -1 }, /* brki R14,8.  */
+     { TRAMP_SENTINEL_INSN },
+   },
+   microblaze_linux_sighandler_cache_init
+diff --git a/gdb/microblaze-linux-tdep.c.debug b/gdb/microblaze-linux-tdep.c.debug
+index ac21026..04b0c41 100644
+--- a/gdb/microblaze-linux-tdep.c.debug
++++ b/gdb/microblaze-linux-tdep.c.debug
+@@ -165,7 +165,7 @@ static struct tramp_frame microblaze_linux_sighandler_tramp_frame =
+   4,
+   {
+     { 0x31800077, -1 }, /* addik R12,R0,119.  */
+-    { 0xb9cc0008, -1 }, /* /rki R14,8.  */
++    { 0xb9cc0008, -1 }, /* brki R14,8.  */
+     { TRAMP_SENTINEL_INSN },
+   },
+   microblaze_linux_sighandler_cache_init
+-- 
+1.7.0.4
+

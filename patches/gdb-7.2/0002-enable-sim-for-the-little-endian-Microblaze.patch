@@ -1,0 +1,57 @@
+From 6c53f2a67a7676e3a032bfc97fd1b808712ab94f Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sun, 12 Feb 2012 13:57:19 +0100
+Subject: [PATCH] enable sim for the little endian Microblaze
+
+This will setting up Native GDB for the liitle endian
+Microblaze too. It is an extension to 1a67b03.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ sim/configure           |    2 +-
+ sim/configure.tgt       |    2 +-
+ sim/testsuite/configure |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/sim/configure b/sim/configure
+index b6488e2..3ec479f 100755
+--- a/sim/configure
++++ b/sim/configure
+@@ -3725,7 +3725,7 @@ subdirs="$subdirs arm"
+ 
+        sim_testsuite=yes
+        ;;
+-   microblaze-*-*)
++   microblaze*-*-*)
+ 
+   sim_arch=microblaze
+   subdirs="$subdirs microblaze"
+diff --git a/sim/configure.tgt b/sim/configure.tgt
+index 592bc3c..b10e33e 100644
+--- a/sim/configure.tgt
++++ b/sim/configure.tgt
+@@ -65,7 +65,7 @@ case "${target}" in
+        SIM_ARCH(mcore)
+        sim_testsuite=yes
+        ;;
+-   microblaze-*-*)
++   microblaze*-*-*)
+        SIM_ARCH(microblaze)
+        sim_testsuite=yes
+        ;;
+diff --git a/sim/testsuite/configure b/sim/testsuite/configure
+index da7967e..68432e3 100755
+--- a/sim/testsuite/configure
++++ b/sim/testsuite/configure
+@@ -1872,7 +1872,7 @@ case "${target}" in
+        sim_arch=mcore
+        sim_testsuite=yes
+        ;;
+-   microblaze-*-*)
++   microblaze*-*-*)
+        sim_arch=microblaze
+        sim_testsuite=yes
+        ;;
+-- 
+1.7.0.4
+
