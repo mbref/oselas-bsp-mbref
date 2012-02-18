@@ -6,3 +6,4 @@
 0006-microblaze-Wire-up-LL_TEMAC-driver-initialization.patch
 0007-net-ll_temac-Add-LL-TEMAC-driver-to-u-boot.patch
 0008-Prepare-v2011.12-mbref.patch
+0009-backport-microblaze-avoid-interrupt-race-conditions.patch

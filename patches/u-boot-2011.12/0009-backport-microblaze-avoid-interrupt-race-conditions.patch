@@ -1,0 +1,46 @@
+From 95a3e08738a6ed67dc8252708d3f0205bd99e068 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sat, 18 Feb 2012 13:06:03 +0100
+Subject: [PATCH] backport: microblaze: avoid interrupt race conditions
+
+backport of ac58732b8388175dcbe4ef8089d5ae80a8f40fd7
+
+The interrupt acknowledge action have to run after the
+registered interrupt handler. So we have a chance to
+bear out the corresponding interrupt request in the
+corresponding controller hardware.
+
+With this reorderng, we optain a proper interrupt
+handling for level triggerd interrupt sources -- for
+example the new axi_timer v1.02.a introduced in ISE 13.2
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ arch/microblaze/cpu/interrupts.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/microblaze/cpu/interrupts.c b/arch/microblaze/cpu/interrupts.c
+index 5a13211..e7ca859 100644
+--- a/arch/microblaze/cpu/interrupts.c
++++ b/arch/microblaze/cpu/interrupts.c
+@@ -155,8 +155,6 @@ void interrupt_handler (void)
+ #endif
+ 	struct irq_action *act = vecs + irqs;
+ 
+-	intc->iar = mask << irqs;
+-
+ #ifdef DEBUG_INT
+ 	printf
+ 	    ("Jumping to interrupt handler rutine addr %x,count %x,arg %x\n",
+@@ -165,6 +163,8 @@ void interrupt_handler (void)
+ 	act->handler (act->arg);
+ 	act->count++;
+ 
++	intc->iar = mask << irqs;
++
+ #ifdef DEBUG_INT
+ 	printf ("Dump INTC reg, isr %x, ier %x, iar %x, mer %x\n", intc->isr,
+ 		intc->ier, intc->iar, intc->mer);
+-- 
+1.7.0.4
+
