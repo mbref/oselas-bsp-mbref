@@ -34,8 +34,13 @@ you have to use the Crosstool-NG based toolchain v1.4 from my home page:
 
     http://www.li-pro.de/xilinx_mb/toolchain/start
 
+Big endian:
 For 64 bit Linux: tools-4.1.2-mb-ctng-v1.4-x86_64.tar.bz2
 For 32 bit Linux: tools-4.1.2-mb-ctng-v1.4-i686.tar.bz2
+
+Little endian:
+For 64 bit Linux: tools-4.1.2-mbel-ctng-v1.4-x86_64.tar.bz2
+For 32 bit Linux: tools-4.1.2-mbel-ctng-v1.4-i686.tar.bz2
 
 Extract the archive content to /opt.
 
@@ -94,6 +99,14 @@ Image recompilation for Xilinx-ML605-MMU-lite-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-13.2/platformconfig
 ptxdist toolchain /opt/tools-4.1.2-mb-ctng-v1.4/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Xilinx-ML605-AXI-lite-13.2:
+---------------------------------------------------
+ptxdist platform configs/Xilinx-ML605-AXI-lite-13.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-ctng-v1.4/microblazeel-unknown-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images

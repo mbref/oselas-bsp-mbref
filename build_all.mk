@@ -26,13 +26,16 @@ endif
 ifeq ($(PETALOGIX),true)
 # use the Petalogix Microblaze toolchain preperated for ptxdist
 TOOLCHAIN	:= /opt/tools-4.1.2-mb-petalogix-v2.1/linux-i386/microblaze-unknown-linux-gnu/bin
+TOOLCHAIN_LE	:= /opt/tools-4.1.2-mb-petalogix-v2.1/linux-i386/microblazeel-unknown-linux-gnu/bin
 else
 ifeq ($(XILINX),true)
 # use the Xilinx Microblaze toolchain preperated for ptxdist
 TOOLCHAIN	:= /opt/tools-4.1.2-mb-xilinx-v2.0/microblaze-unknown-linux-gnu/bin
+TOOLCHAIN_LE	:= /opt/tools-4.1.2-mb-xilinx-v2.0/microblazeel-unknown-linux-gnu/bin
 else
 # use the Crosstool-NG Microblaze toolchain preperated for ptxdist
 TOOLCHAIN	:= /opt/tools-4.1.2-mb-ctng-v1.4/microblaze-unknown-linux-gnu/bin
+TOOLCHAIN_LE	:= /opt/tools-4.1.2-mb-ctng-v1.4/microblazeel-unknown-linux-gnu/bin
 endif
 endif
 
@@ -77,6 +80,14 @@ $(TBZ2_PREFIX)%$(TBZ2_SUFFIX): $(STATEDIR)/%.build | mkdirs
 	@echo 'tar -C "$(2IMAGEDIR_$(*))" -cvjf "$(@)" "."' | fakeroot
 	@rm -rf "$(2PLATFORMDIR_$(*))"
 
+# special AXI little endian systems
+$(STATEDIR)/Xilinx-ML605-AXI-%.build: $(TOOLCHAIN_LE)/ptxconfig | mkdirs
+	@echo "found AXI little endian system"
+	@echo "building Xilinx-ML605-AXI-${*} with" $(shell awk -F'[=]' '{printf("%s", $$(NF))}' $<)
+	$(NICE) $(PTXDIST) images --ptxconfig=$(CONFIGFILE) \
+	  --toolchain=$(TOOLCHAIN_LE) --platformconfig=$(2PLATFORMFILE_Xilinx-ML605-AXI-$(*))
+
+# generic big endian systems
 $(STATEDIR)/%.build: $(TOOLCHAIN)/ptxconfig | mkdirs
 	@echo "building ${*} with" $(shell awk -F'[=]' '{printf("%s", $$(NF))}' $<)
 	$(NICE) $(PTXDIST) images --ptxconfig=$(CONFIGFILE) \
@@ -88,6 +99,6 @@ mkdirs:
 print-%:
 	@echo "$* is \"$($(*))\""
 
-help: print-VERSION print-BUILDDATE print-PTXDIST print-TOOLCHAIN
+help: print-VERSION print-BUILDDATE print-PTXDIST print-TOOLCHAIN print-TOOLCHAIN_LE
 	@echo "Available tarball targets:"
 	@for i in $(TBZ2S); do echo $$i; done;

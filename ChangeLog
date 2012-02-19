@@ -1,3 +1,7 @@
+2012-02-19	Stephan Linz <linz@li-pro.net>
+
+	* common: supports AXI systems by the build_all.mk make script
+
 2012-02-18	Stephan Linz <linz@li-pro.net>
 
 	* common: adapt latest patch sets to u-boot-2011.12
