@@ -10,11 +10,11 @@ XILINX		:= false
 #
 # Copyright (C) 2007 Carsten Schlote <c.schlote@konzeptpark.de>
 #               2008, 2011 Marc Kleine-Budde <mkl@pengutronix.de>
-#               2011 Stephan Linz <linz@li-pro.net>
+#               2011, 2012 Stephan Linz <linz@li-pro.net>
 #
 
 SHELL		:= /bin/bash
-PTXDIST		:= /usr/bin/ptxdist-2011.12.0
+PTXDIST		:= /usr/bin/ptxdist-2012.03.0
 
 BUILDDATE	:= $(shell date +%y%m%d-%H%M)
 VERSION		:= $(shell ./scripts/setlocalversion ./.tarball-version)
