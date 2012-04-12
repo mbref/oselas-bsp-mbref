@@ -1,0 +1,29 @@
+From bc8fc2dbe33a3b4b4bfea4bac577d70c74f875e5 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Wed, 11 Apr 2012 17:53:24 +0200
+Subject: [PATCH] uio/pdrv_genirq: Add OF compatible list
+
+"generic-uio" compatible property is used.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/uio/uio_pdrv_genirq.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/uio/uio_pdrv_genirq.c b/drivers/uio/uio_pdrv_genirq.c
+index b98371d..33fa27b 100644
+--- a/drivers/uio/uio_pdrv_genirq.c
++++ b/drivers/uio/uio_pdrv_genirq.c
+@@ -255,7 +255,8 @@ static const struct dev_pm_ops uio_pdrv_genirq_dev_pm_ops = {
+ 
+ #ifdef CONFIG_OF
+ static const struct of_device_id uio_of_genirq_match[] = {
+-	{ /* empty for now */ },
++	{ .compatible = "generic-uio", },
++	{ /* end of list */ },
+ };
+ MODULE_DEVICE_TABLE(of, uio_of_genirq_match);
+ #else
+-- 
+1.7.0.4
+

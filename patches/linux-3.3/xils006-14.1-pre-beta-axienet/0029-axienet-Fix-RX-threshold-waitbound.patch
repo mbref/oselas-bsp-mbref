@@ -1,0 +1,30 @@
+From d2a896bc07f22e6e6e80e74904fc25b2e463e0e4 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 3 Oct 2011 13:55:03 +0200
+Subject: [PATCH] axienet: Fix RX threshold/waitbound
+
+Extend threshold and waitbound values.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/net/ethernet/xilinx/xilinx_axienet.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/ethernet/xilinx/xilinx_axienet.h b/drivers/net/ethernet/xilinx/xilinx_axienet.h
+index 5cb4ed4..95fbf8d 100644
+--- a/drivers/net/ethernet/xilinx/xilinx_axienet.h
++++ b/drivers/net/ethernet/xilinx/xilinx_axienet.h
+@@ -132,8 +132,8 @@
+ /* Default TX/RX Threshold and waitbound values for SGDMA mode */
+ #define XAXIDMA_DFT_TX_THRESHOLD	24
+ #define XAXIDMA_DFT_TX_WAITBOUND	254
+-#define XAXIDMA_DFT_RX_THRESHOLD	01
+-#define XAXIDMA_DFT_RX_WAITBOUND	10
++#define XAXIDMA_DFT_RX_THRESHOLD	24
++#define XAXIDMA_DFT_RX_WAITBOUND	254
+ 
+ #define XAXIDMA_BD_CTRL_TXSOF_MASK	0x08000000	/* First tx packet */
+ #define XAXIDMA_BD_CTRL_TXEOF_MASK	0x04000000	/* Last tx packet */
+-- 
+1.7.0.4
+

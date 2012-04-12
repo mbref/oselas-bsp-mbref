@@ -1,6 +1,7 @@
 2012-04-12	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: prepare mbref-uio-trunk for kernel 3.3
+	* common: adapt latest patch sets to linux-3.3
 
 2012-03-16	Stephan Linz <linz@li-pro.net>
 
