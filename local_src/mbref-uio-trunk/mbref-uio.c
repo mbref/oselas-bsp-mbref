@@ -1,6 +1,6 @@
 /*
  * mbref-uio.c
- * Copyright (c) 2011 Li-Pro.Net, Stephan Linz
+ * Copyright (c) 2011-2012 Li-Pro.Net, Stephan Linz
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -21,20 +21,42 @@
 #include <linux/spinlock.h>
 #include <linux/bitops.h>
 #include <linux/interrupt.h>
+#include <linux/stringify.h>
+#include <linux/pm_runtime.h>
 #include <linux/slab.h>
 #include <linux/of_platform.h>
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
+#include <linux/platform_device.h>
 #include <linux/uio_driver.h>
+
+#define DRIVER_NAME "mbref-uio"
+#define DRIVER_VERS "0.0.3"
 
 struct mbref_uio_platdata {
 	struct uio_info *uioinfo;
 	spinlock_t lock;
 	unsigned long flags;
+	struct platform_device *pdev;
 };
 
-#define DRIVER_NAME "mbref-uio"
-#define DRIVER_VERS "0.0.2"
+static int mbref_uio_open(struct uio_info *info, struct inode *inode)
+{
+	struct mbref_uio_platdata *priv = info->priv;
+
+	/* Wait until the Runtime PM code has woken up the device */
+	pm_runtime_get_sync(&priv->pdev->dev);
+	return 0;
+}
+
+static int mbref_uio_release(struct uio_info *info, struct inode *inode)
+{
+	struct mbref_uio_platdata *priv = info->priv;
+
+	/* Tell the Runtime PM code that the device has become idle */
+	pm_runtime_put_sync(&priv->pdev->dev);
+	return 0;
+}
 
 static irqreturn_t mbref_uio_handler(int irq, struct uio_info *dev_info)
 {
@@ -75,43 +97,77 @@ static int mbref_uio_irqcontrol(struct uio_info *dev_info, s32 irq_on)
 	return 0;
 }
 
-int __mbref_uio_pdrv_probe(struct device *dev, struct uio_info *uioinfo,
-		struct resource *resources, unsigned int num_resources)
+static int __devinit mbref_uio_probe(struct platform_device *pdev)
 {
-	struct mbref_uio_platdata *priv;
+	struct uio_info *uioinfo = pdev->dev.platform_data;
 	struct uio_mem *uiomem;
-	unsigned int i;
-	int ret;
+	struct mbref_uio_platdata *priv;
+	int i, ret = -EINVAL;
+
+	if (!uioinfo) {
+		int irq;
+
+		/* alloc uioinfo for one device */
+		uioinfo = kzalloc(sizeof(*uioinfo), GFP_KERNEL);
+		if (!uioinfo) {
+			ret = -ENOMEM;
+			dev_err(&pdev->dev, "unable to kmalloc uioinfo\n");
+			goto err;
+		}
+
+		uioinfo->name = DRIVER_NAME; /* or: pdev->dev.of_node->name */
+		uioinfo->version = DRIVER_VERS;
+
+		/* Multiple IRQs are not supported */
+		irq = platform_get_irq(pdev, 0);
+		if (irq == -ENXIO)
+			uioinfo->irq = UIO_IRQ_NONE;
+		else
+			uioinfo->irq = irq;
+	}
+
+	if (!uioinfo || !uioinfo->name || !uioinfo->version) {
+		dev_err(&pdev->dev, "missing platform_data\n");
+		goto err_cleanup0;
+	}
+
+	if (uioinfo->handler || uioinfo->irqcontrol ||
+	    uioinfo->irq_flags & IRQF_SHARED) {
+		dev_err(&pdev->dev, "interrupt configuration error\n");
+		goto err_cleanup0;
+	}
 
 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
 	if (!priv) {
 		ret = -ENOMEM;
-		dev_err(dev, "unable to kmalloc priv\n");
-		goto bad0;
+		dev_err(&pdev->dev, "unable to kmalloc\n");
+		goto err_cleanup0;
 	}
 
 	priv->uioinfo = uioinfo;
 	spin_lock_init(&priv->lock);
 	priv->flags = 0; /* interrupt is enabled to begin with */
+	priv->pdev = pdev;
 
 	uiomem = &uioinfo->mem[0];
 
-	for (i = 0; i < num_resources; ++i) {
-		struct resource *r = resources + i;
+	for (i = 0; i < pdev->num_resources; ++i) {
+		struct resource *r = &pdev->resource[i];
 
 		if (r->flags != IORESOURCE_MEM)
 			continue;
 
 		if (uiomem >= &uioinfo->mem[MAX_UIO_MAPS]) {
-			dev_warn(dev, "device has more than "
+			dev_warn(&pdev->dev, "device has more than "
 					__stringify(MAX_UIO_MAPS)
 					" I/O memory resources.\n");
 			break;
 		}
 
+		dev_info(&pdev->dev, "0x%08X-0x%08X\n", r->start, r->end);
 		uiomem->memtype = UIO_MEM_PHYS;
 		uiomem->addr = r->start;
-		uiomem->size = r->end - r->start + 1;
+		uiomem->size = resource_size(r);
 		++uiomem;
 	}
 
@@ -119,6 +175,11 @@ int __mbref_uio_pdrv_probe(struct device *dev, struct uio_info *uioinfo,
 		uiomem->size = 0;
 		++uiomem;
 	}
+
+	if (uioinfo->irq != UIO_IRQ_NONE)
+		dev_info(&pdev->dev, "IRQ%li\n", uioinfo->irq);
+	else
+		dev_info(&pdev->dev, "no IRQ\n");
 
 	/* This driver requires no hardware specific kernel code to handle
 	 * interrupts. Instead, the interrupt handler simply disables the
@@ -129,87 +190,81 @@ int __mbref_uio_pdrv_probe(struct device *dev, struct uio_info *uioinfo,
 	 * Interrupt sharing is not supported.
 	 */
 
-	uioinfo->irq_flags |= IRQF_DISABLED;
 	uioinfo->handler = mbref_uio_handler;
 	uioinfo->irqcontrol = mbref_uio_irqcontrol;
+	uioinfo->open = mbref_uio_open;
+	uioinfo->release = mbref_uio_release;
 	uioinfo->priv = priv;
 
-	ret = uio_register_device(dev, priv->uioinfo);
+	/* Enable Runtime PM for this device:
+	 * The device starts in suspended state to allow the hardware to be
+	 * turned off by default. The Runtime PM bus code should power on the
+	 * hardware and enable clocks at open().
+	 */
+	pm_runtime_enable(&pdev->dev);
+
+	ret = uio_register_device(&pdev->dev, priv->uioinfo);
 	if (ret) {
-		dev_err(dev, "unable to register uio device\n");
-		goto bad1;
+		dev_err(&pdev->dev, "unable to register uio device\n");
+		goto err_cleanup1;
 	}
 
-	dev_set_drvdata(dev, priv);
+	platform_set_drvdata(pdev, priv);
+	dev_info(&pdev->dev, "registered\n");
 	return 0;
- bad1:
+
+err_cleanup1:
 	kfree(priv);
- bad0:
+	pm_runtime_disable(&pdev->dev);
+
+err_cleanup0:
+	/* kfree uioinfo for OF */
+	if (pdev->dev.of_node)
+		kfree(uioinfo);
+
+err:
 	return ret;
 }
 
-static int __devinit mbref_uio_of_probe(struct platform_device *op,
-		const struct of_device_id *match)
+static int __devexit mbref_uio_remove(struct platform_device *pdev)
 {
-	struct uio_info *uioinfo;
-	struct resource resources[MAX_UIO_MAPS];
-	int i, ret;
-
-	uioinfo = kzalloc(sizeof(*uioinfo), GFP_KERNEL);
-	if (!uioinfo) {
-		pr_err("%s: %s: unable to kmalloc uioinfo\n",
-				DRIVER_NAME, op->dev.of_node->full_name);
-		return -ENOMEM;
-	}
-
-	uioinfo->name = DRIVER_NAME; /* alternetive: op->dev.of_node->name */
-	uioinfo->version = DRIVER_VERS;
-	uioinfo->irq = irq_of_parse_and_map(op->dev.of_node, 0);
-	if (!uioinfo->irq)
-		uioinfo->irq = UIO_IRQ_NONE;
-	else
-		pr_info("%s: %s: IRQ%li\n", uioinfo->name,
-				op->dev.of_node->full_name, uioinfo->irq);
-
-	for (i = 0; i < MAX_UIO_MAPS; ++i)
-		if (of_address_to_resource(op->dev.of_node, i, &resources[i]))
-			break;
-		else
-			pr_info("%s: %s: 0x%08X-0x%08X\n",
-					uioinfo->name, op->dev.of_node->full_name,
-					resources[i].start, resources[i].end);
-
-	ret = __mbref_uio_pdrv_probe(&op->dev, uioinfo, resources, i);
-	if (ret)
-		goto err_cleanup;
-
-	pr_info("%s: %s: registered\n", uioinfo->name, op->dev.of_node->full_name);
-	return 0;
-
-err_cleanup:
-	if (uioinfo->irq != UIO_IRQ_NONE)
-		irq_dispose_mapping(uioinfo->irq);
-
-	kfree(uioinfo);
-	return ret;
-}
-
-static int __devexit mbref_uio_of_remove(struct platform_device *op)
-{
-	struct mbref_uio_platdata *priv = dev_get_drvdata(&op->dev);
+	struct mbref_uio_platdata *priv = platform_get_drvdata(pdev);
 
 	uio_unregister_device(priv->uioinfo);
+	pm_runtime_disable(&pdev->dev);
 
-	if (priv->uioinfo->irq != UIO_IRQ_NONE)
-		irq_dispose_mapping(priv->uioinfo->irq);
+	priv->uioinfo->handler = NULL;
+	priv->uioinfo->irqcontrol = NULL;
 
-	kfree(priv->uioinfo);
+	/* kfree uioinfo for OF */
+	if (pdev->dev.of_node)
+		kfree(priv->uioinfo);
+
 	kfree(priv);
 	return 0;
 }
 
-/* work with hotplug and coldplug */
-MODULE_ALIAS("platform:"DRIVER_NAME);
+static int mbref_uio_runtime_nop(struct device *dev)
+{
+	/* Runtime PM callback shared between ->runtime_suspend()
+	 * and ->runtime_resume(). Simply returns success.
+	 *
+	 * In this driver pm_runtime_get_sync() and pm_runtime_put_sync()
+	 * are used at open() and release() time. This allows the
+	 * Runtime PM code to turn off power to the device while the
+	 * device is unused, ie before open() and after release().
+	 *
+	 * This Runtime PM callback does not need to save or restore
+	 * any registers since user space is responsbile for hardware
+	 * register reinitialization after open().
+	 */
+	return 0;
+}
+
+static const struct dev_pm_ops mbref_uio_dev_pm_ops = {
+	.runtime_suspend = mbref_uio_runtime_nop,
+	.runtime_resume = mbref_uio_runtime_nop,
+};
 
 #ifdef CONFIG_OF
 /* Match table for of_platform binding */
@@ -219,50 +274,24 @@ static const struct of_device_id mbref_uio_of_match[] __devinitdata = {
 	{ /* end of list */ },
 };
 MODULE_DEVICE_TABLE(of, mbref_uio_of_match);
+#else
+# define mbref_uio_of_match NULL
 #endif
 
-static struct of_platform_driver mbref_uio_driver = {
-	.probe		= mbref_uio_of_probe,
-	.remove		= __devexit_p(mbref_uio_of_remove),
+static struct platform_driver mbref_uio_driver = {
+	.probe		= mbref_uio_probe,
+	.remove		= __devexit_p(mbref_uio_remove),
 	.driver		= {
 		.name		= DRIVER_NAME,
 		.owner		= THIS_MODULE,
-#ifdef CONFIG_OF
+		.pm = &mbref_uio_dev_pm_ops,
 		.of_match_table	= mbref_uio_of_match,
-#endif
 	},
 };
 
-/*
- * mbref_uio_init - function to insert this module into kernel space
- *
- * This is the first of two exported functions to handle inserting this
- * code into a running kernel
- *
- * Returns 0 if successfull, otherwise -1
- */
+module_platform_driver(mbref_uio_driver);
 
-static int __init mbref_uio_init(void)
-{
-	return of_register_platform_driver(&mbref_uio_driver);
-}
-
-/*
- * mbref_uio_exit - function to cleanup this module from kernel space
- *
- * This is the second of two exported functions to handle cleanup this
- * code from a running kernel
- */
-
-static void __exit mbref_uio_exit(void)
-{
-	of_unregister_platform_driver(&mbref_uio_driver);
-}
-
-module_init(mbref_uio_init);
-module_exit(mbref_uio_exit);
-
-MODULE_AUTHOR("linz@li-pro.net");
+MODULE_AUTHOR("Stephan Linz <linz@li-pro.net>");
 MODULE_DESCRIPTION("MicroBlaze References simple UIO lowlevel driver.");
 MODULE_LICENSE("GPL v2");
-
+MODULE_ALIAS("platform:" DRIVER_NAME); /* work with hotplug and coldplug */

@@ -1,6 +1,6 @@
 # -*-makefile-*-
 #
-# Copyright (C) 2011 by Stephan Linz
+# Copyright (C) 2011-2012 by Stephan Linz
 #
 # See CREDITS for details about who has contributed to this project.
 #
@@ -19,7 +19,11 @@ PACKAGES-$(PTXCONF_MBREF_UIO) += mbref-uio
 ifeq ($(KERNEL_VERSION),2.6.31.13)
 MBREF_UIO_VERSION	:= 0.0.1
 else
+ifeq ($(KERNEL_VERSION),2.6.37.6)
+MBREF_UIO_VERSION	:= 0.0.2
+else
 MBREF_UIO_VERSION	:= trunk
+endif
 endif
 MBREF_UIO		:= mbref-uio-$(MBREF_UIO_VERSION)
 MBREF_UIO_SRCDIR	:= $(PTXDIST_WORKSPACE)/local_src/$(MBREF_UIO)
