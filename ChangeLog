@@ -1,3 +1,7 @@
+2012-04-23	Stephan Linz <linz@li-pro.net>
+
+	* common: adapt latest patch sets to u-boot-2012.04
+
 2012-04-12	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: prepare mbref-uio-trunk for kernel 3.3
