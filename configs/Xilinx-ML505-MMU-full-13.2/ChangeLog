@@ -1,3 +1,7 @@
+2012-04-25	Stephan Linz <linz@li-pro.net>
+
+	* platform: upgrade to u-boot-2012.04.01
+
 2012-04-24	Stephan Linz <linz@li-pro.net>
 
 	* common: initial version Xilinx-ML505-MMU-full-13.2
