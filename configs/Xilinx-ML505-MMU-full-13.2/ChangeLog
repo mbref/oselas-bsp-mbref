@@ -1,3 +1,7 @@
+2012-04-29      Stephan Linz <linz@li-pro.net>
+
+	* platform: fix target name missmatch (to ML505)
+
 2012-04-25	Stephan Linz <linz@li-pro.net>
 
 	* platform: upgrade to u-boot-2012.04.01
