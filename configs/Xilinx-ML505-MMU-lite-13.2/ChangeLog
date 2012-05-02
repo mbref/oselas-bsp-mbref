@@ -1,3 +1,7 @@
+2012-05-02      Stephan Linz <linz@li-pro.net>
+
+	* platform: harmonize kernel configuration for 13.2 designs
+
 2012-04-29      Stephan Linz <linz@li-pro.net>
 
 	* platform: fix target name missmatch (to ML505)
