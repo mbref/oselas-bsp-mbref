@@ -1,3 +1,7 @@
+2012-05-03      Stephan Linz <linz@li-pro.net>
+
+	* xlbsp: upgrade to lates exports from ISE 13.2 (FPU and UBIFS)
+
 2012-05-02      Stephan Linz <linz@li-pro.net>
 
 	* platform: harmonize kernel configuration for 13.2 designs
