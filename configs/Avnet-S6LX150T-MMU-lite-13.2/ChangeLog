@@ -1,6 +1,7 @@
 2012-05-11      Stephan Linz <linz@li-pro.net>
 
 	* xlbsp: upgrade to lates exports from ISE 13.2
+	* xlbsp: correct I2C infrastructure
 
 2012-05-10      Stephan Linz <linz@li-pro.net>
 

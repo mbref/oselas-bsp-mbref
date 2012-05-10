@@ -405,6 +405,8 @@
 			xlnx,tri-default-2 = <0xffffffff>;
 		} ;
 		xps_iic_0: i2c@80ef0000 {
+			#address-cells = <1>;
+			#size-cells = <0>;
 			compatible = "xlnx,xps-iic-2.03.a", "xlnx,xps-iic-2.00.a";
 			interrupt-parent = <&xps_intc_0>;
 			interrupts = < 5 2 >;
@@ -416,6 +418,12 @@
 			xlnx,scl-inertial-delay = <0x5>;
 			xlnx,sda-inertial-delay = <0x5>;
 			xlnx,ten-bit-adr = <0x0>;
+			rtc0: rtc@68 {
+				compatible = "dallas,ds3232";
+				reg = <0x68>;
+				interrupt-parent = <&xps_intc_0>;
+				interrupts = < 1 1 >;
+			};
 		} ;
 		xps_intc_0: interrupt-controller@8aff0000 {
 			#interrupt-cells = <0x2>;
