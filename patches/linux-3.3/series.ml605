@@ -34,3 +34,5 @@ mbref/0001-uio-pdrv_genirq-Add-OF-compatible-list.patch
 mbref/0002-uartlite-Make-the-number-of-UARTs-registered-configu.patch
 mbref/0003-microblaze-enable-debugger-functionality.patch
 mbref/0004-Allow-more-up-to-32kbyte-DTB.patch
+mbref/0005-iic-OF-Support-for-xilinx-i2c.patch
+mbref/0006-i2c-Use-32bit-accesses-only.patch
