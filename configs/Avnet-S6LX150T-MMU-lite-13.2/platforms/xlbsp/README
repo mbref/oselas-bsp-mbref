@@ -1,3 +1,17 @@
+______________________________________________________________________________
+
+ K N O W N   I S S U E S
+=========================
+
+(1) DTS: MBRef-TPOS doesn't generate correct PHY parameters. Fix to:
+
+	phy0: phy@1 {
+		compatible = "natsemi,dp83865";
+		device_type = "ethernet-phy";
+		reg = <1>;
+	};
+______________________________________________________________________________
+
 OF FDT:
   - copy all files from microblaze_#/libsrc/device-tree_v#_##_# to here:
 	xilinx.dts
