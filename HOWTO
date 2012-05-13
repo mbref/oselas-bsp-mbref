@@ -63,6 +63,22 @@ References
 ----------
 t.b.d.
 
+Image recompilation for Avnet-S6LX150T-MMU-full-13.2:
+-----------------------------------------------------
+ptxdist platform configs/Avnet-S6LX150T-MMU-full-13.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-ctng-v1.4/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
+Image recompilation for Avnet-S6LX150T-MMU-lite-13.2:
+-----------------------------------------------------
+ptxdist platform configs/Avnet-S6LX150T-MMU-lite-13.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-ctng-v1.4/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
 Image recompilation for Xilinx-ML605-MMU-full-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-13.2/platformconfig
@@ -259,6 +275,69 @@ ptxdist toolchain /opt/tools-4.1.2-mb-petalogix-v2.1/linux-i386/microblaze-unkno
 
 PTXCONF_CROSSCHAIN_VENDOR="Xilinx MicroBlaze Tools v2.0 (20110211.154242)"
 ptxdist toolchain /opt/tools-4.1.2-mb-xilinx-v2.0/microblaze-unknown-linux-gnu/bin
+
+
+______________________________________________________________________________
+Shortcuts: Avnet-S6LX150T-MMU
+-----------------------------
+
+Shortcut: boot with external FDT-Support:
+-----------------------------------------
+dhcp 0x20880000 /s6lx150t/oftree
+fdt addr 0x20880000
+fdt list /
+fdt print /
+dcache off
+dhcp 0x20900000 /s6lx150t/linuximage.ub
+bootm 0x20900000 - 0x20880000
+
+Shortcut: boot without external FDT-Support:
+--------------------------------------------
+dhcp 0x20900000 /s6lx150t/linuximage.ub
+
+bootm 0x20900000
+
+Shortcut: write FPGA configuration into Flash:
+----------------------------------------------
+dhcp 0x20900000 /s6lx150t/download.bin
+
+era AE000000 AEFFFFFF
+cp.b 0x20900000 AE000000 $filesize
+
+Shortcut: write U-Boot XLBLOB into Flash:
+-----------------------------------------
+dhcp 0x20900000 /s6lx150t/u-boot-xl.bin
+
+era AFF80000 AFFDFFFF
+cp.b 0x20900000 AFF80000 $filesize
+
+Shortcut: write FDT-BLOB into Flash:
+------------------------------------
+dhcp 0x20880000 /s6lx150t/oftree
+FIXME: era <fdt_start> <fdt_end>
+
+FIXME: cp.b 0x20880000 <fdt_start> $filesize
+FIXME: fdt addr <fdt_start>
+fdt list /
+
+Shortcut: write RootFS into Flash:
+----------------------------------
+dhcp 0x20900000 /s6lx150t/root.ubi
+
+era AF400000 AFF7FFFF
+cp.b 0x20900000 AF400000 $filesize
+
+Shortcut: write Linux kernel into Flash:
+----------------------------------------
+dhcp 0x20900000 /s6lx150t/linuximage.ub
+
+era AF000000 AFF7FFFF
+or
+era AF000000 AF3FFFFF
+
+cp.b 0x20900000 AF000000 $filesize
+imi AF000000
+bootm AF000000
 
 
 ______________________________________________________________________________
