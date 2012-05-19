@@ -388,6 +388,8 @@ Shortcut: write RootFS into Flash:
 dhcp 0x20900000 /ml605/root.squashfs
 or
 dhcp 0x20900000 /ml605/root.jffs2
+or
+dhcp 0x20900000 /ml505/root.ubi
 
 era AF400000 AFF7FFFF
 cp.b 0x20900000 AF400000 $filesize
