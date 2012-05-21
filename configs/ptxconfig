@@ -27,7 +27,9 @@ PTXCONF_MBREF_UIO=m
 #
 # PTXdist Base Configuration       
 #
-PTXCONF_CONFIGFILE_VERSION="2012.03.0"
+PTXCONF_RUNTIME=y
+PTXCONF_BUILDTIME=y
+PTXCONF_CONFIGFILE_VERSION="2012.05.0"
 PTXCONF__ptxconfig_MAGIC__=y
 
 #
@@ -112,7 +114,7 @@ PTXCONF_HOST_PKG_CONFIG=y
 # PTXCONF_HOST_QT4 is not set
 # PTXCONF_HOST_SQUASHFS_TOOLS is not set
 # PTXCONF_HOST_TIMEOUT is not set
-# PTXCONF_HOST_UMKIMAGE is not set
+# PTXCONF_HOST_U_BOOT_TOOLS is not set
 # PTXCONF_HOST_USPLASH is not set
 # PTXCONF_HOST_UTIL_LINUX_NG is not set
 # PTXCONF_HOST_XCB_PROTO is not set
@@ -178,6 +180,7 @@ PTXCONF_GDB_SHARED=y
 #
 # busybox's ps is enabled: rtps disabled
 #
+# PTXCONF_SP_OOPS_EXTRACT is not set
 # PTXCONF_STRACE is not set
 # PTXCONF_SYSSTAT is not set
 # PTXCONF_TRACE_CMD is not set
@@ -1232,7 +1235,6 @@ PTXCONF_MTD_UTILS=m
 # PTXCONF_MTD_UTILS_DOCFDISK is not set
 PTXCONF_MTD_UTILS_FLASH_ERASE=y
 # PTXCONF_MTD_UTILS_FLASH_ERASEALL is not set
-PTXCONF_MTD_UTILS_FLASH_INFO=y
 PTXCONF_MTD_UTILS_FLASH_LOCK=y
 # PTXCONF_MTD_UTILS_FLASH_OTP_DUMP is not set
 # PTXCONF_MTD_UTILS_FLASH_OTP_INFO is not set
@@ -1287,9 +1289,9 @@ PTXCONF_MTD_UTILS_MTDINFO=y
 # PTXCONF_SUDO is not set
 # PTXCONF_SYSTEMD is not set
 # PTXCONF_TIMEOUT is not set
+# PTXCONF_U_BOOT_TOOLS is not set
 # PTXCONF_UDEV is not set
 # PTXCONF_UDISKS is not set
-# PTXCONF_UMKIMAGE is not set
 # PTXCONF_UPSTART is not set
 # PTXCONF_USBUTILS is not set
 # PTXCONF_UTIL_LINUX_NG is not set
@@ -1528,7 +1530,6 @@ PTXCONF_EXPAT=m
 # PTXCONF_LIBFTDI is not set
 # PTXCONF_LIBGCRYPT is not set
 # PTXCONF_LIBGD is not set
-# PTXCONF_LIBGDBUS is not set
 # PTXCONF_LIBGMP is not set
 # PTXCONF_LIBGPG_ERROR is not set
 # PTXCONF_LIBGSF is not set
@@ -1551,6 +1552,7 @@ PTXCONF_EXPAT=m
 # PTXCONF_LIBNL is not set
 # PTXCONF_LIBOIL is not set
 # PTXCONF_LIBOOP is not set
+# PTXCONF_LIBOSIP2 is not set
 # PTXCONF_LIBPCRE is not set
 # PTXCONF_LIBPIPELINE is not set
 # PTXCONF_LIBPNG is not set
@@ -1637,6 +1639,7 @@ PTXCONF_BONNIEXX=m
 # PTXCONF_CALIBRATOR is not set
 # PTXCONF_DBENCH is not set
 # PTXCONF_EVTEST is not set
+# PTXCONF_FLASHBENCH is not set
 # PTXCONF_HACKBENCH is not set
 # PTXCONF_HOST_PELTS is not set
 # PTXCONF_IOZONE is not set
@@ -1673,6 +1676,7 @@ PTXCONF_IPERF=m
 #
 # PTXCONF_FBGRAB is not set
 # PTXCONF_FBSET is not set
+# PTXCONF_FBTERM is not set
 # PTXCONF_FBTEST is not set
 # PTXCONF_FBUTILS is not set
 # PTXCONF_FBV is not set
@@ -1680,7 +1684,7 @@ PTXCONF_IPERF=m
 # PTXCONF_USPLASH is not set
 
 #
-# gstreamer                     
+# gstreamer 0.10                
 #
 # PTXCONF_GST_PLUGINS_BAD is not set
 # PTXCONF_GST_PLUGINS_BASE is not set
@@ -1690,6 +1694,15 @@ PTXCONF_IPERF=m
 # PTXCONF_GST_PLUGINS_UGLY is not set
 # PTXCONF_GSTREAMER is not set
 # PTXCONF_LIBFSL_VPU is not set
+
+#
+# gstreamer 0.11                
+#
+# PTXCONF_GST_PLUGINS_BAD11 is not set
+# PTXCONF_GST_PLUGINS_BASE11 is not set
+# PTXCONF_GST_PLUGINS_GOOD11 is not set
+# PTXCONF_GST_PLUGINS_UGLY11 is not set
+# PTXCONF_GSTREAMER11 is not set
 
 #
 # gtk+ & friends                
@@ -1745,6 +1758,7 @@ PTXCONF_GLIBMM=m
 # PTXCONF_LAME is not set
 # PTXCONF_LIBID3TAG is not set
 # PTXCONF_LIBMAD is not set
+# PTXCONF_LIBMIKMOD is not set
 # PTXCONF_MADPLAY is not set
 # PTXCONF_MPG123 is not set
 # PTXCONF_RAWREC is not set

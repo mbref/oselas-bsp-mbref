@@ -2,6 +2,7 @@
 
 	* xlbsp: upgrade to lates exports from ISE 13.2 (UBIFS)
 	* platform: change from JFFS2 to UBIFS
+	* platform: migrate to ptxdist-2012.05.0
 
 2012-05-02      Stephan Linz <linz@li-pro.net>
 

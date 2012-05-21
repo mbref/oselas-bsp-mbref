@@ -1,3 +1,7 @@
+2012-05-20	Stephan Linz <linz@li-pro.net>
+
+	* platform: migrate to ptxdist-2012.05.0
+
 2012-05-16      Stephan Linz <linz@li-pro.net>
 
 	* common: initial version Avnet-S6LX150T-AXI-full-13.2

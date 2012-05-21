@@ -14,7 +14,7 @@ XILINX		:= false
 #
 
 SHELL		:= /bin/bash
-PTXDIST		:= /usr/bin/ptxdist-2012.03.0
+PTXDIST		:= /usr/bin/ptxdist-2012.05.0
 
 BUILDDATE	:= $(shell date +%y%m%d-%H%M)
 VERSION		:= $(shell ./scripts/setlocalversion ./.tarball-version)
@@ -81,6 +81,12 @@ $(TBZ2_PREFIX)%$(TBZ2_SUFFIX): $(STATEDIR)/%.build | mkdirs
 	@rm -rf "$(2PLATFORMDIR_$(*))"
 
 # special AXI little endian systems
+$(STATEDIR)/Avnet-S6LX150T-AXI-%.build: $(TOOLCHAIN_LE)/ptxconfig | mkdirs
+	@echo "found AXI little endian system"
+	@echo "building Avnet-S6LX150T-AXI-${*} with" $(shell awk -F'[=]' '{printf("%s", $$(NF))}' $<)
+	$(NICE) $(PTXDIST) images --ptxconfig=$(CONFIGFILE) \
+	  --toolchain=$(TOOLCHAIN_LE) --platformconfig=$(2PLATFORMFILE_Avnet-S6LX150T-AXI-$(*))
+
 $(STATEDIR)/Xilinx-ML605-AXI-%.build: $(TOOLCHAIN_LE)/ptxconfig | mkdirs
 	@echo "found AXI little endian system"
 	@echo "building Xilinx-ML605-AXI-${*} with" $(shell awk -F'[=]' '{printf("%s", $$(NF))}' $<)
