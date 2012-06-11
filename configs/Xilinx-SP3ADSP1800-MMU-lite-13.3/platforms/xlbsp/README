@@ -1,0 +1,31 @@
+______________________________________________________________________________
+
+ K N O W N   I S S U E S
+=========================
+
+(1) DTS: MBRef-TPOS doesn't generate correct PHY parameters. Fix to:
+
+	phy0: phy@1 {
+		compatible = "natsemi,dp83865";
+		device_type = "ethernet-phy";
+		reg = <1>;
+	};
+
+______________________________________________________________________________
+
+OF FDT:
+  - copy all files from microblaze_#/libsrc/device-tree_v#_##_# to here:
+	xilinx.dts
+
+U-Boot:
+  - copy all files from microblaze_#/libsrc/uboot_v#_##_# to here:
+	config.mk
+	xparameters.h
+
+Linux:
+  - copy all files from microblaze_#/libsrc/linux_v#_##_# to here:
+	Kconfig.auto
+	auto-config.in
+
+Renew ptxdist project:
+  - run the upgrade script in ptxdist project root (./scripts/xlbsp2ptxdist)
