@@ -215,6 +215,14 @@ ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
+Image recompilation for Xilinx-ML505-MMU-lite-13.3:
+---------------------------------------------------
+ptxdist platform configs/Xilinx-ML505-MMU-lite-13.3/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-ctng-v1.4/microblaze-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
 Image recompilation for Xilinx-ML505-MMU-lite-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML505-MMU-lite-13.2/platformconfig
