@@ -87,6 +87,14 @@ ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
+Image recompilation for Avnet-S6LX150T-AXI-full-13.4:
+-----------------------------------------------------
+ptxdist platform configs/Avnet-S6LX150T-AXI-full-13.4/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-ctng-v1.4/microblazeel-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
 Image recompilation for Avnet-S6LX150T-AXI-full-13.3:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-AXI-full-13.3/platformconfig
