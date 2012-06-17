@@ -33,5 +33,9 @@ xils006-14.1-pre-beta-axienet/0032-axienet-Fix-some-compatibility-things-to-get-
 mbref/0001-uio-pdrv_genirq-Add-OF-compatible-list.patch
 mbref/0002-uartlite-Make-the-number-of-UARTs-registered-configu.patch
 mbref/0003-microblaze-enable-debugger-functionality.patch
+mbref/0004-Allow-more-up-to-32kbyte-DTB.patch
 mbref/0005-iic-OF-Support-for-xilinx-i2c.patch
 mbref/0006-i2c-Use-32bit-accesses-only.patch
+mbref/0007-Revert-Allow-more-up-to-32kbyte-DTB.patch
+mbref/0008-microblaze-Extend-space-for-compiled-in-FDT-to-32kB.patch
+mbref/0009-microblaze-Add-PVR-version-string-for-MB-8.20.b-and-.patch

@@ -1,0 +1,40 @@
+From 199271902f50ef47302a4544ed7bbf3557192b02 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 13 Jul 2011 15:26:09 +0200
+Subject: [PATCH] microblaze: Extend space for compiled-in FDT to 32kB
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/kernel/head.S        |    2 +-
+ arch/microblaze/kernel/vmlinux.lds.S |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/microblaze/kernel/head.S b/arch/microblaze/kernel/head.S
+index 77320b8..2aee1df 100644
+--- a/arch/microblaze/kernel/head.S
++++ b/arch/microblaze/kernel/head.S
+@@ -96,7 +96,7 @@ big_endian:
+ _prepare_copy_fdt:
+ 	or	r11, r0, r0 /* incremment */
+ 	ori	r4, r0, TOPHYS(_fdt_start)
+-	ori	r3, r0, (0x4000 - 4)
++	ori	r3, r0, (0x8000 - 4)
+ _copy_fdt:
+ 	lw	r12, r7, r11 /* r12 = r7 + r11 */
+ 	sw	r12, r4, r11 /* addr[r4 + r11] = r12 */
+diff --git a/arch/microblaze/kernel/vmlinux.lds.S b/arch/microblaze/kernel/vmlinux.lds.S
+index ac0e1a5..109e9d8 100644
+--- a/arch/microblaze/kernel/vmlinux.lds.S
++++ b/arch/microblaze/kernel/vmlinux.lds.S
+@@ -44,7 +44,7 @@ SECTIONS {
+ 	__fdt_blob : AT(ADDR(__fdt_blob) - LOAD_OFFSET) {
+ 		_fdt_start = . ;		/* place for fdt blob */
+ 		*(__fdt_blob) ;			/* Any link-placed DTB */
+-	        . = _fdt_start + 0x4000;	/* Pad up to 16kbyte */
++	        . = _fdt_start + 0x8000;	/* Pad up to 32kbyte */
+ 		_fdt_end = . ;
+ 	}
+ 
+-- 
+1.7.0.4
+
