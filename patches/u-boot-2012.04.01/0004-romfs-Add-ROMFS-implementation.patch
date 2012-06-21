@@ -1,7 +1,7 @@
-From 29c18126bd7f5ba0fce078406052e0d8253030de Mon Sep 17 00:00:00 2001
+From 4c3f37cdcc10f07d4000473d05617c51f05723f2 Mon Sep 17 00:00:00 2001
 From: Michal Simek <monstr@monstr.eu>
 Date: Fri, 14 Aug 2009 10:52:31 +0200
-Subject: [PATCH] romfs: Add ROMFS implementation
+Subject: [PATCH 4/5] romfs: Add ROMFS implementation
 
 Signed-off-by: Michal Simek <monstr@monstr.eu>
 Signed-off-by: Stephan Linz <linz@li-pro.net>
@@ -645,10 +645,10 @@ index 2c6b829..e3fb4e1 100644
  #define CONFIG_CMD_SAVEENV	/* saveenv			*/
  #define CONFIG_CMD_SAVES	/* save S record dump		*/
 diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
-index 6f90abb..7caa735 100644
+index 362506e..6cca774 100644
 --- a/include/configs/microblaze-generic.h
 +++ b/include/configs/microblaze-generic.h
-@@ -254,6 +254,8 @@
+@@ -247,6 +247,8 @@
  #define CONFIG_CMD_MFSL
  #define CONFIG_CMD_ECHO
  

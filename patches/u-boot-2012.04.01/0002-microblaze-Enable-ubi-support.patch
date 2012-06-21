@@ -1,36 +1,23 @@
-From 893969ced8d2a64d9a449f15e20474a1b513da2a Mon Sep 17 00:00:00 2001
-From: Michal Simek <monstr@monstr.eu>
-Date: Tue, 21 Dec 2010 19:11:03 +0100
-Subject: [PATCH] microblaze: Enable ubi support
+From 223831385e3533cb56c34adaddaa66e84a63dfd1 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Thu, 21 Jun 2012 21:40:36 +0200
+Subject: [PATCH 2/5] microblaze: Enable ubi support
 
-Signed-off-by: Michal Simek <monstr@monstr.eu>
+To save memory the UBIFS is disabled by default.
+
+The original patch was introdused with commit:
+0114da7b06bd47b7f5c3f20a152dd11903b38fba
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
 ---
- include/configs/microblaze-generic.h |   16 +++++++++++++---
- 1 files changed, 13 insertions(+), 3 deletions(-)
+ include/configs/microblaze-generic.h |   23 +++++++++++++++++++----
+ 1 files changed, 19 insertions(+), 4 deletions(-)
 
 diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
-index 958d3ad..6f90abb 100644
+index 001597f..68e9bee 100644
 --- a/include/configs/microblaze-generic.h
 +++ b/include/configs/microblaze-generic.h
-@@ -31,6 +31,17 @@
- #define	CONFIG_MICROBLAZE	1
- #define	MICROBLAZE_V5		1
- 
-+/* UBI commands */
-+#define	CONFIG_CMD_UBI
-+#define	CONFIG_RBTREE
-+#define	CONFIG_MTD_PARTITIONS
-+
-+/* UBIFS */
-+/*
-+#define	CONFIG_CMD_UBIFS
-+#define	CONFIG_LZO
-+*/
-+
- /* uart */
- #ifdef XILINX_UARTLITE_BASEADDR
- # define CONFIG_XILINX_UARTLITE
-@@ -150,14 +161,13 @@
+@@ -159,14 +159,13 @@
  		(CONFIG_SYS_SDRAM_SIZE - GENERATED_GBL_DATA_SIZE)
  
  /* monitor code */
@@ -47,6 +34,38 @@ index 958d3ad..6f90abb 100644
  #define	CONFIG_SYS_MALLOC_BASE \
  			(CONFIG_SYS_MONITOR_BASE - CONFIG_SYS_MALLOC_LEN)
  
+@@ -273,6 +272,8 @@
+ # define CONFIG_CMD_FLASH
+ # define CONFIG_CMD_IMLS
+ # define CONFIG_CMD_JFFS2
++# define CONFIG_CMD_UBI
++# undef CONFIG_CMD_UBIFS
+ 
+ # if !defined(RAMENV)
+ #  define CONFIG_CMD_SAVEENV
+@@ -285,7 +286,21 @@
+ #endif
+ 
+ #if defined(CONFIG_CMD_JFFS2)
+-/* JFFS2 partitions */
++# define CONFIG_MTD_PARTITIONS
++#endif
++
++#if defined(CONFIG_CMD_UBIFS)
++# define CONFIG_CMD_UBI
++# define CONFIG_LZO
++#endif
++
++#if defined(CONFIG_CMD_UBI)
++# define CONFIG_MTD_PARTITIONS
++# define CONFIG_RBTREE
++#endif
++
++#if defined(CONFIG_MTD_PARTITIONS)
++/* MTD partitions */
+ #define CONFIG_CMD_MTDPARTS	/* mtdparts command line support */
+ #define CONFIG_MTD_DEVICE	/* needed for mtdparts commands */
+ #define CONFIG_FLASH_CFI_MTD
 -- 
 1.7.0.4
 

@@ -1,0 +1,60 @@
+From dddfa5122b7d5bdd1943c2ee9f0673b3dd4b3c46 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Thu, 21 Jun 2012 19:46:01 +0200
+Subject: [PATCH 1/5] microblaze: avoid compile error on systems without cfi flash
+
+Use XILINX_FLASH_START to set/unset FLASH and RAMENV.
+
+Error was:
+board.c: In function 'board_init':
+board.c:134: error: 'XILINX_FLASH_START' undeclared (first use in this function)
+board.c:134: error: (Each undeclared identifier is reported only once
+board.c:134: error: for each function it appears in.)
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |   14 +++++++++-----
+ 1 files changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index efca136..001597f 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -31,6 +31,15 @@
+ #define	CONFIG_MICROBLAZE	1
+ #define	MICROBLAZE_V5		1
+ 
++/* linear flash memory */
++#ifdef XILINX_FLASH_START
++#define	FLASH
++#undef	RAMENV	/* hold environment in flash */
++#else
++#undef	FLASH
++#define	RAMENV	/* hold environment in RAM */
++#endif
++
+ /* uart */
+ #ifdef XILINX_UARTLITE_BASEADDR
+ # define CONFIG_XILINX_UARTLITE
+@@ -164,9 +173,6 @@
+ /* stack */
+ #define	CONFIG_SYS_INIT_SP_OFFSET	CONFIG_SYS_MALLOC_BASE
+ 
+-/*#define	RAMENV */
+-#define	FLASH
+-
+ #ifdef FLASH
+ # define CONFIG_SYS_FLASH_BASE		XILINX_FLASH_START
+ # define CONFIG_SYS_FLASH_SIZE		XILINX_FLASH_SIZE
+@@ -200,8 +206,6 @@
+ # define CONFIG_ENV_IS_NOWHERE	1
+ # define CONFIG_ENV_SIZE	0x1000
+ # define CONFIG_ENV_ADDR	(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
+-/* hardware flash protection */
+-# define CONFIG_SYS_FLASH_PROTECTION
+ #endif /* !FLASH */
+ 
+ /* system ace */
+-- 
+1.7.0.4
+

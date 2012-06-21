@@ -1,3 +1,5 @@
-0001-microblaze-generic-move-ENV-onto-top-of-flash.patch
+0001-microblaze-avoid-compile-error-on-systems-without-cf.patch
 0002-microblaze-Enable-ubi-support.patch
-0003-romfs-Add-ROMFS-implementation.patch
+0003-microblaze-generic-move-ENV-onto-top-of-flash.patch
+0004-romfs-Add-ROMFS-implementation.patch
+0005-Prepare-v2012.04-mbref-20120621.patch
