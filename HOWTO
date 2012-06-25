@@ -63,6 +63,14 @@ References
 ----------
 t.b.d.
 
+Image recompilation for Avnet-S6LX9-AXI-tiny-13.2 (!!! ALPHA !!!):
+------------------------------------------------------------------
+ptxdist platform configs/Avnet-S6LX9-AXI-tiny-13.2/platformconfig
+ptxdist toolchain /opt/tools-4.1.2-mb-ctng-v1.4/microblazeel-unknown-linux-gnu/bin
+ptxdist select configs/ptxconfig
+ptxdist collection configs/startup.collection
+ptxdist images
+
 Image recompilation for Avnet-S6LX150T-MMU-full-13.4:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-MMU-full-13.4/platformconfig
@@ -467,6 +475,17 @@ ptxdist toolchain /opt/tools-4.1.2-mb-petalogix-v2.1/linux-i386/microblaze-unkno
 
 PTXCONF_CROSSCHAIN_VENDOR="Xilinx MicroBlaze Tools v2.0 (20110211.154242)"
 ptxdist toolchain /opt/tools-4.1.2-mb-xilinx-v2.0/microblaze-unknown-linux-gnu/bin
+
+
+______________________________________________________________________________
+Shortcuts: Avnet-S6LX9-AXI
+--------------------------
+
+Shortcut: boot without external FDT-Support:
+--------------------------------------------
+dhcp 0x80900000 /s6lx9/linuximage.ub
+
+bootm 0x80900000
 
 
 ______________________________________________________________________________
