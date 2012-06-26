@@ -1,6 +1,7 @@
 2012-06-26	Stephan Linz <linz@li-pro.net>
 
 	* common: improve build_all.mk make script
+	* common: fix dependency error to toolchains in build_all.mk make script
 
 2012-06-25	Stephan Linz <linz@li-pro.net>
 

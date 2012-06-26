@@ -75,12 +75,6 @@ $(eval 2TOOLCHAIN_$(subst _,-,$(notdir $(patsubst %/,%,$(dir $(1))))) := \
 		$(TOOLCHAIN_LE), \
 	$(if $(shell PTX_AUTOBUILD_DESTDIR='' source "$(1)" && echo "$${PTXCONF_ENDIAN_BIG}"), \
 		$(TOOLCHAIN_BE), \
-	$(error "$(1): can not determine endianess (big or little)")))) \
-$(eval $(subst _,-,$(notdir $(patsubst %/,%,$(dir $(1))))).toolchain: \
-	$(if $(shell PTX_AUTOBUILD_DESTDIR='' source "$(1)" && echo "$${PTXCONF_ENDIAN_LITTLE}"), \
-		$(TOOLCHAIN_LE)/ptxconfig, \
-	$(if $(shell PTX_AUTOBUILD_DESTDIR='' source "$(1)" && echo "$${PTXCONF_ENDIAN_BIG}"), \
-		$(TOOLCHAIN_BE)/ptxconfig, \
 	$(error "$(1): can not determine endianess (big or little)"))))
 endef
 
@@ -119,7 +113,7 @@ $(TBZ2_PREFIX)%$(TBZ2_SUFFIX): $(STATEDIR)/%.build | mkdirs
 	@rm -rf "$(2PLATFORMDIR_$(*))"
 
 # generic big endian systems
-$(STATEDIR)/%.build: %.toolchain | mkdirs
+$(STATEDIR)/%.build: $(TOOLCHAIN_BE)/ptxconfig $(TOOLCHAIN_LE)/ptxconfig | mkdirs
 	@echo "******************************************************************************"
 	@echo "building:  $(2PLATFORMNAME_$(*))"
 	@echo " version:  $(2PLATFORMVERS_$(*))"
