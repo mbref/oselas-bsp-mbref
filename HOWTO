@@ -487,6 +487,14 @@ dhcp 0x80900000 /s6lx9/linuximage.ub
 
 bootm 0x80900000
 
+Shortcut: write U-Boot XLBLOB into Flash:
+-----------------------------------------
+dhcp 0x80900000 /s6lx9/u-boot-xl.bin
+
+sf probe
+sf erase F80000 +60000
+sf write 0x80900000 F80000 $filesize
+
 
 ______________________________________________________________________________
 Shortcuts: Avnet-S6LX150T-MMU

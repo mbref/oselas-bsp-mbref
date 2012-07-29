@@ -2,6 +2,7 @@
 
 	* common: adapt latest patch sets to linux-3.3
 	* common: adapt latest patch sets to u-boot-2012.07-rc3
+	* common: HOWTO: add XLBLOB shortcut for Avnet-S6LX9-AXI-tiny-13.2
 
 2012-06-26	Stephan Linz <linz@li-pro.net>
 
