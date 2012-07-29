@@ -1,4 +1,8 @@
-2012-06-16      Stephan Linz <linz@li-pro.net>
+2012-07-29	Stephan Linz <linz@li-pro.net>
+
+	* xlbsp: upgrade to lates exports from ISE 13.4
+
+2012-06-16	Stephan Linz <linz@li-pro.net>
 
 	* common: initial version Avnet-S6LX150T-AXI-full-13.4
 
