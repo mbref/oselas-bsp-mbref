@@ -1,0 +1,30 @@
+From 2a6092b79a3cbb8679a6a60653968ae91ebbe110 Mon Sep 17 00:00:00 2001
+From: Wendy Liang <wendy.liang@petalogix.com>
+Date: Mon, 5 Mar 2012 15:29:36 +1000
+Subject: [PATCH] AXI Eth MDIO: correct AXI eth mdio bus id
+
+Currently, the AXI ethernet mdio bus id is set as the mdio device node start
+address, but the mdio node don't have a start address. Use the start address
+of the AXI ethernet controller which connects to the MDIO bus instead.
+
+Signed-off-by: Wendy Liang <wendy.liang@petalogix.com>
+---
+ drivers/net/ethernet/xilinx/xilinx_axienet_mdio.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/net/ethernet/xilinx/xilinx_axienet_mdio.c b/drivers/net/ethernet/xilinx/xilinx_axienet_mdio.c
+index 0f22d9a..fe58e0c 100755
+--- a/drivers/net/ethernet/xilinx/xilinx_axienet_mdio.c
++++ b/drivers/net/ethernet/xilinx/xilinx_axienet_mdio.c
+@@ -220,7 +220,7 @@ int axienet_mdio_setup(struct axienet_local *lp, struct device_node *np)
+ 	if (!bus)
+ 		return -ENOMEM;
+ 
+-	of_address_to_resource(np1, 0, &res);
++	of_address_to_resource(npp, 0, &res);
+ 	snprintf(bus->id, MII_BUS_ID_SIZE, "%.8llx",
+ 		 (unsigned long long)res.start);
+ 	bus->priv = lp;
+-- 
+1.7.0.4
+

@@ -1,0 +1,57 @@
+From a2c490fa1689d56a0895eef885f5fce38c0231ab Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 13 Mar 2012 13:10:09 +0100
+Subject: [PATCH] arm: zynq: Fix timer code with new OF gic initialization
+
+Some changes to get timer work with new OF git initialization.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/arm/mach-zynq/timer.c |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-zynq/timer.c b/arch/arm/mach-zynq/timer.c
+index 3ffea7f..38021dc 100644
+--- a/arch/arm/mach-zynq/timer.c
++++ b/arch/arm/mach-zynq/timer.c
+@@ -24,6 +24,7 @@
+ #include <linux/clockchips.h>
+ #include <linux/io.h>
+ #include <linux/of.h>
++#include <linux/of_irq.h>
+ 
+ #include <asm/mach/time.h>
+ #include <asm/smp_twd.h>
+@@ -50,9 +51,6 @@
+ #define XTTCPSS_CLOCKSOURCE	0	/* Timer 1 as a generic timekeeping */
+ #define XTTCPSS_CLOCKEVENT	1	/* Timer 2 as a clock event */
+ 
+-#define XTTCPSS_TIMER_BASE		TTC0_BASE
+-#define XTTCPCC_EVENT_TIMER_IRQ		(IRQ_TIMERCOUNTER0 + 1)
+-
+ /*
+  * Timer Register Offset Definitions of Timer 1, Increment base address by 4
+  * and use same offsets for Timer 2
+@@ -294,7 +292,7 @@ static void __init xttcpss_timer_init(void)
+ 	timer = of_find_compatible_node(NULL, NULL, timer_list[0]);
+ 	if (timer) {
+ 		timer_baseaddr = be32_to_cpup(of_get_property(timer, "reg", NULL));
+-		irq = be32_to_cpup(of_get_property(timer, "interrupts", NULL)) + 1;
++		irq = irq_of_parse_and_map(timer, 1);
+ 		prop = (void *)of_get_property(timer, "clock-frequency", NULL);
+ 	} else {
+ 		printk(KERN_ERR "Xilinx, no compatible timer found, using default\n");
+@@ -305,6 +303,10 @@ static void __init xttcpss_timer_init(void)
+ 	/* Map the memory so it's accessible in the page table */
+ 
+ 	timer_baseaddr = (u32)ioremap(timer_baseaddr, PAGE_SIZE);
++	if (!timer_baseaddr) {
++		printk(KERN_EMERG "Timer ioremap failed!\n");
++		BUG();
++	}
+ 	timers[XTTCPSS_CLOCKSOURCE].base_addr = (void __iomem *)timer_baseaddr;
+ 	timers[XTTCPSS_CLOCKEVENT].base_addr = (void __iomem *)timer_baseaddr + 4;
+ 
+-- 
+1.7.0.4
+

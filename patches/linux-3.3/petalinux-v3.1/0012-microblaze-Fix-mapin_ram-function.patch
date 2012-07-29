@@ -1,0 +1,45 @@
+From 7c0d26150781cbd8a522259c9dea9e7ef23df8e3 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Thu, 22 Dec 2011 12:33:24 +0100
+Subject: [PATCH] microblaze: Fix mapin_ram function
+
+Fix how many pages are allocated in mapin_ram. It is lowmem_size
+not setup CONFIG_LOWMEM_SIZE because it is the same for all systems.
+Which means that wrong pages are allocated if memory size is smaller
+than CONFIG_LOWMEM_SIZE. It has dramatic impact on bootup time.
+On sp605 MMU full hw design is 7s.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/include/asm/page.h |    1 +
+ arch/microblaze/mm/pgtable.c       |    2 +-
+ 2 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/arch/microblaze/include/asm/page.h b/arch/microblaze/include/asm/page.h
+index 665f293..352cc23 100644
+--- a/arch/microblaze/include/asm/page.h
++++ b/arch/microblaze/include/asm/page.h
+@@ -136,6 +136,7 @@ extern unsigned long max_pfn;
+ 
+ extern unsigned long memory_start;
+ extern unsigned long memory_size;
++extern unsigned long lowmem_size;
+ 
+ extern int page_is_ram(unsigned long pfn);
+ 
+diff --git a/arch/microblaze/mm/pgtable.c b/arch/microblaze/mm/pgtable.c
+index 84905da..d1c06d0 100644
+--- a/arch/microblaze/mm/pgtable.c
++++ b/arch/microblaze/mm/pgtable.c
+@@ -167,7 +167,7 @@ void __init mapin_ram(void)
+ 
+ 	v = CONFIG_KERNEL_START;
+ 	p = memory_start;
+-	for (s = 0; s < CONFIG_LOWMEM_SIZE; s += PAGE_SIZE) {
++	for (s = 0; s < lowmem_size; s += PAGE_SIZE) {
+ 		f = _PAGE_PRESENT | _PAGE_ACCESSED |
+ 				_PAGE_SHARED | _PAGE_HWEXEC;
+ 		if ((char *) v < _stext || (char *) v >= _etext)
+-- 
+1.7.0.4
+

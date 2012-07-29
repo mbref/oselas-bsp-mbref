@@ -1,0 +1,35 @@
+From eaf83a9403c50424967a5be5847fa96b31be0a52 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 22 May 2012 13:49:56 +0200
+Subject: [PATCH] zynq: Remap consoles to different location because of remoteproc
+
+Remoteproc requires 256MB memory and consoles break it.
+Console can't be mapped to that location because after that
+there is no space for remoteproc.
+Move it to higher addresses.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/arm/mach-zynq/include/mach/zynq_soc.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-zynq/include/mach/zynq_soc.h b/arch/arm/mach-zynq/include/mach/zynq_soc.h
+index e8e015d..6ff7015 100644
+--- a/arch/arm/mach-zynq/include/mach/zynq_soc.h
++++ b/arch/arm/mach-zynq/include/mach/zynq_soc.h
+@@ -23,10 +23,10 @@
+ /* Virtual address must be inside vmalloc area - this is weird - better
+  * to create virtual mapping on the fly */
+ #define UART0_PHYS			0xE0000000
+-#define UART0_VIRT			UART0_PHYS + 0x10000000
++#define UART0_VIRT			UART0_PHYS + 0x1E000000
+ 
+ #define UART1_PHYS			0xE0001000
+-#define UART1_VIRT			UART1_PHYS + 0x10000000
++#define UART1_VIRT			UART1_PHYS + 0x1E000000
+ 
+ #define TTC0_PHYS			0xF8001000
+ #define TTC0_VIRT			TTC0_PHYS
+-- 
+1.7.0.4
+

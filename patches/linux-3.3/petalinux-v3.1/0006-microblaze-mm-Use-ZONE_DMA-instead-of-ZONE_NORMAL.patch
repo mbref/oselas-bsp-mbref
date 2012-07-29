@@ -1,0 +1,47 @@
+From 4e2e4124b7fe68b28e9f759b7ecc0ec16307fce6 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Thu, 15 Dec 2011 09:24:06 +0100
+Subject: [PATCH] microblaze: mm: Use ZONE_DMA instead of ZONE_NORMAL
+
+We should use ZONE_DMA because all address space is dma-able.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/Kconfig   |    3 +++
+ arch/microblaze/mm/init.c |    6 +-----
+ 2 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/arch/microblaze/Kconfig b/arch/microblaze/Kconfig
+index c8d6efb..8e9da3d 100644
+--- a/arch/microblaze/Kconfig
++++ b/arch/microblaze/Kconfig
+@@ -27,6 +27,9 @@ config SWAP
+ config RWSEM_GENERIC_SPINLOCK
+ 	def_bool y
+ 
++config ZONE_DMA
++	def_bool y
++
+ config RWSEM_XCHGADD_ALGORITHM
+ 	bool
+ 
+diff --git a/arch/microblaze/mm/init.c b/arch/microblaze/mm/init.c
+index 565d193..a72f424 100644
+--- a/arch/microblaze/mm/init.c
++++ b/arch/microblaze/mm/init.c
+@@ -58,11 +58,7 @@ static void __init paging_init(void)
+ 	/* Clean every zones */
+ 	memset(zones_size, 0, sizeof(zones_size));
+ 
+-	/*
+-	 * old: we can DMA to/from any address.put all page into ZONE_DMA
+-	 * We use only ZONE_NORMAL
+-	 */
+-	zones_size[ZONE_NORMAL] = max_mapnr;
++	zones_size[ZONE_DMA] = max_mapnr;
+ 
+ 	free_area_init(zones_size);
+ }
+-- 
+1.7.0.4
+

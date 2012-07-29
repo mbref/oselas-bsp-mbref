@@ -1,0 +1,30 @@
+From 53a52abfdc6d111aa016a2a11cde620e601ad5d4 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 25 Jun 2012 07:40:44 +0200
+Subject: [PATCH] remoteproc: Select HOTPLUG CPU if SMP is enabled
+
+Fix compilation warning if SMP is turn OFF and Zynq remoteproc
+module is enabled because HOTPLUG_CPU depends on SMP.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/remoteproc/Kconfig |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/remoteproc/Kconfig b/drivers/remoteproc/Kconfig
+index 74456d9..81af655 100644
+--- a/drivers/remoteproc/Kconfig
++++ b/drivers/remoteproc/Kconfig
+@@ -43,8 +43,7 @@ config ZYNQ_REMOTEPROC
+ 	depends on ARCH_ZYNQ
+ 	select REMOTEPROC
+ 	select RPMSG
+-	select SMP
+-	select HOTPLUG_CPU
++	select HOTPLUG_CPU if SMP
+ 	default m
+ 	help
+ 	  Say y here to support Xilinx ZynQ remote processors (the second
+-- 
+1.7.0.4
+

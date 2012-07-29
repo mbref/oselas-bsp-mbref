@@ -1,0 +1,41 @@
+From 503c4955083a6a9d305beb970bbdc46fbc1ff3f5 Mon Sep 17 00:00:00 2001
+From: Mark Grosen <mgrosen@ti.com>
+Date: Tue, 13 Dec 2011 08:41:47 +0200
+Subject: [PATCH] remoteproc: do not require an iommu
+
+Not all remote processors employ an IOMMU, so do not error out
+on !iommu_present().
+
+Note: we currently still use iommu_present() to tell whether we need
+to configure an IOMMU or not. That works for simple cases, but will
+easily fail with more complicated ones (e.g. where an IOMMU exists,
+but not all remote processors use it). When those use cases show up,
+we will solve them by introducing something like remoteproc hw
+capabilities.
+
+[ohad@wizery.com: write commit log]
+
+Signed-off-by: Mark Grosen <mgrosen@ti.com>
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+---
+ drivers/remoteproc/remoteproc_core.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/remoteproc/remoteproc_core.c b/drivers/remoteproc/remoteproc_core.c
+index ad93d7d..0d9a955 100644
+--- a/drivers/remoteproc/remoteproc_core.c
++++ b/drivers/remoteproc/remoteproc_core.c
+@@ -105,8 +105,8 @@ static int rproc_enable_iommu(struct rproc *rproc)
+ 	 * that will be set by the remoteproc driver.
+ 	 */
+ 	if (!iommu_present(dev->bus)) {
+-		dev_err(dev, "iommu not found\n");
+-		return -ENODEV;
++		dev_dbg(dev, "iommu not found\n");
++		return 0;
+ 	}
+ 
+ 	domain = iommu_domain_alloc(dev->bus);
+-- 
+1.7.0.4
+

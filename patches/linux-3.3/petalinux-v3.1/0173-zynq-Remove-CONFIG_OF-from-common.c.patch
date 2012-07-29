@@ -1,0 +1,50 @@
+From 892bb7065f864a9ff9b42a3ae9205c2b655a1d20 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 2 May 2012 14:30:36 +0200
+Subject: [PATCH] zynq: Remove CONFIG_OF from common.c
+
+The whole platform is OF driven.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/arm/mach-zynq/common.c |    7 +------
+ 1 files changed, 1 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/mach-zynq/common.c b/arch/arm/mach-zynq/common.c
+index b1fd0a3..908fad9 100644
+--- a/arch/arm/mach-zynq/common.c
++++ b/arch/arm/mach-zynq/common.c
+@@ -56,24 +56,18 @@ static void __init xilinx_init_machine(void)
+ 	of_platform_bus_probe(NULL, zynq_of_bus_ids, NULL);
+ }
+ 
+-#ifdef CONFIG_OF
+ static const struct of_device_id zynq_dt_irq_match[] __initconst = {
+ 	{ .compatible = "arm,cortex-a9-gic", .data = gic_of_init },
+ 	{ .compatible = "arm,gic", .data = gic_of_init },
+ 	{ }
+ };
+-#endif
+ 
+ /**
+  * xilinx_irq_init() - Interrupt controller initialization for the GIC.
+  */
+ static void __init xilinx_irq_init(void)
+ {
+-#ifdef CONFIG_OF
+ 	of_irq_init(zynq_dt_irq_match);
+-#else
+-	gic_init(0, 29, SCU_GIC_DIST_BASE, SCU_GIC_CPU_BASE);
+-#endif
+ }
+ 
+ /* The minimum devices needed to be mapped before the VM system is up and
+@@ -132,4 +126,5 @@ MACHINE_START(XILINX_EP107, "Xilinx Zynq Platform")
+ 	.timer		= &xttcpss_sys_timer,
+ 	.dt_compat	= xilinx_dt_match,
+ 	.restart        = xilinx_restart,
++	.nr_irqs	= NR_IRQS,
+ MACHINE_END
+-- 
+1.7.0.4
+

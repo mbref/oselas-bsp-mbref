@@ -1,0 +1,40 @@
+From 8dbfc678d08228915e8c7affea114afaa9e6c77c Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 23 Apr 2012 15:07:28 +0200
+Subject: [PATCH] zynq: Do not map OCM because of SMP
+
+SMP code is using SLCR feature how to reset the second core
+that's why it is not necessary to map OCM with bootloader code.
+
+Log:
+BUG: mapping for 0xfffff000 at 0xffffe000 out of vmalloc space
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/arm/mach-zynq/common.c |   10 ----------
+ 1 files changed, 0 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm/mach-zynq/common.c b/arch/arm/mach-zynq/common.c
+index 03bc733..3599d9d 100644
+--- a/arch/arm/mach-zynq/common.c
++++ b/arch/arm/mach-zynq/common.c
+@@ -93,16 +93,6 @@ static struct map_desc io_desc[] __initdata = {
+ 	},
+ 
+ 
+-	/* HIGHMEM */
+-	/* create a mapping for the OCM  (256K) leaving a hole for the
+-	* interrupt vectors which are handled in the kernel
+-	*/
+-	{
+-		.virtual        = OCM_HIGH_VIRT,
+-		.pfn            = __phys_to_pfn(OCM_HIGH_PHYS),
+-		.length         = SZ_4K,
+-		.type           = MT_DEVICE,
+-	},
+ #ifdef CONFIG_DEBUG_LL
+ 	{
+ 		.virtual	= LL_UART_VADDR,
+-- 
+1.7.0.4
+

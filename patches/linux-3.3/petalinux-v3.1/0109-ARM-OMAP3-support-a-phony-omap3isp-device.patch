@@ -1,0 +1,42 @@
+From b3724e92a71bf38f71ee4f0acebacba5fe4dee72 Mon Sep 17 00:00:00 2001
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Date: Thu, 20 Oct 2011 21:59:03 +0200
+Subject: [PATCH] ARM: OMAP3: support a phony omap3isp device
+
+This is non-upstream stuff.
+
+Only required to test omap3isp IOMMU functionality.
+
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+---
+ arch/arm/mach-omap2/devices.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-omap2/devices.c b/arch/arm/mach-omap2/devices.c
+index 283d11e..6648c6f 100644
+--- a/arch/arm/mach-omap2/devices.c
++++ b/arch/arm/mach-omap2/devices.c
+@@ -219,6 +219,12 @@ static struct omap_iommu_arch_data omap3_isp_iommu = {
+ 	.name = "isp",
+ };
+ 
++struct isp_platform_data {
++	struct isp_v4l2_subdevs_group *subdevs;
++	void (*set_constraints)(struct isp_device *isp, bool enable);
++};
++static struct isp_platform_data bogus_isp_pdata;
++
+ int omap3_init_camera(struct isp_platform_data *pdata)
+ {
+ 	omap3isp_device.dev.platform_data = pdata;
+@@ -724,6 +730,7 @@ static int __init omap2_init_devices(void)
+ 	omap_init_mcpdm();
+ 	omap_init_dmic();
+ 	omap_init_camera();
++	omap3_init_camera(&bogus_isp_pdata);
+ 	omap_init_mbox();
+ 	omap_init_mcspi();
+ 	omap_init_pmu();
+-- 
+1.7.0.4
+

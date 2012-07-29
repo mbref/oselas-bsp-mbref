@@ -1,0 +1,37 @@
+From 86bdf99f3eb0614fa5ec6e50ab8c9972bb082aa4 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 4 Oct 2011 14:10:29 +0200
+Subject: [PATCH] axienet: Fix mdio driver handling
+
+If phy-handle is not defined do not setup mdio bus.
+It fixes the problem when phy-handle property is missing.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/net/ethernet/xilinx/xilinx_axienet_main.c |   10 +++++++---
+ 1 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/net/ethernet/xilinx/xilinx_axienet_main.c b/drivers/net/ethernet/xilinx/xilinx_axienet_main.c
+index d3f5af6..b38fd80 100755
+--- a/drivers/net/ethernet/xilinx/xilinx_axienet_main.c
++++ b/drivers/net/ethernet/xilinx/xilinx_axienet_main.c
+@@ -1823,9 +1823,13 @@ axienet_probe(struct platform_device *op)
+ 	lp->coalesce_count_tx = XAXIDMA_DFT_TX_THRESHOLD;
+ 
+ 	lp->phy_node = of_parse_phandle(op->dev.of_node, "phy-handle", 0);
+-	rc = axienet_mdio_setup(lp, op->dev.of_node);
+-	if (rc)
+-		dev_warn(&op->dev, "error registering MDIO bus\n");
++	if (lp->phy_node) {
++		dev_dbg(lp->dev, "using PHY node %s (%p)\n", np->full_name, np);
++
++		rc = axienet_mdio_setup(lp, op->dev.of_node);
++		if (rc)
++			dev_warn(&op->dev, "error registering MDIO bus\n");
++	}
+ 
+ 	rc = register_netdev(lp->ndev);
+ 	if (rc) {
+-- 
+1.7.0.4
+

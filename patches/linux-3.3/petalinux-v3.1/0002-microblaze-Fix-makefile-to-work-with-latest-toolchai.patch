@@ -1,0 +1,30 @@
+From 00708d421a22a0f82de2dbb91ca6213b3dcc5267 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 5 Mar 2012 15:53:19 +0100
+Subject: [PATCH] microblaze: Fix makefile to work with latest toolchain
+
+When building with latest binutils, vmlinux includes
+some sections which need to be stripped out when building
+the binary image.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/boot/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/microblaze/boot/Makefile b/arch/microblaze/boot/Makefile
+index 0c796cf..34940c8 100644
+--- a/arch/microblaze/boot/Makefile
++++ b/arch/microblaze/boot/Makefile
+@@ -8,7 +8,7 @@ obj-y += linked_dtb.o
+ 
+ targets := linux.bin linux.bin.gz simpleImage.%
+ 
+-OBJCOPYFLAGS := -O binary
++OBJCOPYFLAGS := -R .note -R .comment -R .note.gnu.build-id -O binary
+ 
+ # Ensure system.dtb exists
+ $(obj)/linked_dtb.o: $(obj)/system.dtb
+-- 
+1.7.0.4
+

@@ -1,0 +1,34 @@
+From 0e7c7d2959a4d0d02827ea12e501201e2b1ce1c1 Mon Sep 17 00:00:00 2001
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Date: Sun, 29 Jan 2012 14:04:43 +0200
+Subject: [PATCH] ARM: OMAP4: adapt rproc CMA base addr to 3.3 RAM truncation
+
+On 3.3 the System RAM is truncated earlier than it was before,
+due to an increase in the vmalloc region to 240MB (from 120MB);
+see commit 0536bdf33faff4d940ac094c77998cfac368cfff "ARM: move
+iotable mappings within the vmalloc region".
+
+Adapt the rproc CMA region to accomodate that (otherwise some of the pages
+will elicit invalid pfn warnings when the cma regions are activated).
+
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+---
+ arch/arm/mach-omap2/remoteproc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-omap2/remoteproc.c b/arch/arm/mach-omap2/remoteproc.c
+index 9d75cd9..f267881 100644
+--- a/arch/arm/mach-omap2/remoteproc.c
++++ b/arch/arm/mach-omap2/remoteproc.c
+@@ -32,7 +32,7 @@
+  * This will go away as soon as we have the IOMMU-based generic
+  * DMA API in place.
+  */
+-#define OMAP_RPROC_CMA_BASE	(0xa9800000)
++#define OMAP_RPROC_CMA_BASE	(0xa9000000)
+ 
+ /*
+  * These data structures define platform-specific information
+-- 
+1.7.0.4
+

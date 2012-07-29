@@ -1,0 +1,40 @@
+From a6b0ffd69e7c653f48f1c46d3c32a04a0a8130a7 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 28 May 2012 09:56:40 +0200
+Subject: [PATCH] microblaze: Show message when reset gpio is not present
+
+Also remove dump_stack because it was identified as confusing.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/kernel/reset.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/arch/microblaze/kernel/reset.c b/arch/microblaze/kernel/reset.c
+index 88a0163..8d663d9 100644
+--- a/arch/microblaze/kernel/reset.c
++++ b/arch/microblaze/kernel/reset.c
+@@ -63,7 +63,11 @@ static void gpio_system_reset(void)
+ 	gpio_set_value(handle, 1 - reset_val);
+ }
+ #else
+-#define gpio_system_reset() do {} while (0)
++static void gpio_system_reset(void)
++{
++	printk(KERN_NOTICE "No reset GPIO present - halting!\n");
++}
++
+ void of_platform_reset_gpio_probe(void)
+ {
+ 	return;
+@@ -74,7 +78,6 @@ void machine_restart(char *cmd)
+ {
+ 	printk(KERN_NOTICE "Machine restart...\n");
+ 	gpio_system_reset();
+-	dump_stack();
+ 	while (1)
+ 		;
+ }
+-- 
+1.7.0.4
+

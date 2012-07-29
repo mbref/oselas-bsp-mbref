@@ -1,0 +1,33 @@
+From ee19b424b4ba8674a18943bf43d82d026d1e5bed Mon Sep 17 00:00:00 2001
+From: Joe Perches <joe@perches.com>
+Date: Tue, 28 Feb 2012 10:49:33 -0800
+Subject: [PATCH] microblaze: Use vsprintf extention %pf with builtin_return_address
+
+Emit the function name not the address when possible.
+
+builtin_return_address() gives an address.  When building
+a kernel with CONFIG_KALLSYMS, emit the actual function
+name not the address.
+
+Signed-off-by: Joe Perches <joe@perches.com>
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/mm/pgtable.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/microblaze/mm/pgtable.c b/arch/microblaze/mm/pgtable.c
+index 59bf233..e3a68bb 100644
+--- a/arch/microblaze/mm/pgtable.c
++++ b/arch/microblaze/mm/pgtable.c
+@@ -80,7 +80,7 @@ static void __iomem *__ioremap(phys_addr_t addr, unsigned long size,
+ 		!(p >= virt_to_phys((unsigned long)&__bss_stop) &&
+ 		p < virt_to_phys((unsigned long)__bss_stop))) {
+ 		printk(KERN_WARNING "__ioremap(): phys addr "PTE_FMT
+-			" is RAM lr %p\n", (unsigned long)p,
++			" is RAM lr %pf\n", (unsigned long)p,
+ 			__builtin_return_address(0));
+ 		return NULL;
+ 	}
+-- 
+1.7.0.4
+

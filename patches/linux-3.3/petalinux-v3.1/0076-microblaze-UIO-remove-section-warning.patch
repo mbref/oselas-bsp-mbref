@@ -1,0 +1,34 @@
+From dd5a08d61b7a4f4884d9865098b16931c68d2d51 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 12 Dec 2011 13:34:44 +0100
+Subject: [PATCH] microblaze: UIO remove section warning
+
+Log:
+WARNING: vmlinux.o(.data+0xc0e4): Section mismatch in reference
+from the variable uio_pdrv_genirq to the variable .devinit.rodata:uio_of_genirq_match
+The variable uio_pdrv_genirq references
+the variable __devinitconst uio_of_genirq_match
+If the reference is valid then annotate the
+variable with __init* or __refdata (see linux/init.h) or name the variable:
+*driver, *_template, *_timer, *_sht, *_ops, *_probe, *_probe_one, *_console,
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/uio/uio_pdrv_genirq.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/uio/uio_pdrv_genirq.c b/drivers/uio/uio_pdrv_genirq.c
+index b98371d..720cc15 100644
+--- a/drivers/uio/uio_pdrv_genirq.c
++++ b/drivers/uio/uio_pdrv_genirq.c
+@@ -255,6 +255,7 @@ static const struct dev_pm_ops uio_pdrv_genirq_dev_pm_ops = {
+ 
+ #ifdef CONFIG_OF
+ static const struct of_device_id uio_of_genirq_match[] = {
++	{ .compatible = "generic-uio", },
+ 	{ /* empty for now */ },
+ };
+ MODULE_DEVICE_TABLE(of, uio_of_genirq_match);
+-- 
+1.7.0.4
+

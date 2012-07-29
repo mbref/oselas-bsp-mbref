@@ -1,0 +1,28 @@
+From 03bbd2d4b7e4aada5a4b879f8b97c900980333d1 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 13 Mar 2012 13:18:54 +0100
+Subject: [PATCH] arm: zynq: Use new platform compatibility string
+
+New device-tree compatibility string.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/arm/mach-zynq/common.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-zynq/common.c b/arch/arm/mach-zynq/common.c
+index a6c78e6..eee9f9a 100644
+--- a/arch/arm/mach-zynq/common.c
++++ b/arch/arm/mach-zynq/common.c
+@@ -100,7 +100,7 @@ static void __init xilinx_map_io(void)
+ }
+ 
+ static const char *xilinx_dt_match[] = {
+-	"xlnx,zynq-ep107",
++	"xlnx,zynq-zc770",
+ 	NULL
+ };
+ 
+-- 
+1.7.0.4
+

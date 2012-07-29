@@ -1,0 +1,45 @@
+From 5e172fa4ea8b9057a8acbd00cf1d6350b9f32123 Mon Sep 17 00:00:00 2001
+From: John Linn <john.linn@xilinx.com>
+Date: Tue, 4 Oct 2011 14:13:34 -0600
+Subject: [PATCH] Xilinx: ARM: Video: Updated Xilinx FB driver for ARM
+
+A minor change was made to allow it to work on ARM.
+There are still issues with some of the device tree
+properties which are not required (resolution) as they
+default in the driver.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/video/Kconfig    |    2 +-
+ drivers/video/xilinxfb.c |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/video/Kconfig b/drivers/video/Kconfig
+index f4263f0..0385679 100644
+--- a/drivers/video/Kconfig
++++ b/drivers/video/Kconfig
+@@ -2199,7 +2199,7 @@ config FB_PS3_DEFAULT_SIZE_M
+ 
+ config FB_XILINX
+ 	tristate "Xilinx frame buffer support"
+-	depends on FB && (XILINX_VIRTEX || MICROBLAZE)
++	depends on FB && (XILINX_VIRTEX || MICROBLAZE || ARCH_ZYNQ)
+ 	select FB_CFB_FILLRECT
+ 	select FB_CFB_COPYAREA
+ 	select FB_CFB_IMAGEBLIT
+diff --git a/drivers/video/xilinxfb.c b/drivers/video/xilinxfb.c
+index 2ffb3af..27b7f13 100644
+--- a/drivers/video/xilinxfb.c
++++ b/drivers/video/xilinxfb.c
+@@ -154,7 +154,7 @@ static void xilinx_fb_out_be32(struct xilinxfb_drvdata *drvdata, u32 offset,
+ 				u32 val)
+ {
+ 	if (drvdata->flags & PLB_ACCESS_FLAG)
+-		out_be32(drvdata->regs + (offset << 2), val);
++		iowrite32(val, drvdata->regs + (offset << 2));
+ #ifdef CONFIG_PPC_DCR
+ 	else
+ 		dcr_write(drvdata->dcr_host, offset, val);
+-- 
+1.7.0.4
+

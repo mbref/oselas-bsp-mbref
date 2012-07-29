@@ -1,0 +1,31 @@
+From b66ca07ad499c885f993b60459fb6162ca455da2 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Thu, 31 May 2012 09:40:28 +0200
+Subject: [PATCH] xylonfb: Check return value for interrupt allocation
+
+xylonfb shouldn't be probed when IRQ is already allocated.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/video/xylon/xylonfb/xylonfb-main.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/video/xylon/xylonfb/xylonfb-main.c b/drivers/video/xylon/xylonfb/xylonfb-main.c
+index b88154a..f93c763 100644
+--- a/drivers/video/xylon/xylonfb/xylonfb-main.c
++++ b/drivers/video/xylon/xylonfb/xylonfb-main.c
+@@ -1735,8 +1735,9 @@ static int xylonfb_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	common_data->xylonfb_irq = irq_res->start;
+-	if (request_irq(common_data->xylonfb_irq, xylonfb_isr,
+-			IRQF_TRIGGER_HIGH, PLATFORM_DRIVER_NAME, afbi)) {
++	rc = request_irq(common_data->xylonfb_irq, xylonfb_isr,
++			IRQF_TRIGGER_HIGH, PLATFORM_DRIVER_NAME, afbi);
++	if (rc) {
+ 		common_data->xylonfb_irq = 0;
+ 		goto err_fb;
+ 	}
+-- 
+1.7.0.4
+

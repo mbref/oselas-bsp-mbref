@@ -1,0 +1,33 @@
+From b54ccc2900e1aae82438ce031308c6de887475d3 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 30 May 2012 12:11:17 +0200
+Subject: [PATCH] xylon: Xylon FB depends on proc device tree
+
+Directfb implementation requires proc device tree entries
+which reads. Enable it by default.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/video/xylon/xylonfb/Kconfig |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/video/xylon/xylonfb/Kconfig b/drivers/video/xylon/xylonfb/Kconfig
+index a90e91d..ed38130 100644
+--- a/drivers/video/xylon/xylonfb/Kconfig
++++ b/drivers/video/xylon/xylonfb/Kconfig
+@@ -5,9 +5,11 @@ menuconfig FB_XYLON
+ 	select FB_CFB_FILLRECT
+ 	select FB_CFB_COPYAREA
+ 	select FB_CFB_IMAGEBLIT
++	select PROC_DEVICETREE
+ 	help
+ 	  Choose this option if you want to use the Xylon logiCVC as frame
+-	  buffer device. Without the support of PCI & AGP.
++	  buffer device. Without the support of PCI & AGP. Device-tree
++	  dependency is directfb requirement.
+ 
+ config FB_XYLON_PLATFORM
+ 	bool "Xylon logiCVC frame buffer platform driver"
+-- 
+1.7.0.4
+

@@ -1,0 +1,34 @@
+From 89a41947129e8248beefe8932561cbe27b1bbef6 Mon Sep 17 00:00:00 2001
+From: Edgar E. Iglesias <edgar.iglesias@gmail.com>
+Date: Fri, 24 Feb 2012 14:52:25 +1000
+Subject: [PATCH] microblaze: Setup correct pointer to TLS area
+
+Setup a pointer to the TLS area in copy_thread.
+r10 is 6th argumetn which contains TLS area.
+And r21 is the thread reg.
+
+Signed-off-by: Edgar E. Iglesias <edgar.iglesias@gmail.com>
+Signed-off-by: David Holsgrove <david.holsgrove@petalogix.com>
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/kernel/process.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/arch/microblaze/kernel/process.c b/arch/microblaze/kernel/process.c
+index 7dcb5bf..963fe40 100644
+--- a/arch/microblaze/kernel/process.c
++++ b/arch/microblaze/kernel/process.c
+@@ -185,8 +185,9 @@ int copy_thread(unsigned long clone_flags, unsigned long usp,
+ #endif
+ 	ti->cpu_context.r15 = (unsigned long)ret_from_fork - 8;
+ 
++	/* r21 is the thread reg, r10 is 6th arg to clone which contains TLS area */
+ 	if (clone_flags & CLONE_SETTLS)
+-		;
++		childregs->r21 = childregs->r10;
+ 
+ 	return 0;
+ }
+-- 
+1.7.0.4
+

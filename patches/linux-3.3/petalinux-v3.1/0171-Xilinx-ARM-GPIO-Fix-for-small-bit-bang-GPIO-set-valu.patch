@@ -1,0 +1,47 @@
+From 8a5847fa71c225cde80596cee44c803556c401bd Mon Sep 17 00:00:00 2001
+From: David Luman <dluman@cmlab.biz>
+Date: Fri, 30 Mar 2012 13:58:19 -0600
+Subject: [PATCH] Xilinx: ARM: GPIO: Fix for small bit-bang GPIO set value problem
+
+Using GPIO to bit-bang an SPI interface, a problem was found. When the kernel
+code needed to set the MOSI signal to TRUE, it called gpio_set_value. But
+gpio_set_value was called with a value greater than 1 instead of 1 (10000000).
+
+Since the xgpiops_set_value function was expecting to see the variable state
+set to be a value of 0 or 1, the value, while not zero, was seen as zero due
+to the AND'ing of the variable state with 1.
+
+This change corrects this behavior by testing the variable state and setting it
+to be 1 if it is initially a non-zero value.
+
+Signed-off-by: David Luman dluman@cmlab.biz
+---
+ drivers/gpio/xilinx_gpiops.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpio/xilinx_gpiops.c b/drivers/gpio/xilinx_gpiops.c
+index 7700fdd..48edf77 100644
+--- a/drivers/gpio/xilinx_gpiops.c
++++ b/drivers/gpio/xilinx_gpiops.c
+@@ -193,7 +193,7 @@ static int xgpiops_get_value(struct gpio_chip *chip, unsigned int pin)
+  *
+  * This function calculates the register offset (i.e to lower 16 bits or
+  * upper 16 bits) based on the given pin number and sets the state of a
+- * gpio pin to the specified value. The state is either 0 or 1.
++ * gpio pin to the specified value. The state is either 0 or non-zero.
+  */
+ static void xgpiops_set_value(struct gpio_chip *chip, unsigned int pin,
+ 			       int state)
+@@ -215,7 +215,8 @@ static void xgpiops_set_value(struct gpio_chip *chip, unsigned int pin,
+ 	 * get the 32 bit value to be written to the mask/data register where
+ 	 * the upper 16 bits is the mask and lower 16 bits is the data
+ 	 */
+-	state &= 0x01;
++	if (state)
++		state = 1;
+ 	state = ~(1 << (bank_pin_num + 16)) & ((state << bank_pin_num) |
+ 					       0xFFFF0000);
+ 
+-- 
+1.7.0.4
+

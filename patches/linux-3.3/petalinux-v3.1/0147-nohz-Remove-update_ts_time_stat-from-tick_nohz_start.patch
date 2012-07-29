@@ -1,0 +1,40 @@
+From febf4e7a36abe2ca2cb63d0bfb85a0bd17b3484f Mon Sep 17 00:00:00 2001
+From: Michal Hocko <mhocko@suse.cz>
+Date: Thu, 1 Dec 2011 17:00:22 +0100
+Subject: [PATCH] nohz: Remove update_ts_time_stat from tick_nohz_start_idle
+
+There is no reason to call update_ts_time_stat from tick_nohz_start_idle
+anymore (after e0e37c20 sched: Eliminate the ts->idle_lastupdate field)
+when we updated idle_lastupdate unconditionally.
+
+We haven't set idle_active yet and do not provide last_update_time so
+the whole call end up being just 2 wasted branches.
+
+Signed-off-by: Michal Hocko <mhocko@suse.cz>
+Cc: Arjan van de Ven <arjan@linux.intel.com>
+Link: http://lkml.kernel.org/r/1322755222-6951-1-git-send-email-mhocko@suse.cz
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+---
+ kernel/time/tick-sched.c |    6 +-----
+ 1 files changed, 1 insertions(+), 5 deletions(-)
+
+diff --git a/kernel/time/tick-sched.c b/kernel/time/tick-sched.c
+index 7656642..8cfffd9 100644
+--- a/kernel/time/tick-sched.c
++++ b/kernel/time/tick-sched.c
+@@ -182,11 +182,7 @@ static void tick_nohz_stop_idle(int cpu, ktime_t now)
+ 
+ static ktime_t tick_nohz_start_idle(int cpu, struct tick_sched *ts)
+ {
+-	ktime_t now;
+-
+-	now = ktime_get();
+-
+-	update_ts_time_stats(cpu, ts, now, NULL);
++	ktime_t now = ktime_get();
+ 
+ 	ts->idle_entrytime = now;
+ 	ts->idle_active = 1;
+-- 
+1.7.0.4
+

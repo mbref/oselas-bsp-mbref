@@ -1,0 +1,37 @@
+From 91d068507db48382c72dcb3dabe06d76d7d57762 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 15 May 2012 10:26:39 +0200
+Subject: [PATCH] zynq: Remap early console to vmalloc area
+
+Here is problem with ARM because early mapping setups
+virtual address. It will be much better to just use physical
+address and virtual address should be returned by the kernel.
+
+Anyway origin early console mapping was to address 0xe0001000
+which is lowmem area for ram size greater than 512MB.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/arm/mach-zynq/include/mach/zynq_soc.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-zynq/include/mach/zynq_soc.h b/arch/arm/mach-zynq/include/mach/zynq_soc.h
+index ffd5255..e8e015d 100644
+--- a/arch/arm/mach-zynq/include/mach/zynq_soc.h
++++ b/arch/arm/mach-zynq/include/mach/zynq_soc.h
+@@ -23,10 +23,10 @@
+ /* Virtual address must be inside vmalloc area - this is weird - better
+  * to create virtual mapping on the fly */
+ #define UART0_PHYS			0xE0000000
+-#define UART0_VIRT			UART0_PHYS + 0x800000
++#define UART0_VIRT			UART0_PHYS + 0x10000000
+ 
+ #define UART1_PHYS			0xE0001000
+-#define UART1_VIRT			UART1_PHYS + 0x800000
++#define UART1_VIRT			UART1_PHYS + 0x10000000
+ 
+ #define TTC0_PHYS			0xF8001000
+ #define TTC0_VIRT			TTC0_PHYS
+-- 
+1.7.0.4
+

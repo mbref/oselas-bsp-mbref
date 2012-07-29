@@ -1,0 +1,35 @@
+From c454f3aa783588b587f6c9ed9e876354738f8a32 Mon Sep 17 00:00:00 2001
+From: Mark Grosen <mgrosen@ti.com>
+Date: Tue, 13 Dec 2011 09:14:15 +0200
+Subject: [PATCH] remoteproc: avoid registering a virtio device if not supported
+
+Let remoteproc know when the firmware doesn't support any virtio
+functionality, so registering a virtio device can be avoided.
+
+This is needed for remote processors that doesn't require any
+virtio-based communications, but are still controlled via remoteproc.
+
+[ohad@wizery.com: write commit log]
+
+Signed-off-by: Mark Grosen <mgrosen@ti.com>
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+---
+ drivers/remoteproc/remoteproc_core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/remoteproc/remoteproc_core.c b/drivers/remoteproc/remoteproc_core.c
+index 0d9a955..080c056 100644
+--- a/drivers/remoteproc/remoteproc_core.c
++++ b/drivers/remoteproc/remoteproc_core.c
+@@ -695,7 +695,7 @@ static int
+ rproc_handle_virtio_rsc(struct rproc *rproc, struct fw_resource *rsc, int len)
+ {
+ 	struct device *dev = rproc->dev;
+-	int ret = 0;
++	int ret = -ENODEV;
+ 
+ 	for (; len >= sizeof(*rsc); rsc++, len -= sizeof(*rsc))
+ 		if (rsc->type == RSC_VIRTIO_DEV) {
+-- 
+1.7.0.4
+

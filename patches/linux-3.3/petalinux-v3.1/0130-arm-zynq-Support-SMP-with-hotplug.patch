@@ -1,0 +1,293 @@
+From de50f63d1f7b41607a2bc583a22acac743343e27 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 13 Mar 2012 13:13:35 +0100
+Subject: [PATCH] arm: zynq: Support SMP with hotplug
+
+The main problem is how to rerun the second cpu.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/arm/Kconfig                           |    1 +
+ arch/arm/mach-zynq/Makefile                |    1 +
+ arch/arm/mach-zynq/common.c                |   11 ++
+ arch/arm/mach-zynq/include/mach/system.h   |    2 +
+ arch/arm/mach-zynq/include/mach/zynq_soc.h |   16 +++
+ arch/arm/mach-zynq/platsmp.c               |  164 ++++++++++++++++++++++++++++
+ arch/arm/plat-versatile/platsmp.c          |    4 +-
+ 7 files changed, 197 insertions(+), 2 deletions(-)
+ create mode 100644 arch/arm/mach-zynq/platsmp.c
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index dfb0312..4ee779d 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -981,6 +981,7 @@ config ARCH_ZYNQ
+ 	select ICST
+ 	select MIGHT_HAVE_CACHE_L2X0
+ 	select USE_OF
++	select HAVE_SMP
+ 	help
+ 	  Support for Xilinx Zynq ARM Cortex A9 Platform
+ endchoice
+diff --git a/arch/arm/mach-zynq/Makefile b/arch/arm/mach-zynq/Makefile
+index 397268c..a745bd8 100644
+--- a/arch/arm/mach-zynq/Makefile
++++ b/arch/arm/mach-zynq/Makefile
+@@ -4,3 +4,4 @@
+ 
+ # Common support
+ obj-y				:= common.o timer.o
++obj-$(CONFIG_SMP)               += platsmp.o
+diff --git a/arch/arm/mach-zynq/common.c b/arch/arm/mach-zynq/common.c
+index 4b92110..1b886cd 100644
+--- a/arch/arm/mach-zynq/common.c
++++ b/arch/arm/mach-zynq/common.c
+@@ -92,6 +92,17 @@ static struct map_desc io_desc[] __initdata = {
+ 		.type		= MT_DEVICE,
+ 	},
+ 
++
++	/* HIGHMEM */
++	/* create a mapping for the OCM  (256K) leaving a hole for the
++	* interrupt vectors which are handled in the kernel
++	*/
++	{
++		.virtual        = OCM_HIGH_VIRT,
++		.pfn            = __phys_to_pfn(OCM_HIGH_PHYS),
++		.length         = SZ_4K,
++		.type           = MT_DEVICE,
++	},
+ #ifdef CONFIG_DEBUG_LL
+ 	{
+ 		.virtual	= UART0_VIRT,
+diff --git a/arch/arm/mach-zynq/include/mach/system.h b/arch/arm/mach-zynq/include/mach/system.h
+index 8e88e0b..d597efc 100644
+--- a/arch/arm/mach-zynq/include/mach/system.h
++++ b/arch/arm/mach-zynq/include/mach/system.h
+@@ -20,4 +20,6 @@ static inline void arch_idle(void)
+ 	cpu_do_idle();
+ }
+ 
++extern void zynq_cpu1_start(u32 status, u32 addr);
++
+ #endif
+diff --git a/arch/arm/mach-zynq/include/mach/zynq_soc.h b/arch/arm/mach-zynq/include/mach/zynq_soc.h
+index e2a399a..42a4881 100644
+--- a/arch/arm/mach-zynq/include/mach/zynq_soc.h
++++ b/arch/arm/mach-zynq/include/mach/zynq_soc.h
+@@ -46,4 +46,20 @@
+ #define LL_UART_PADDR	UART0_PHYS
+ #define LL_UART_VADDR	UART0_VIRT
+ 
++
++/* There are two OCM addresses needed for communication between CPUs in SMP.
++ * The memory addresses are in the high on-chip RAM and these addresses are
++ * mapped flat (virtual = physical). The memory must be mapped early and
++ * non-cached.
++ */
++#define BOOT_ADDR_OFFSET	0xFF0
++#define BOOT_STATUS_OFFSET	0xFF4
++#define BOOT_STATUS_CPU1_UP	1
++
++/* not possible to you the last page */
++#define OCM_HIGH_PHYS			0xFFFFF000
++#define OCM_HIGH_VIRT			(OCM_HIGH_PHYS - 0x1000)
++
++#define OCM_HIGH_BASE			IOMEM(OCM_HIGH_VIRT)
++
+ #endif
+diff --git a/arch/arm/mach-zynq/platsmp.c b/arch/arm/mach-zynq/platsmp.c
+new file mode 100644
+index 0000000..93da503
+--- /dev/null
++++ b/arch/arm/mach-zynq/platsmp.c
+@@ -0,0 +1,164 @@
++/*
++ * This file contains Xilinx specific SMP code, used to start up
++ * the second processor.
++ *
++ * Copyright (C) 2011 Xilinx
++ *
++ * based on linux/arch/arm/mach-realview/platsmp.c
++ *
++ * Copyright (C) 2002 ARM Ltd.
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include <linux/module.h>
++#include <linux/jiffies.h>
++#include <linux/init.h>
++#include <linux/io.h>
++#include <asm/cacheflush.h>
++#include <asm/smp_scu.h>
++#include <asm/hardware/gic.h>
++#include <mach/zynq_soc.h>
++#include "common.h"
++
++extern void secondary_startup(void);
++
++static DEFINE_SPINLOCK(boot_lock);
++
++/* Secondary CPU kernel startup is a 2 step process. The primary CPU
++ * starts the secondary CPU by giving it the address of the kernel and
++ * then sending it an event to wake it up. The secondary CPU then
++ * starts the kernel and tells the primary CPU it's up and running.
++ */
++void __cpuinit platform_secondary_init(unsigned int cpu)
++{
++	/*
++	 * if any interrupts are already enabled for the primary
++	 * core (e.g. timer irq), then they will not have been enabled
++	 * for us: do so
++	 */
++	gic_secondary_init(0);
++
++	/* Indicate to the primary core that the secondary is up and running.
++	 * Let the write buffer drain.
++	 */
++	__raw_writel(BOOT_STATUS_CPU1_UP, OCM_HIGH_BASE + BOOT_STATUS_OFFSET);
++	wmb();
++
++	/*
++	 * Synchronise with the boot thread.
++	 */
++	spin_lock(&boot_lock);
++	spin_unlock(&boot_lock);
++}
++
++void zynq_cpu1_start(u32 status, u32 addr)
++{
++	/* Initialize the boot status and give the secondary core
++	 * the start address of the kernel, let the write buffer drain
++	 */
++	__raw_writel(status, OCM_HIGH_BASE + BOOT_STATUS_OFFSET);
++
++	__raw_writel(addr, OCM_HIGH_BASE + BOOT_ADDR_OFFSET);
++
++	wmb();
++
++	/*
++	 * Send an event to wake the secondary core from WFE state.
++	 */
++	sev();
++}
++EXPORT_SYMBOL(zynq_cpu1_start);
++
++int __cpuinit boot_secondary(unsigned int cpu, struct task_struct *idle)
++{
++	unsigned long timeout;
++
++	/*
++	 * set synchronisation state between this boot processor
++	 * and the secondary one
++	 */
++	spin_lock(&boot_lock);
++
++	zynq_cpu1_start(0, virt_to_phys(secondary_startup));
++
++	/*
++	 * Wait for the other CPU to boot, but timeout if it doesn't
++	 */
++	timeout = jiffies + (1 * HZ);
++	while ((__raw_readl(OCM_HIGH_BASE + BOOT_STATUS_OFFSET) !=
++				BOOT_STATUS_CPU1_UP) &&
++				(time_before(jiffies, timeout)))
++		rmb();
++
++	/*
++	 * now the secondary core is starting up let it run its
++	 * calibrations, then wait for it to finish
++	 */
++	spin_unlock(&boot_lock);
++
++	return 0;
++}
++
++/*
++ * Initialise the CPU possible map early - this describes the CPUs
++ * which may be present or become present in the system.
++ */
++void __init smp_init_cpus(void)
++{
++	int i, ncores;
++
++	ncores = scu_get_core_count(SCU_PERIPH_BASE);
++
++	for (i = 0; i < ncores; i++)
++		set_cpu_possible(i, true);
++
++	set_smp_cross_call(gic_raise_softirq);
++}
++
++void __init platform_smp_prepare_cpus(unsigned int max_cpus)
++{
++	int i;
++
++	/*
++	 * Initialise the present map, which describes the set of CPUs
++	 * actually populated at the present time.
++	 */
++	for (i = 0; i < max_cpus; i++)
++		set_cpu_present(i, true);
++
++	scu_enable(SCU_PERIPH_BASE);
++}
++
++/* hotplug part */
++int platform_cpu_kill(unsigned int cpu)
++{
++        return 1;
++}
++
++/*
++ * platform-specific code to shutdown a CPU
++ * Called with IRQs disabled
++ */
++void platform_cpu_die(unsigned int cpu)
++{
++	flush_cache_all();
++
++	while(1);
++}
++
++int platform_cpu_disable(unsigned int cpu)
++{
++        /*
++         * we don't allow CPU 0 to be shutdown (it is still too special
++         * e.g. clock tick interrupts)
++         */
++        return cpu == 0 ? -EPERM : 0;
++}
++
+diff --git a/arch/arm/plat-versatile/platsmp.c b/arch/arm/plat-versatile/platsmp.c
+index 49c7db4..740beb9 100644
+--- a/arch/arm/plat-versatile/platsmp.c
++++ b/arch/arm/plat-versatile/platsmp.c
+@@ -40,7 +40,7 @@ static void __cpuinit write_pen_release(int val)
+ 
+ static DEFINE_SPINLOCK(boot_lock);
+ 
+-void __cpuinit platform_secondary_init(unsigned int cpu)
++void __cpuinit __weak platform_secondary_init(unsigned int cpu)
+ {
+ 	/*
+ 	 * if any interrupts are already enabled for the primary
+@@ -62,7 +62,7 @@ void __cpuinit platform_secondary_init(unsigned int cpu)
+ 	spin_unlock(&boot_lock);
+ }
+ 
+-int __cpuinit boot_secondary(unsigned int cpu, struct task_struct *idle)
++int __cpuinit __weak boot_secondary(unsigned int cpu, struct task_struct *idle)
+ {
+ 	unsigned long timeout;
+ 
+-- 
+1.7.0.4
+

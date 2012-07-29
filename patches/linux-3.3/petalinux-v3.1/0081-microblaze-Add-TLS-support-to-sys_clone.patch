@@ -1,0 +1,40 @@
+From 13d3338c1621fe9ad3e42fbb73df00ee8dc44020 Mon Sep 17 00:00:00 2001
+From: Edgar E. Iglesias <edgar.iglesias@gmail.com>
+Date: Fri, 24 Feb 2012 14:52:26 +1000
+Subject: [PATCH] microblaze: Add TLS support to sys_clone
+
+Formerly unused Args 4/5 now load parent tid / child tid so the brid to
+do_fork can pick up TLS from r10. Arg 3 still unused
+
+There is also necessary to fix old glibc which do not setup r9/r10 (arg 4/5).
+Simple clearing them is fine.
+
+Signed-off-by: Edgar E. Iglesias <edgar.iglesias@gmail.com>
+Signed-off-by: David Holsgrove <david.holsgrove@petalogix.com>
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/kernel/entry.S |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/arch/microblaze/kernel/entry.S b/arch/microblaze/kernel/entry.S
+index 66e34a3..21a2833 100644
+--- a/arch/microblaze/kernel/entry.S
++++ b/arch/microblaze/kernel/entry.S
+@@ -493,10 +493,11 @@ C_ENTRY(sys_clone):
+ 	bnei	r6, 1f;			/* See if child SP arg (arg 1) is 0. */
+ 	lwi	r6, r1, PT_R1;	/* If so, use paret's stack ptr */
+ 1:	addik	r7, r1, 0;			/* Arg 2: parent context */
+-	add	r8, r0, r0;			/* Arg 3: (unused) */
+-	add	r9, r0, r0;			/* Arg 4: (unused) */
++	lwi     r9, r1, PT_R8;          /* parent tid.  */
++	lwi     r10, r1, PT_R9;         /* child tid.  */
++					/* do_fork will pick up TLS from regs->r10.  */
+ 	brid	do_fork		/* Do real work (tail-call) */
+-	add	r10, r0, r0;			/* Arg 5: (unused) */
++	add     r8, r0, r0;             /* Arg 3: (unused) */
+ 
+ C_ENTRY(sys_execve):
+ 	brid	microblaze_execve;	/* Do real work (tail-call).*/
+-- 
+1.7.0.4
+

@@ -1,0 +1,36 @@
+From addeccfe7e276e8c2094a05d1504693a593272f0 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 7 May 2012 14:21:02 +0200
+Subject: [PATCH] microblaze: ftrace: Pass the first calling instruction for dynamic ftrace
+
+Selftest for dynamic ftrace requres to pass address of the first
+calling instruction because hash function is calculated from it.
+
+ftrace_update_ftrace_func setups pointer to function which is called
+in _mcount function. trace_selftest is not aware about instruction
+size (for microblaze 8 - imm and addik) and that's why we have
+to pass in r5 address of imm not addik which is in r15.12
+
+For more info look at ftrace_ops_list_func/ftrace.c.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/kernel/mcount.S |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/microblaze/kernel/mcount.S b/arch/microblaze/kernel/mcount.S
+index e7eaa7a..fc1e132 100644
+--- a/arch/microblaze/kernel/mcount.S
++++ b/arch/microblaze/kernel/mcount.S
+@@ -138,7 +138,7 @@ NOALIGN_ENTRY(ftrace_call)
+ #endif /* CONFIG_DYNAMIC_FTRACE */
+ /* static normal trace */
+ 	lwi	r6, r1, 120; /* MS: load parent addr */
+-	addik	r5, r15, 0; /* MS: load current function addr */
++	addik	r5, r15, -4; /* MS: load current function addr */
+ 	/* MS: here is dependency on previous code */
+ 	brald	r15, r20; /* MS: jump to ftrace handler */
+ 	nop;
+-- 
+1.7.0.4
+

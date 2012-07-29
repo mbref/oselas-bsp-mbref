@@ -1,0 +1,25 @@
+From 04f39bd85767e29cce0551aedb3455f00823007a Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Thu, 21 Jun 2012 08:57:49 +0200
+Subject: [PATCH] watchdog: Extend compatible property to match BSP
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/watchdog/of_xilinx_wdt.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/watchdog/of_xilinx_wdt.c b/drivers/watchdog/of_xilinx_wdt.c
+index e8dff78..a10b0bc 100644
+--- a/drivers/watchdog/of_xilinx_wdt.c
++++ b/drivers/watchdog/of_xilinx_wdt.c
+@@ -400,6 +400,7 @@ static int __devexit xwdt_remove(struct platform_device *dev)
+ /* Match table for of_platform binding */
+ static struct of_device_id __devinitdata xwdt_of_match[] = {
+ 	{ .compatible = "xlnx,xps-timebase-wdt-1.01.a", },
++	{ .compatible = "xlnx,xps-timebase-wdt-1.00.a", },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, xwdt_of_match);
+-- 
+1.7.0.4
+

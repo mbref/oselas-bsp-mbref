@@ -1,0 +1,61 @@
+From fb07b9cda7db9ef9b6dc5dcdb1a3086d185e688c Mon Sep 17 00:00:00 2001
+From: Frederic Weisbecker <fweisbec@gmail.com>
+Date: Tue, 24 Jan 2012 18:59:43 +0100
+Subject: [PATCH] nohz: Remove ts->Einidle checks before restarting the tick
+
+ts->inidle is set by tick_nohz_idle_enter() and unset by
+tick_nohz_idle_exit(). However these two calls are assumed
+to be always paired. This means that by the time we call
+tick_nohz_idle_exit(), ts->inidle is supposed to be always
+set to 1.
+
+Remove the checks for ts->inidle in tick_nohz_idle_exit().
+This simplifies a bit the code and improves its debuggability
+(ie: ensure the call is paired with a tick_nohz_idle_enter()
+call).
+
+Signed-off-by: Frederic Weisbecker <fweisbec@gmail.com>
+Reviewed-by: Yong Zhang <yong.zhang0@gmail.com>
+Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+Cc: John Stultz <john.stultz@linaro.org>
+Cc: Ingo Molnar <mingo@elte.hu>
+Link: http://lkml.kernel.org/r/1327427984-23282-2-git-send-email-fweisbec@gmail.com
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+---
+ kernel/time/tick-sched.c |   11 ++++++-----
+ 1 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/kernel/time/tick-sched.c b/kernel/time/tick-sched.c
+index 8cfffd9..3526038 100644
+--- a/kernel/time/tick-sched.c
++++ b/kernel/time/tick-sched.c
+@@ -558,20 +558,21 @@ void tick_nohz_idle_exit(void)
+ 
+ 	local_irq_disable();
+ 
+-	if (ts->idle_active || (ts->inidle && ts->tick_stopped))
++	WARN_ON_ONCE(!ts->inidle);
++
++	ts->inidle = 0;
++
++	if (ts->idle_active || ts->tick_stopped)
+ 		now = ktime_get();
+ 
+ 	if (ts->idle_active)
+ 		tick_nohz_stop_idle(cpu, now);
+ 
+-	if (!ts->inidle || !ts->tick_stopped) {
+-		ts->inidle = 0;
++	if (!ts->tick_stopped) {
+ 		local_irq_enable();
+ 		return;
+ 	}
+ 
+-	ts->inidle = 0;
+-
+ 	/* Update jiffies first */
+ 	select_nohz_load_balancer(0);
+ 	tick_do_update_jiffies64(now);
+-- 
+1.7.0.4
+

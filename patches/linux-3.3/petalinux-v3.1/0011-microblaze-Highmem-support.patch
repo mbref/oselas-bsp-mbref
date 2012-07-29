@@ -1,0 +1,406 @@
+From 2f2f371f8907d169650f594850ca6096e2f73b77 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Thu, 15 Dec 2011 15:02:37 +0100
+Subject: [PATCH] microblaze: Highmem support
+
+The first highmem implementation.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/Kconfig               |   24 ++++-----
+ arch/microblaze/include/asm/fixmap.h  |    8 +++
+ arch/microblaze/include/asm/highmem.h |   96 +++++++++++++++++++++++++++++++++
+ arch/microblaze/mm/Makefile           |    1 +
+ arch/microblaze/mm/highmem.c          |   88 ++++++++++++++++++++++++++++++
+ arch/microblaze/mm/init.c             |   68 +++++++++++++++++++++++
+ 6 files changed, 272 insertions(+), 13 deletions(-)
+ create mode 100644 arch/microblaze/include/asm/highmem.h
+ create mode 100644 arch/microblaze/mm/highmem.c
+
+diff --git a/arch/microblaze/Kconfig b/arch/microblaze/Kconfig
+index 3267cc5..86ae278 100644
+--- a/arch/microblaze/Kconfig
++++ b/arch/microblaze/Kconfig
+@@ -159,20 +159,18 @@ config XILINX_UNCACHED_SHADOW
+ 	  The feature requires the design to define the RAM memory controller
+ 	  window to be twice as large as the actual physical memory.
+ 
+-config HIGHMEM_START_BOOL
+-	bool "Set high memory pool address"
+-	depends on ADVANCED_OPTIONS && HIGHMEM
+-	help
+-	  This option allows you to set the base address of the kernel virtual
+-	  area used to map high memory pages.  This can be useful in
+-	  optimizing the layout of kernel virtual memory.
+-
+-	  Say N here unless you know what you are doing.
+-
+-config HIGHMEM_START
+-	hex "Virtual start address of high memory pool" if HIGHMEM_START_BOOL
++config HIGHMEM
++	bool "High memory support"
+ 	depends on MMU
+-	default "0xfe000000"
++	help
++	  The address space of Microblaze processors is only 4 Gigabytes large
++	  and it has to accommodate user address space, kernel address
++	  space as well as some memory mapped IO. That means that, if you
++	  have a large amount of physical memory and/or IO, not all of the
++	  memory can be "permanently mapped" by the kernel. The physical
++	  memory that is not permanently mapped is called "high memory".
++
++	  If unsure, say n.
+ 
+ config LOWMEM_SIZE_BOOL
+ 	bool "Set maximum low memory"
+diff --git a/arch/microblaze/include/asm/fixmap.h b/arch/microblaze/include/asm/fixmap.h
+index dd89754..f2b312e 100644
+--- a/arch/microblaze/include/asm/fixmap.h
++++ b/arch/microblaze/include/asm/fixmap.h
+@@ -21,6 +21,10 @@
+ #ifndef __ASSEMBLY__
+ #include <linux/kernel.h>
+ #include <asm/page.h>
++#ifdef CONFIG_HIGHMEM
++#include <linux/threads.h>
++#include <asm/kmap_types.h>
++#endif
+ 
+ #define FIXADDR_TOP	((unsigned long)(-PAGE_SIZE))
+ 
+@@ -44,6 +48,10 @@
+  */
+ enum fixed_addresses {
+ 	FIX_HOLE,
++#ifdef CONFIG_HIGHMEM
++	FIX_KMAP_BEGIN,	/* reserved pte's for temporary kernel mappings */
++	FIX_KMAP_END = FIX_KMAP_BEGIN + (KM_TYPE_NR * num_possible_cpus()) - 1,
++#endif
+ 	__end_of_fixed_addresses
+ };
+ 
+diff --git a/arch/microblaze/include/asm/highmem.h b/arch/microblaze/include/asm/highmem.h
+new file mode 100644
+index 0000000..2446a73
+--- /dev/null
++++ b/arch/microblaze/include/asm/highmem.h
+@@ -0,0 +1,96 @@
++/*
++ * highmem.h: virtual kernel memory mappings for high memory
++ *
++ * Used in CONFIG_HIGHMEM systems for memory pages which
++ * are not addressable by direct kernel virtual addresses.
++ *
++ * Copyright (C) 1999 Gerhard Wichert, Siemens AG
++ *		      Gerhard.Wichert@pdb.siemens.de
++ *
++ *
++ * Redesigned the x86 32-bit VM architecture to deal with
++ * up to 16 Terabyte physical memory. With current x86 CPUs
++ * we now support up to 64 Gigabytes physical RAM.
++ *
++ * Copyright (C) 1999 Ingo Molnar <mingo@redhat.com>
++ */
++#ifndef _ASM_HIGHMEM_H
++#define _ASM_HIGHMEM_H
++
++#ifdef __KERNEL__
++
++#include <linux/init.h>
++#include <linux/interrupt.h>
++#include <linux/uaccess.h>
++#include <asm/fixmap.h>
++
++extern pte_t *kmap_pte;
++extern pgprot_t kmap_prot;
++extern pte_t *pkmap_page_table;
++
++/*
++ * Right now we initialize only a single pte table. It can be extended
++ * easily, subsequent pte tables have to be allocated in one physical
++ * chunk of RAM.
++ */
++/*
++ * We use one full pte table with 4K pages. And with 16K/64K/256K pages pte
++ * table covers enough memory (32MB/512MB/2GB resp.), so that both FIXMAP
++ * and PKMAP can be placed in a single pte table. We use 512 pages for PKMAP
++ * in case of 16K/64K/256K page sizes.
++ */
++
++#define PKMAP_ORDER	PTE_SHIFT
++#define LAST_PKMAP	(1 << PKMAP_ORDER)
++
++#define PKMAP_BASE	((FIXADDR_START - PAGE_SIZE * (LAST_PKMAP + 1)) \
++								& PMD_MASK)
++
++#define LAST_PKMAP_MASK	(LAST_PKMAP - 1)
++#define PKMAP_NR(virt)  ((virt - PKMAP_BASE) >> PAGE_SHIFT)
++#define PKMAP_ADDR(nr)  (PKMAP_BASE + ((nr) << PAGE_SHIFT))
++
++extern void *kmap_high(struct page *page);
++extern void kunmap_high(struct page *page);
++extern void *kmap_atomic_prot(struct page *page, pgprot_t prot);
++extern void __kunmap_atomic(void *kvaddr);
++
++static inline void *kmap(struct page *page)
++{
++	might_sleep();
++	if (!PageHighMem(page))
++		return page_address(page);
++	return kmap_high(page);
++}
++
++static inline void kunmap(struct page *page)
++{
++	BUG_ON(in_interrupt());
++	if (!PageHighMem(page))
++		return;
++	kunmap_high(page);
++}
++
++static inline void *__kmap_atomic(struct page *page)
++{
++	return kmap_atomic_prot(page, kmap_prot);
++}
++
++static inline struct page *kmap_atomic_to_page(void *ptr)
++{
++	unsigned long idx, vaddr = (unsigned long) ptr;
++	pte_t *pte;
++
++	if (vaddr < FIXADDR_START)
++		return virt_to_page(ptr);
++
++	idx = virt_to_fix(vaddr);
++	pte = kmap_pte - (idx - FIX_KMAP_BEGIN);
++	return pte_page(*pte);
++}
++
++#define flush_cache_kmaps()	{ flush_icache(); flush_dcache(); }
++
++#endif /* __KERNEL__ */
++
++#endif /* _ASM_HIGHMEM_H */
+diff --git a/arch/microblaze/mm/Makefile b/arch/microblaze/mm/Makefile
+index 09c49ed..7313bd8 100644
+--- a/arch/microblaze/mm/Makefile
++++ b/arch/microblaze/mm/Makefile
+@@ -5,3 +5,4 @@
+ obj-y := consistent.o init.o
+ 
+ obj-$(CONFIG_MMU) += pgtable.o mmu_context.o fault.o
++obj-$(CONFIG_HIGHMEM) += highmem.o
+diff --git a/arch/microblaze/mm/highmem.c b/arch/microblaze/mm/highmem.c
+new file mode 100644
+index 0000000..7d78838
+--- /dev/null
++++ b/arch/microblaze/mm/highmem.c
+@@ -0,0 +1,88 @@
++/*
++ * highmem.c: virtual kernel memory mappings for high memory
++ *
++ * PowerPC version, stolen from the i386 version.
++ *
++ * Used in CONFIG_HIGHMEM systems for memory pages which
++ * are not addressable by direct kernel virtual addresses.
++ *
++ * Copyright (C) 1999 Gerhard Wichert, Siemens AG
++ *		      Gerhard.Wichert@pdb.siemens.de
++ *
++ *
++ * Redesigned the x86 32-bit VM architecture to deal with
++ * up to 16 Terrabyte physical memory. With current x86 CPUs
++ * we now support up to 64 Gigabytes physical RAM.
++ *
++ * Copyright (C) 1999 Ingo Molnar <mingo@redhat.com>
++ *
++ * Reworked for PowerPC by various contributors. Moved from
++ * highmem.h by Benjamin Herrenschmidt (c) 2009 IBM Corp.
++ */
++
++#include <linux/highmem.h>
++#include <linux/module.h>
++
++/*
++ * The use of kmap_atomic/kunmap_atomic is discouraged - kmap/kunmap
++ * gives a more generic (and caching) interface. But kmap_atomic can
++ * be used in IRQ contexts, so in some (very limited) cases we need
++ * it.
++ */
++#include <asm/tlbflush.h>
++
++void *kmap_atomic_prot(struct page *page, pgprot_t prot)
++{
++
++	unsigned long vaddr;
++	int idx, type;
++
++	/* even !CONFIG_PREEMPT needs this, for in_atomic in do_page_fault */
++	pagefault_disable();
++	if (!PageHighMem(page))
++		return page_address(page);
++
++
++	type = kmap_atomic_idx_push();
++	idx = type + KM_TYPE_NR*smp_processor_id();
++	vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
++#ifdef CONFIG_DEBUG_HIGHMEM
++	BUG_ON(!pte_none(*(kmap_pte-idx)));
++#endif
++	set_pte_at(&init_mm, vaddr, kmap_pte-idx, mk_pte(page, prot));
++	local_flush_tlb_page(NULL, vaddr);
++
++	return (void *) vaddr;
++}
++EXPORT_SYMBOL(kmap_atomic_prot);
++
++void __kunmap_atomic(void *kvaddr)
++{
++	unsigned long vaddr = (unsigned long) kvaddr & PAGE_MASK;
++	int type;
++
++	if (vaddr < __fix_to_virt(FIX_KMAP_END)) {
++		pagefault_enable();
++		return;
++	}
++
++	type = kmap_atomic_idx();
++#ifdef CONFIG_DEBUG_HIGHMEM
++	{
++		unsigned int idx;
++
++		idx = type + KM_TYPE_NR * smp_processor_id();
++		BUG_ON(vaddr != __fix_to_virt(FIX_KMAP_BEGIN + idx));
++
++		/*
++		 * force other mappings to Oops if they'll try to access
++		 * this pte without first remap it
++		 */
++		pte_clear(&init_mm, vaddr, kmap_pte-idx);
++		local_flush_tlb_page(NULL, vaddr);
++	}
++#endif
++	kmap_atomic_idx_pop();
++	pagefault_enable();
++}
++EXPORT_SYMBOL(__kunmap_atomic);
+diff --git a/arch/microblaze/mm/init.c b/arch/microblaze/mm/init.c
+index 43b3f60..95297b1 100644
+--- a/arch/microblaze/mm/init.c
++++ b/arch/microblaze/mm/init.c
+@@ -49,6 +49,53 @@ unsigned long memory_size;
+ EXPORT_SYMBOL(memory_size);
+ unsigned long lowmem_size;
+ 
++#ifdef CONFIG_HIGHMEM
++pte_t *kmap_pte;
++EXPORT_SYMBOL(kmap_pte);
++pgprot_t kmap_prot;
++EXPORT_SYMBOL(kmap_prot);
++
++static inline pte_t *virt_to_kpte(unsigned long vaddr)
++{
++	return pte_offset_kernel(pmd_offset(pgd_offset_k(vaddr),
++			vaddr), vaddr);
++}
++
++static void __init highmem_init(void)
++{
++	pr_debug("%x\n", (u32)PKMAP_BASE);
++	map_page(PKMAP_BASE, 0, 0);	/* XXX gross */
++	pkmap_page_table = virt_to_kpte(PKMAP_BASE);
++
++	kmap_pte = virt_to_kpte(__fix_to_virt(FIX_KMAP_BEGIN));
++	kmap_prot = PAGE_KERNEL;
++}
++
++static unsigned long highmem_setup(void)
++{
++	unsigned long pfn;
++	unsigned long reservedpages = 0;
++
++	for (pfn = max_low_pfn; pfn < max_pfn; ++pfn) {
++		struct page *page = pfn_to_page(pfn);
++
++		/* FIXME not sure about */
++		if (memblock_is_reserved(pfn << PAGE_SHIFT))
++			continue;
++		ClearPageReserved(page);
++		init_page_count(page);
++		__free_page(page);
++		totalhigh_pages++;
++		reservedpages++;
++	}
++	totalram_pages += totalhigh_pages;
++	printk(KERN_INFO "High memory: %luk\n",
++					totalhigh_pages << (PAGE_SHIFT-10));
++
++	return reservedpages;
++}
++#endif /* CONFIG_HIGHMEM */
++
+ /*
+  * paging_init() sets up the page tables - in fact we've already done this.
+  */
+@@ -66,7 +113,14 @@ static void __init paging_init(void)
+ 	/* Clean every zones */
+ 	memset(zones_size, 0, sizeof(zones_size));
+ 
++#ifdef CONFIG_HIGHMEM
++	highmem_init();
++
++	zones_size[ZONE_DMA] = max_low_pfn;
++	zones_size[ZONE_HIGHMEM] = max_pfn;
++#else
+ 	zones_size[ZONE_DMA] = max_pfn;
++#endif
+ 
+ 	/* We don't have holes in memory map */
+ 	free_area_init_nodes(zones_size);
+@@ -241,6 +295,10 @@ void __init mem_init(void)
+ 		}
+ 	}
+ 
++#ifdef CONFIG_HIGHMEM
++	reservedpages -= highmem_setup();
++#endif
++
+ 	codesize = (unsigned long)&_sdata - (unsigned long)&_stext;
+ 	datasize = (unsigned long)&_edata - (unsigned long)&_sdata;
+ 	initsize = (unsigned long)&__init_end - (unsigned long)&__init_begin;
+@@ -259,6 +317,10 @@ void __init mem_init(void)
+ #ifdef CONFIG_MMU
+ 	pr_info("Kernel virtual memory layout:\n");
+ 	pr_info("  * 0x%08lx..0x%08lx  : fixmap\n", FIXADDR_START, FIXADDR_TOP);
++#ifdef CONFIG_HIGHMEM
++	pr_info("  * 0x%08lx..0x%08lx  : highmem PTEs\n",
++		PKMAP_BASE, PKMAP_ADDR(LAST_PKMAP));
++#endif /* CONFIG_HIGHMEM */
+ 	pr_info("  * 0x%08lx..0x%08lx  : early ioremap\n",
+ 		ioremap_bot, ioremap_base);
+ 	pr_info("  * 0x%08lx..0x%08lx  : vmalloc & ioremap\n",
+@@ -346,7 +408,9 @@ asmlinkage void __init mmu_init(void)
+ 
+ 	if (lowmem_size > CONFIG_LOWMEM_SIZE) {
+ 		lowmem_size = CONFIG_LOWMEM_SIZE;
++#ifndef CONFIG_HIGHMEM
+ 		memory_size = lowmem_size;
++#endif
+ 	}
+ 
+ 	mm_cmdline_setup(); /* FIXME parse args from command line - not used */
+@@ -375,7 +439,11 @@ asmlinkage void __init mmu_init(void)
+ 	mapin_ram();
+ 
+ 	/* Extend vmalloc and ioremap area as big as possible */
++#ifdef CONFIG_HIGHMEM
++	ioremap_base = ioremap_bot = PKMAP_BASE;
++#else
+ 	ioremap_base = ioremap_bot = FIXADDR_START;
++#endif
+ 
+ 	/* Initialize the context management stuff */
+ 	mmu_context_init();
+-- 
+1.7.0.4
+

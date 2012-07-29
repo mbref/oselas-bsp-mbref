@@ -1,0 +1,46 @@
+From f0eabe792c2e671673519d597ff329098ce9418a Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 14 May 2012 08:42:50 +0200
+Subject: [PATCH] arm: Do not hardcoded kernel virtual address
+
+Virtual kernel base address is stored in CONFIG_PAGE_OFFSET.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/arm/include/asm/page.h   |    2 +-
+ arch/arm/kernel/vmlinux.lds.S |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/include/asm/page.h b/arch/arm/include/asm/page.h
+index d8d25ec..6c67a48 100644
+--- a/arch/arm/include/asm/page.h
++++ b/arch/arm/include/asm/page.h
+@@ -15,7 +15,7 @@
+ #define PAGE_SIZE		(_AC(1,UL) << PAGE_SHIFT)
+ #define PAGE_MASK		(~(PAGE_SIZE-1))
+ 
+-#define LOAD_OFFSET	0xc0000000 - CONFIG_PHYS_OFFSET
++#define LOAD_OFFSET	(CONFIG_PAGE_OFFSET - CONFIG_PHYS_OFFSET)
+ 
+ #ifndef __ASSEMBLY__
+ 
+diff --git a/arch/arm/kernel/vmlinux.lds.S b/arch/arm/kernel/vmlinux.lds.S
+index 28229bb..de43b01 100644
+--- a/arch/arm/kernel/vmlinux.lds.S
++++ b/arch/arm/kernel/vmlinux.lds.S
+@@ -3,11 +3,11 @@
+  * Written by Martin Mares <mj@atrey.karlin.mff.cuni.cz>
+  */
+ 
++#include <asm/page.h>
+ #include <asm-generic/vmlinux.lds.h>
+ #include <asm/cache.h>
+ #include <asm/thread_info.h>
+ #include <asm/memory.h>
+-#include <asm/page.h>
+ 	
+ #define PROC_INFO							\
+ 	. = ALIGN(4);							\
+-- 
+1.7.0.4
+

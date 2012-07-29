@@ -1,0 +1,86 @@
+From bc7a450cf667eeb4b62cd1b358bef97340a05ab4 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 25 Jun 2012 09:57:39 +0200
+Subject: [PATCH] zynq: Enable device drivers for Zynq
+
+Just enable drivers for Zynq.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/block/Kconfig               |    2 +-
+ drivers/gpio/Kconfig                |    4 ++--
+ drivers/net/ethernet/xilinx/Kconfig |    4 ++--
+ drivers/tty/serial/Kconfig          |    2 +-
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/block/Kconfig b/drivers/block/Kconfig
+index 4a5b2f6..d9390b7 100644
+--- a/drivers/block/Kconfig
++++ b/drivers/block/Kconfig
+@@ -484,7 +484,7 @@ source "drivers/s390/block/Kconfig"
+ 
+ config XILINX_SYSACE
+ 	tristate "Xilinx SystemACE support"
+-	depends on 4xx || MICROBLAZE
++	depends on 4xx || MICROBLAZE || ARCH_ZYNQ
+ 	help
+ 	  Include support for the Xilinx SystemACE CompactFlash interface
+ 
+diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
+index 4054513..4bfe1c5 100644
+--- a/drivers/gpio/Kconfig
++++ b/drivers/gpio/Kconfig
+@@ -151,13 +151,13 @@ config GPIO_PXA
+ 
+ config GPIO_XILINX
+ 	bool "Xilinx GPIO support"
+-	depends on PPC_OF || MICROBLAZE
++	depends on PPC_OF || MICROBLAZE || ARCH_ZYNQ
+ 	help
+ 	  Say yes here to support the Xilinx FPGA GPIO device
+ 
+ config GPIO_XILINX_PS
+ 	tristate "Xilinx GPIO PS"
+-	depends on ARCH_XILINX || ARCH_ZYNQ
++	depends on ARCH_ZYNQ
+ 	help
+ 	  Say yes here to support Xilinx GPIO PS controller
+ 
+diff --git a/drivers/net/ethernet/xilinx/Kconfig b/drivers/net/ethernet/xilinx/Kconfig
+index bd318dd..252a056 100644
+--- a/drivers/net/ethernet/xilinx/Kconfig
++++ b/drivers/net/ethernet/xilinx/Kconfig
+@@ -27,7 +27,7 @@ config XILINX_EMACLITE
+ 
+ config XILINX_AXI_ETHERNET
+ 	tristate "Xilinx Axi Ethernet driver"
+-	depends on MICROBLAZE
++	depends on MICROBLAZE || ARCH_ZYNQ
+ 	select PHYLIB
+ 	help
+ 	  This driver supports the Xilinx 10/100/1000 Axi Ethernet IP
+@@ -52,7 +52,7 @@ config XILINX_LLTEMAC
+ choice
+ 	prompt "Xilinx LLTEMAC PHY Support"
+ 	default XILINX_LLTEMAC_MARVELL_88E1111_GMII
+-	
++
+ config XILINX_LLTEMAC_MARVELL_88E1111_RGMII
+ 	bool "MARVELL 88E1111 using RGMII"
+    help
+diff --git a/drivers/tty/serial/Kconfig b/drivers/tty/serial/Kconfig
+index 2de9924..cff4a1b 100644
+--- a/drivers/tty/serial/Kconfig
++++ b/drivers/tty/serial/Kconfig
+@@ -537,7 +537,7 @@ config SERIAL_IMX_CONSOLE
+ 
+ config SERIAL_UARTLITE
+ 	tristate "Xilinx uartlite serial port support"
+-	depends on PPC32 || MICROBLAZE || MFD_TIMBERDALE
++	depends on PPC32 || MICROBLAZE || MFD_TIMBERDALE || ARCH_ZYNQ
+ 	select SERIAL_CORE
+ 	help
+ 	  Say Y here if you want to use the Xilinx uartlite serial controller.
+-- 
+1.7.0.4
+

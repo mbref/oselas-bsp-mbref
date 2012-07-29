@@ -1,0 +1,82 @@
+From baab8a828d2d6b5b073c192ebe777514bbf3c831 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Thu, 15 Dec 2011 15:47:16 +0100
+Subject: [PATCH] microblaze: Use active regions
+
+Register lowmem active regions.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/Kconfig   |    4 ++++
+ arch/microblaze/mm/init.c |   18 ++++++++++++++++--
+ 2 files changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/arch/microblaze/Kconfig b/arch/microblaze/Kconfig
+index 8e9da3d..3267cc5 100644
+--- a/arch/microblaze/Kconfig
++++ b/arch/microblaze/Kconfig
+@@ -1,6 +1,7 @@
+ config MICROBLAZE
+ 	def_bool y
+ 	select HAVE_MEMBLOCK
++	select HAVE_MEMBLOCK_NODE_MAP
+ 	select HAVE_FUNCTION_TRACER
+ 	select HAVE_FUNCTION_TRACE_MCOUNT_TEST
+ 	select HAVE_FUNCTION_GRAPH_TRACER
+@@ -30,6 +31,9 @@ config RWSEM_GENERIC_SPINLOCK
+ config ZONE_DMA
+ 	def_bool y
+ 
++config ARCH_POPULATES_NODE_MAP
++	def_bool y
++
+ config RWSEM_XCHGADD_ALGORITHM
+ 	bool
+ 
+diff --git a/arch/microblaze/mm/init.c b/arch/microblaze/mm/init.c
+index cbcdf24..43b3f60 100644
+--- a/arch/microblaze/mm/init.c
++++ b/arch/microblaze/mm/init.c
+@@ -68,7 +68,8 @@ static void __init paging_init(void)
+ 
+ 	zones_size[ZONE_DMA] = max_pfn;
+ 
+-	free_area_init(zones_size);
++	/* We don't have holes in memory map */
++	free_area_init_nodes(zones_size);
+ }
+ 
+ void __init setup_memory(void)
+@@ -142,8 +143,18 @@ void __init setup_memory(void)
+ 		PFN_UP(TOPHYS((u32)klimit)), min_low_pfn, max_low_pfn);
+ 	memblock_reserve(PFN_UP(TOPHYS((u32)klimit)) << PAGE_SHIFT, map_size);
+ 
++	/* Add active regions with valid PFNs */
++	for_each_memblock(memory, reg) {
++		unsigned long start_pfn, end_pfn;
++
++		start_pfn = memblock_region_memory_base_pfn(reg);
++		end_pfn = memblock_region_memory_end_pfn(reg);
++		memblock_set_node(start_pfn << PAGE_SHIFT,
++					(end_pfn - start_pfn) << PAGE_SHIFT, 0);
++	}
++
+ 	/* free bootmem is whole main memory */
+-	free_bootmem(memory_start, lowmem_size);
++	free_bootmem_with_active_regions(0, max_low_pfn);
+ 
+ 	/* reserve allocate blocks */
+ 	for_each_memblock(reserved, reg) {
+@@ -162,6 +173,9 @@ void __init setup_memory(void)
+ 		}
+ 	}
+ 
++	/* XXX need to clip this if using highmem? */
++	sparse_memory_present_with_active_regions(0);
++
+ #ifdef CONFIG_MMU
+ 	init_bootmem_done = 1;
+ #endif
+-- 
+1.7.0.4
+

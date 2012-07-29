@@ -1,0 +1,26 @@
+From 16fccc46584cbe5b5b92975201ea655c3d0ab5f8 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 20 Mar 2012 14:51:01 +0100
+Subject: [PATCH] sample: Do not compile hidraw
+
+Because of different includes in my toolchain.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ samples/Makefile |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/samples/Makefile b/samples/Makefile
+index 2f75851..85c48b7 100644
+--- a/samples/Makefile
++++ b/samples/Makefile
+@@ -1,4 +1,5 @@
+ # Makefile for Linux samples code
+ 
+ obj-$(CONFIG_SAMPLES)	+= kobject/ kprobes/ tracepoints/ trace_events/ \
+-			   hw_breakpoint/ kfifo/ kdb/ hidraw/ rpmsg/
++			   hw_breakpoint/ kfifo/ kdb/ rpmsg/
++
+-- 
+1.7.0.4
+

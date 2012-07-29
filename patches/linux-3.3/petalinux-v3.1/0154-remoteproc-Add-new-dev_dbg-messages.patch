@@ -1,0 +1,45 @@
+From 96b9486b26edfeff5e403a8b1d8b2fffdaa7feb0 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 23 Apr 2012 08:16:26 +0200
+Subject: [PATCH] remoteproc: Add new dev_dbg messages
+
+Just for debugging purpose.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/remoteproc/remoteproc_core.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/remoteproc/remoteproc_core.c b/drivers/remoteproc/remoteproc_core.c
+index 6212b82..1e98468 100644
+--- a/drivers/remoteproc/remoteproc_core.c
++++ b/drivers/remoteproc/remoteproc_core.c
+@@ -260,8 +260,11 @@ rproc_load_segments(struct rproc *rproc, const u8 *elf_data, size_t len)
+ 		}
+ 
+ 		/* put the segment where the remote processor expects it */
+-		if (phdr->p_filesz)
++		if (phdr->p_filesz) {
++			dev_dbg(dev, "memcpy %x %x, size %x\n",
++					ptr, elf_data + phdr->p_offset, filesz);
+ 			memcpy(ptr, elf_data + phdr->p_offset, filesz);
++		}
+ 
+ 		/*
+ 		 * Zero out remaining memory for this segment.
+@@ -270,8 +273,11 @@ rproc_load_segments(struct rproc *rproc, const u8 *elf_data, size_t len)
+ 		 * did this for us. albeit harmless, we may consider removing
+ 		 * this.
+ 		 */
+-		if (memsz > filesz)
++		if (memsz > filesz) {
++			dev_dbg(dev, "memset %x size %x\n",
++						ptr + filesz, memsz - filesz);
+ 			memset(ptr + filesz, 0, memsz - filesz);
++		}
+ 	}
+ 
+ 	return ret;
+-- 
+1.7.0.4
+

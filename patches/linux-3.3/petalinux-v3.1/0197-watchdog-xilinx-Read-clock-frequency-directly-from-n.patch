@@ -1,0 +1,30 @@
+From da3684abd361cd3217f4149e643c3a6dfbf9ad89 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Thu, 21 Jun 2012 07:23:54 +0200
+Subject: [PATCH] watchdog: xilinx: Read clock frequency directly from node
+
+Mainline xilinx wdt driver uses clock property from parent
+which is definitely wrong thing to do. The BSP adds
+clock-frequncy property directly to wdt node.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/watchdog/of_xilinx_wdt.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/watchdog/of_xilinx_wdt.c b/drivers/watchdog/of_xilinx_wdt.c
+index f359ab8..e8dff78 100644
+--- a/drivers/watchdog/of_xilinx_wdt.c
++++ b/drivers/watchdog/of_xilinx_wdt.c
+@@ -296,7 +296,7 @@ static int __devinit xwdt_probe(struct platform_device *pdev)
+ 
+ 	no_timeout = 0;
+ 
+-	pfreq = (u32 *)of_get_property(pdev->dev.of_node->parent,
++	pfreq = (u32 *)of_get_property(pdev->dev.of_node,
+ 					"clock-frequency", NULL);
+ 
+ 	if (pfreq == NULL) {
+-- 
+1.7.0.4
+

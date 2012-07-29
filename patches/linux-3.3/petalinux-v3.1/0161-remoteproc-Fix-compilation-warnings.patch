@@ -1,0 +1,43 @@
+From 56ce15937512401d64f6b27151855941dad3be8a Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 24 Apr 2012 09:09:58 +0200
+Subject: [PATCH] remoteproc: Fix compilation warnings
+
+Log:
+remoteproc_core.c: In function 'rproc_load_segments':
+remoteproc_core.c:264:4: warning: format '%x' expects type 'unsigned int', but argument 4 has type 'void *'
+remoteproc_core.c:264:4: warning: format '%x' expects type 'unsigned int', but argument 5 has type 'const u8 *'
+remoteproc_core.c:277:4: warning: format '%x' expects type 'unsigned int', but argument 4 has type 'void *'
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/remoteproc/remoteproc_core.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/remoteproc/remoteproc_core.c b/drivers/remoteproc/remoteproc_core.c
+index 29e0fa7..f31fc78 100644
+--- a/drivers/remoteproc/remoteproc_core.c
++++ b/drivers/remoteproc/remoteproc_core.c
+@@ -261,8 +261,8 @@ rproc_load_segments(struct rproc *rproc, const u8 *elf_data, size_t len)
+ 
+ 		/* put the segment where the remote processor expects it */
+ 		if (phdr->p_filesz) {
+-			dev_dbg(dev, "memcpy %x %x, size %x\n",
+-					ptr, elf_data + phdr->p_offset, filesz);
++			dev_dbg(dev, "memcpy %x %x, size %x\n", (u32)ptr,
++				(u32)elf_data + phdr->p_offset, filesz);
+ 			memcpy(ptr, elf_data + phdr->p_offset, filesz);
+ 		}
+ 
+@@ -275,7 +275,7 @@ rproc_load_segments(struct rproc *rproc, const u8 *elf_data, size_t len)
+ 		 */
+ 		if (memsz > filesz) {
+ 			dev_dbg(dev, "memset %x size %x\n",
+-						ptr + filesz, memsz - filesz);
++					(u32)ptr + filesz, memsz - filesz);
+ 			memset(ptr + filesz, 0, memsz - filesz);
+ 		}
+ 	}
+-- 
+1.7.0.4
+

@@ -1,0 +1,30 @@
+From 09ca9a7038cfe334630725f486a54cbb5896862c Mon Sep 17 00:00:00 2001
+From: Jay Hirata <jhirata@digilentinc.com>
+Date: Mon, 9 Apr 2012 10:44:58 -0600
+Subject: [PATCH] Xilinx: ARM: GPIO: Fix GPIO boundary bug
+
+Fixes a bug where GPIO register is determined by checking pin number.
+Bank_pin_num 16 is incorrectly set in XGPIOPS_DATA_LSW_OFFSET
+register when it should be set in XGPIOPS_DATA_MSW_OFFSET register.
+
+Signed-off-by: Jay Hirata <jhirata@digilentinc.com>
+---
+ drivers/gpio/xilinx_gpiops.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/gpio/xilinx_gpiops.c b/drivers/gpio/xilinx_gpiops.c
+index 1646358..7700fdd 100644
+--- a/drivers/gpio/xilinx_gpiops.c
++++ b/drivers/gpio/xilinx_gpiops.c
+@@ -205,7 +205,7 @@ static void xgpiops_set_value(struct gpio_chip *chip, unsigned int pin,
+ 
+ 	xgpiops_get_bank_pin(pin, &bank_num, &bank_pin_num);
+ 
+-	if (bank_pin_num > 16) {
++	if (bank_pin_num >= 16) {
+ 		bank_pin_num -= 16; /* only 16 data bits in bit maskable reg */
+ 		reg_offset = XGPIOPS_DATA_MSW_OFFSET(bank_num);
+ 	} else
+-- 
+1.7.0.4
+

@@ -1,0 +1,50 @@
+From c59cb7fcb44d8458f753d412f2b392d8bca60682 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 29 May 2012 10:04:54 +0200
+Subject: [PATCH] xylonfb: Enable module
+
+Move spinlock initialization to prevert bug
+when spinlock debug is enabled.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ drivers/video/xylon/xylonfb/Kconfig        |    2 +-
+ drivers/video/xylon/xylonfb/xylonfb-main.c |    4 +++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/video/xylon/xylonfb/Kconfig b/drivers/video/xylon/xylonfb/Kconfig
+index 658eea4..a90e91d 100644
+--- a/drivers/video/xylon/xylonfb/Kconfig
++++ b/drivers/video/xylon/xylonfb/Kconfig
+@@ -1,5 +1,5 @@
+ menuconfig FB_XYLON
+-	bool "Xylon logiCVC frame buffer support"
++	tristate "Xylon logiCVC frame buffer support"
+ 	depends on FB
+ 	default n
+ 	select FB_CFB_FILLRECT
+diff --git a/drivers/video/xylon/xylonfb/xylonfb-main.c b/drivers/video/xylon/xylonfb/xylonfb-main.c
+index 6dd695a..b88154a 100644
+--- a/drivers/video/xylon/xylonfb/xylonfb-main.c
++++ b/drivers/video/xylon/xylonfb/xylonfb-main.c
+@@ -1693,6 +1693,8 @@ static int xylonfb_probe(struct platform_device *pdev)
+ 		layer_data = fbi->par;
+ 		layer_data->xylonfb_cd = common_data;
+ 
++		spin_lock_init(&layer_data->layer_lock);
++
+ 		xylonfb_set_yvirt(lfdata, vmem_base_addr, vmem_high_addr, layers, i);
+ 
+ 		layer_data->layer_fix = lfdata[i];
+@@ -1707,7 +1709,7 @@ static int xylonfb_probe(struct platform_device *pdev)
+ 		if (rc)
+ 			goto err_fb;
+ 
+-		spin_lock_init(&layer_data->layer_lock);
++
+ 
+ 		/* register following layers in HW configuration order */
+ 		if (active_layer > 0) {
+-- 
+1.7.0.4
+
