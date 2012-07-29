@@ -1,6 +1,6 @@
-From 33a4a0c72d3008b63e76baa7238a206cd64897c5 Mon Sep 17 00:00:00 2001
+From e4e4d76a55efae2354a192a0239d7497d3502b9c Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
-Date: Sun, 29 Jul 2012 11:30:52 +0200
+Date: Sun, 29 Jul 2012 14:24:04 +0200
 Subject: [PATCH] microblaze: improve failure handling for GPIO reset
 
 Early exit from of_platform_reset_gpio_probe() if there
@@ -8,19 +8,19 @@ was no GPIO reset line configured.
 
 Avoid kernel oops in gpio_system_reset():
 
-[   27.413294] Restarting system.
-[   27.415674] Machine restart...
-[   27.418787] Oops: kernel access of bad area, sig: 11
-[   27.423252]  Registers dump: mode=83871D1C
-[   27.427428]  r1=00000000, r2=00000000, r3=FFFFFEF8, r4=00000000
-[   27.433310]  r5=C026AED0, r6=00000001, r7=00000068, r8=00000000
-[   27.439189]  r9=C3871DAC, r10=000011A5, r11=00000000, r12=0000000A
-[   27.445318]  r13=00000000, r14=0000000F, r15=C00029BC, r16=00000000
-[   27.451558]  r17=C011DE8C, r18=80000115, r19=0000000F, r20=48184ED8
-[   27.457770]  r21=00000000, r22=FFFFFFEA, r23=00000001, r24=FEE1DEAD
-[   27.463982]  r25=00000054, r26=1000B1C8, r27=00000000, r28=00000000
-[   27.470208]  r29=00000000, r30=00000000, r31=C32D30C0, rPC=C011DE8C
-[   27.476433]  msr=000042A2, ear=0000004B, esr=00000872, fsr=342E3732
+[   96.603690] Restarting system.
+[   96.606094] Machine restart...
+[   96.608810] Oops: kernel access of bad area, sig: 11
+[   96.613662]  Registers dump: mode=824C1D1C
+[   96.617858]  r1=C000BB0C, r2=00000000, r3=FFFFFEF8, r4=000015B4
+[   96.623736]  r5=C0276270, r6=00000001, r7=FFFFFFFF, r8=000015B4
+[   96.629597]  r9=000015B3, r10=000015B4, r11=00000000, r12=00000000
+[   96.635733]  r13=00000000, r14=0000000F, r15=C0002B04, r16=00000000
+[   96.641973]  r17=C011E1A0, r18=80000115, r19=00000010, r20=48184ED8
+[   96.648184]  r21=00000000, r22=FFFFFFEA, r23=00000001, r24=FEE1DEAD
+[   96.654396]  r25=00000054, r26=1000B1C8, r27=00000000, r28=00000000
+[   96.660622]  r29=00000000, r30=00000000, r31=C24A97E0, rPC=C011E1A0
+[   96.666849]  msr=000042A2, ear=0000004C, esr=00000872, fsr=362E3639
 
 Signed-off-by: Stephan Linz <linz@li-pro.net>
 ---
@@ -28,7 +28,7 @@ Signed-off-by: Stephan Linz <linz@li-pro.net>
  1 files changed, 5 insertions(+), 1 deletions(-)
 
 diff --git a/arch/microblaze/kernel/reset.c b/arch/microblaze/kernel/reset.c
-index 8d663d9..c553cd1 100644
+index 8d663d9..c021123 100644
 --- a/arch/microblaze/kernel/reset.c
 +++ b/arch/microblaze/kernel/reset.c
 @@ -28,6 +28,7 @@ void of_platform_reset_gpio_probe(void)
@@ -44,7 +44,7 @@ index 8d663d9..c553cd1 100644
  static void gpio_system_reset(void)
  {
 -	gpio_set_value(handle, 1 - reset_val);
-+	if (!gpio_is_valid(handle))
++	if (gpio_is_valid(handle))
 +		gpio_set_value(handle, 1 - reset_val);
 +	else
 +		printk(KERN_NOTICE "Reset GPIO unavailable - halting!\n");
