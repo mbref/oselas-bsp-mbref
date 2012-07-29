@@ -2,6 +2,7 @@
 
 	* xlbsp: upgrade to lates exports from ISE 13.4
 	* platform: upgrade to u-boot-2012.07-rc3
+	* platform: upgarde to latest linux-3.3 configuration
 
 2012-06-16	Stephan Linz <linz@li-pro.net>
 
