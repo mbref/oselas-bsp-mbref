@@ -1,0 +1,127 @@
+From a01ec7a0b6431201445861e233f3a84baf308ae0 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sat, 28 Jul 2012 21:25:26 +0200
+Subject: [PATCH] microblaze: Wire up SPI driver
+
+Depending on XILINX_SPI_FLASH_BASEADDR enable SPI flash
+and environment in SPI flash.
+
+Expected values from xparameters.h are:
+    - XILINX_SPI_FLASH_BASEADDR
+    - XILINX_SPI_FLASH_MAX_FREQ
+    - XILINX_SPI_FLASH_CS
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |   55 ++++++++++++++++++++++++++++++++--
+ 1 files changed, 52 insertions(+), 3 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index e20eb08..6831c8e 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -31,14 +31,22 @@
+ #define	CONFIG_MICROBLAZE	1
+ #define	MICROBLAZE_V5		1
+ 
+-/* linear flash memory */
++/* linear and spi flash memory */
+ #ifdef XILINX_FLASH_START
+ #define	FLASH
++#undef	SPIFLASH
+ #undef	RAMENV	/* hold environment in flash */
+ #else
++#ifdef XILINX_SPI_FLASH_BASEADDR
+ #undef	FLASH
++#define	SPIFLASH
++#undef	RAMENV	/* hold environment in flash */
++#else
++#undef	FLASH
++#undef	SPIFLASH
+ #define	RAMENV	/* hold environment in RAM */
+ #endif
++#endif
+ 
+ /* uart */
+ #ifdef XILINX_UARTLITE_BASEADDR
+@@ -214,20 +222,51 @@
+ #  define CONFIG_ENV_SIZE	0x1000
+ #  define CONFIG_ENV_ADDR	(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
+ 
+-# else	/* !RAMENV */
++# else	/* FLASH && !RAMENV */
+ #  define CONFIG_ENV_IS_IN_FLASH	1
+ /* 128K(one sector) for env */
+ #  define CONFIG_ENV_SECT_SIZE	0x20000
+ #  define CONFIG_ENV_ADDR \
+ 			(CONFIG_SYS_FLASH_BASE + (2 * CONFIG_ENV_SECT_SIZE))
+ #  define CONFIG_ENV_SIZE	0x20000
+-# endif /* !RAMBOOT */
++# endif /* FLASH && !RAMBOOT */
+ #else /* !FLASH */
++
++#ifdef SPIFLASH
++# define CONFIG_SYS_NO_FLASH		1
++# define CONFIG_SYS_SPI_BASE		XILINX_SPI_FLASH_BASEADDR
++# define CONFIG_XILINX_SPI		1
++# define CONFIG_SPI			1
++# define CONFIG_SPI_FLASH		1
++# define CONFIG_SPI_FLASH_STMICRO	1
++# define CONFIG_SF_DEFAULT_MODE		SPI_MODE_3
++# define CONFIG_SF_DEFAULT_SPEED	XILINX_SPI_FLASH_MAX_FREQ
++# define CONFIG_SF_DEFAULT_CS		XILINX_SPI_FLASH_CS
++
++# ifdef	RAMENV
++#  define CONFIG_ENV_IS_NOWHERE	1
++#  define CONFIG_ENV_SIZE	0x1000
++#  define CONFIG_ENV_ADDR	(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
++
++# else	/* SPIFLASH && !RAMENV */
++#  define CONFIG_ENV_IS_IN_SPI_FLASH	1
++#  define CONFIG_ENV_SPI_MODE		SPI_MODE_3
++#  define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
++#  define CONFIG_ENV_SPI_CS		CONFIG_SF_DEFAULT_CS
++/* 128K(two sectors) for env */
++#  define CONFIG_ENV_SECT_SIZE	0x10000
++#  define CONFIG_ENV_SIZE 	(2 * CONFIG_ENV_SECT_SIZE)
++/* Warning: adjust the offset in respect of other flash content and size */
++#  define CONFIG_ENV_OFFSET	(128 * CONFIG_ENV_SECT_SIZE) /* at 8MB */
++# endif /* SPIFLASH && !RAMBOOT */
++#else /* !SPIFLASH */
++
+ /* ENV in RAM */
+ # define CONFIG_SYS_NO_FLASH	1
+ # define CONFIG_ENV_IS_NOWHERE	1
+ # define CONFIG_ENV_SIZE	0x1000
+ # define CONFIG_ENV_ADDR	(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
++#endif /* !SPIFLASH */
+ #endif /* !FLASH */
+ 
+ /* system ace */
+@@ -302,6 +341,15 @@
+ #  define CONFIG_CMD_SAVEENV
+ #  define CONFIG_CMD_SAVES
+ # endif
++
++#else
++#if defined(SPIFLASH)
++# define CONFIG_CMD_SF
++
++# if !defined(RAMENV)
++#  define CONFIG_CMD_SAVEENV
++#  define CONFIG_CMD_SAVES
++# endif
+ #else
+ # undef CONFIG_CMD_IMLS
+ # undef CONFIG_CMD_FLASH
+@@ -309,6 +357,7 @@
+ # undef CONFIG_CMD_UBI
+ # undef CONFIG_CMD_UBIFS
+ #endif
++#endif
+ 
+ #if defined(CONFIG_CMD_JFFS2)
+ # define CONFIG_MTD_PARTITIONS
+-- 
+1.7.0.4
+

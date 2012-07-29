@@ -1,0 +1,31 @@
+From 0b9146cdc8203b2d3ea4adf3e2b7281f2333d809 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Wed, 27 Jun 2012 00:28:24 +0200
+Subject: [PATCH] microblaze: Remove wrong define CONFIG_SYS_FLASH_PROTECTION
+
+CONFIG_SYS_FLASH_PROTECTION is defined twice. The second one
+is outside the flash configuration context and we can remove
+it safely.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ include/configs/microblaze-generic.h |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 295d123..5f16820 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -200,8 +200,6 @@
+ # define CONFIG_ENV_IS_NOWHERE	1
+ # define CONFIG_ENV_SIZE	0x1000
+ # define CONFIG_ENV_ADDR	(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
+-/* hardware flash protection */
+-# define CONFIG_SYS_FLASH_PROTECTION
+ #endif /* !FLASH */
+ 
+ /* system ace */
+-- 
+1.7.0.4
+

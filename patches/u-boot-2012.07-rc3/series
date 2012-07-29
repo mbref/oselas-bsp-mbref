@@ -1,0 +1,13 @@
+0001-microblaze-Remove-wrong-define-CONFIG_SYS_FLASH_PROT.patch
+0002-microblaze-Avoid-compile-error-on-systems-without-cf.patch
+0003-microblaze-Enable-ubi-support.patch
+0004-microblaze-Expand-and-correct-configuration-comments.patch
+0005-microblaze-Add-missing-undefs-for-UBI-and-UBIFS.patch
+0006-sf-stmicro-support-JEDEC-standard-two-byte-signature.patch
+0007-sf-stmicro-add-support-N25Q128-parts.patch
+0008-spi-microblaze-Adds-driver-for-Xilinx-SPI-controller.patch
+0009-microblaze-Wire-up-SPI-driver.patch
+0010-microblaze-generic-move-ENV-onto-top-of-spi-flash.patch
+0011-microblaze-generic-move-ENV-onto-top-of-flash.patch
+0012-romfs-Add-ROMFS-implementation.patch
+0013-Prepare-v2012.07-rc3-mbref-20120728.patch

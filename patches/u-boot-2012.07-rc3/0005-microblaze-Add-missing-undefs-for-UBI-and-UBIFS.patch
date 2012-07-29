@@ -1,0 +1,29 @@
+From 5850454cce567208277c5ad2ebab8accd0b9c101 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Fri, 29 Jun 2012 23:23:33 +0200
+Subject: [PATCH] microblaze: Add missing undefs for UBI and UBIFS
+
+In the case of missing flash usage disaple (undef)
+all the UBI support in the same way as for JFFS2.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 1de6c69..e20eb08 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -306,6 +306,8 @@
+ # undef CONFIG_CMD_IMLS
+ # undef CONFIG_CMD_FLASH
+ # undef CONFIG_CMD_JFFS2
++# undef CONFIG_CMD_UBI
++# undef CONFIG_CMD_UBIFS
+ #endif
+ 
+ #if defined(CONFIG_CMD_JFFS2)
+-- 
+1.7.0.4
+

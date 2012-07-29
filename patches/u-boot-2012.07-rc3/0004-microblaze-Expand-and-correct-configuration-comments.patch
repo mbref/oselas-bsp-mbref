@@ -1,0 +1,87 @@
+From aae8abae6235e71ad8d49ad7ca3d60af872ded81 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sun, 1 Jul 2012 16:44:37 +0200
+Subject: [PATCH] microblaze: Expand and correct configuration comments
+
+  - fix CONFIG_SYS_MALLOC_BASE from 0x11FB_F000 to 0x13EF_F000
+  - add new size calculation for CONFIG_SYS_MONITOR_LEN
+    and CONFIG_SYS_MALLOC_LEN derived from SIZE
+  - change CONFIG_SYS_MONITOR_BASE and CONFIG_SYS_MALLOC_BASE
+    calculation to a symbolic equation with the corresponding
+    _LEN definitions
+  - add a "CFI flash memory layout - Example" comment
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |   36 +++++++++++++++++++++++++++------
+ 1 files changed, 29 insertions(+), 7 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 2fd2279..1de6c69 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -122,15 +122,19 @@
+ 
+ /*
+  * memory layout - Example
+- * CONFIG_SYS_TEXT_BASE = 0x1200_0000;
++ * CONFIG_SYS_TEXT_BASE = 0x1200_0000;	defined in config.mk
+  * CONFIG_SYS_SRAM_BASE = 0x1000_0000;
+- * CONFIG_SYS_SRAM_SIZE = 0x0400_0000;
++ * CONFIG_SYS_SRAM_SIZE = 0x0400_0000;	64MB
++ *
++ * CONFIG_SYS_MONITOR_LEN = 0x40000
++ * CONFIG_SYS_MALLOC_LEN = 3 * CONFIG_SYS_MONITOR_LEN = 0xC0000
+  *
+  * CONFIG_SYS_GBL_DATA_OFFSET = 0x1000_0000 + 0x0400_0000 - 0x1000 = 0x13FF_F000
+- * CONFIG_SYS_MONITOR_BASE = 0x13FF_F000 - 0x40000 = 0x13FB_F000
+- * CONFIG_SYS_MALLOC_BASE = 0x13FB_F000 - 0x40000 = 0x13F7_F000
++ * CONFIG_SYS_MONITOR_BASE = 0x13FF_F000 - CONFIG_SYS_MONITOR_LEN = 0x13FB_F000
++ * CONFIG_SYS_MALLOC_BASE = 0x13FB_F000 - CONFIG_SYS_MALLOC_LEN = 0x13EF_F000
+  *
+  * 0x1000_0000	CONFIG_SYS_SDRAM_BASE
++ *					MEMTEST_AREA	 64kB
+  *					FREE
+  * 0x1200_0000	CONFIG_SYS_TEXT_BASE
+  *		U-BOOT code
+@@ -138,9 +142,9 @@
+  *					FREE
+  *
+  *					STACK
+- * 0x13F7_F000	CONFIG_SYS_MALLOC_BASE
+- *					MALLOC_AREA	256kB	Alloc
+- * 0x11FB_F000	CONFIG_SYS_MONITOR_BASE
++ * 0x13EF_F000	CONFIG_SYS_MALLOC_BASE
++ *					MALLOC_AREA	768kB	Alloc
++ * 0x13FB_F000	CONFIG_SYS_MONITOR_BASE
+  *					MONITOR_CODE	256kB	Env
+  * 0x13FF_F000	CONFIG_SYS_GBL_DATA_OFFSET
+  *					GLOBAL_DATA	4kB	bd, gd
+@@ -173,6 +177,24 @@
+ /* stack */
+ #define	CONFIG_SYS_INIT_SP_OFFSET	CONFIG_SYS_MALLOC_BASE
+ 
++/*
++ * CFI flash memory layout - Example
++ * CONFIG_SYS_FLASH_BASE = 0x2200_0000;
++ * CONFIG_SYS_FLASH_SIZE = 0x0080_0000;	  8MB
++ *
++ * SECT_SIZE = 0x20000;			128kB is one sector
++ * CONFIG_ENV_SIZE = SECT_SIZE;		128kB environment store
++ *
++ * 0x2200_0000	CONFIG_SYS_FLASH_BASE
++ *					FREE		256kB
++ * 0x2204_0000	CONFIG_ENV_ADDR
++ *					ENV_AREA	128kB
++ * 0x2206_0000
++ *					FREE
++ * 0x2280_0000	CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE
++ *
++ */
++
+ #ifdef FLASH
+ # define CONFIG_SYS_FLASH_BASE		XILINX_FLASH_START
+ # define CONFIG_SYS_FLASH_SIZE		XILINX_FLASH_SIZE
+-- 
+1.7.0.4
+

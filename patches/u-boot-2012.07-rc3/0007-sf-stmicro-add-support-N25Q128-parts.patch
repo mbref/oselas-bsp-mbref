@@ -1,0 +1,35 @@
+From 0754e759abcbb2577c9a5b1490e71275c95d501c Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Fri, 13 Jul 2012 19:53:42 +0200
+Subject: [PATCH] sf: stmicro: add support N25Q128 parts
+
+Adds support for Numonyx's N25Q128 SPI flash. These devices
+are used on (among others) Avnet Spartan-6 LX9 micro-evaluation
+boards. Tested with "sf" commands and CONFIG_ENV_IS_IN_SPI_FLASH.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/mtd/spi/stmicro.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mtd/spi/stmicro.c b/drivers/mtd/spi/stmicro.c
+index e1945ee..e0de768 100644
+--- a/drivers/mtd/spi/stmicro.c
++++ b/drivers/mtd/spi/stmicro.c
+@@ -103,6 +103,13 @@ static const struct stmicro_spi_flash_params stmicro_spi_flash_table[] = {
+ 		.nr_sectors = 64,
+ 		.name = "M25P128",
+ 	},
++	{
++		.id = 0xba18,
++		.page_size = 256,
++		.pages_per_sector = 256,
++		.nr_sectors = 256,
++		.name = "N25Q128",
++	},
+ };
+ 
+ static int stmicro_erase(struct spi_flash *flash, u32 offset, size_t len)
+-- 
+1.7.0.4
+
