@@ -213,3 +213,4 @@ petalinux-v3.1/0212-remoteproc-Fix-compatible-property-for-drivers.patch
 mbref/0001-uartlite-Make-the-number-of-UARTs-registered-configu.patch
 mbref/0002-microblaze-enable-debugger-functionality.patch
 mbref/0003-microblaze-improve-failure-handling-for-GPIO-reset.patch
+mbref/0004-imicroblaze-uartlite-avoid-NULL-pointer-exception.patch
