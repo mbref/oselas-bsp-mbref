@@ -1,4 +1,4 @@
-From ab11f410d6bd1161ccfe3246a652e276dfeab871 Mon Sep 17 00:00:00 2001
+From ddf3218fdba74f580ed052942e613174c3ffa859 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Sat, 18 Sep 2010 13:28:49 +0200
 Subject: [PATCH] microblaze: generic: move ENV onto top of flash

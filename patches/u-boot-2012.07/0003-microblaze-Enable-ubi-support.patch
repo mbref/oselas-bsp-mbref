@@ -1,4 +1,4 @@
-From b3b512e19aaa3fe5ed1a3136cf29f06f67657178 Mon Sep 17 00:00:00 2001
+From 647e35bb9baa2b3ebdf75a40ca0c6452387892cb Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Wed, 27 Jun 2012 00:28:26 +0200
 Subject: [PATCH] microblaze: Enable ubi support

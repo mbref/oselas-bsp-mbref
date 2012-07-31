@@ -1,4 +1,4 @@
-From 5850454cce567208277c5ad2ebab8accd0b9c101 Mon Sep 17 00:00:00 2001
+From 4bb0580cc83127d75c1ae71d00e49a8d7ed1ebd2 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Fri, 29 Jun 2012 23:23:33 +0200
 Subject: [PATCH] microblaze: Add missing undefs for UBI and UBIFS

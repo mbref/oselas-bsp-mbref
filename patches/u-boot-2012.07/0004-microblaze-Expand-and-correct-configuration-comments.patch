@@ -1,4 +1,4 @@
-From aae8abae6235e71ad8d49ad7ca3d60af872ded81 Mon Sep 17 00:00:00 2001
+From 96ca60f553a0834e4d1a30bf951c0adb5281c189 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Sun, 1 Jul 2012 16:44:37 +0200
 Subject: [PATCH] microblaze: Expand and correct configuration comments

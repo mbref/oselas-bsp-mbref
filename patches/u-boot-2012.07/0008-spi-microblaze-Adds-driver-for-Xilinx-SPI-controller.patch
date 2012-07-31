@@ -1,4 +1,4 @@
-From 776a06aae01631bc170d030e7ff6495c7c95f5be Mon Sep 17 00:00:00 2001
+From df1913e52e321265c0fc1875091f584ad8a5804f Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Sat, 28 Jul 2012 21:20:22 +0200
 Subject: [PATCH] spi: microblaze: Adds driver for Xilinx SPI controller

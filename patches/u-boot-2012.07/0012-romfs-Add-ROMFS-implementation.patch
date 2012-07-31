@@ -1,4 +1,4 @@
-From e26a556b743c1bf101bb3e50baa0e8ecc56f4860 Mon Sep 17 00:00:00 2001
+From 4eff966c46780b0e66cee3a16efcc57625d1dd0f Mon Sep 17 00:00:00 2001
 From: Michal Simek <monstr@monstr.eu>
 Date: Fri, 14 Aug 2009 10:52:31 +0200
 Subject: [PATCH] romfs: Add ROMFS implementation
@@ -20,7 +20,7 @@ Signed-off-by: Stephan Linz <linz@li-pro.net>
  create mode 100644 fs/romfs/romfs.c
 
 diff --git a/Makefile b/Makefile
-index d57c15e..17448d8 100644
+index eb37ea1..a5a1db0 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -246,8 +246,8 @@ LIBS += dts/libdts.o

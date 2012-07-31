@@ -1,4 +1,4 @@
-From 0babf9cb8f64ead143a38cbfba476abc7f2662a5 Mon Sep 17 00:00:00 2001
+From ca6d0f5240c38670e617d8304883e65c3ff2e15a Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Sat, 28 Jul 2012 22:29:09 +0200
 Subject: [PATCH] microblaze: generic: move ENV onto top of spi flash

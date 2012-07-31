@@ -1,4 +1,4 @@
-From ec0e4ba3cd5f9363a6fe82b7f7c2fa88e2cd581c Mon Sep 17 00:00:00 2001
+From 1a6efcef4d371edf4fd4a765580d69b78503db93 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Wed, 27 Jun 2012 00:28:25 +0200
 Subject: [PATCH] microblaze: Avoid compile error on systems without cfi flash

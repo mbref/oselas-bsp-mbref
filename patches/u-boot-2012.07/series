@@ -10,4 +10,4 @@
 0010-microblaze-generic-move-ENV-onto-top-of-spi-flash.patch
 0011-microblaze-generic-move-ENV-onto-top-of-flash.patch
 0012-romfs-Add-ROMFS-implementation.patch
-0013-Prepare-v2012.07-rc3-mbref-20120728.patch
+0013-Prepare-v2012.07-mbref.patch

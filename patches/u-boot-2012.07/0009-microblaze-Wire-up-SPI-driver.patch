@@ -1,4 +1,4 @@
-From a01ec7a0b6431201445861e233f3a84baf308ae0 Mon Sep 17 00:00:00 2001
+From ba961633798d986056e73cfb042f7d39d8788ebf Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Sat, 28 Jul 2012 21:25:26 +0200
 Subject: [PATCH] microblaze: Wire up SPI driver

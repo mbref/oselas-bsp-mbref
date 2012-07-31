@@ -1,4 +1,4 @@
-From 0b9146cdc8203b2d3ea4adf3e2b7281f2333d809 Mon Sep 17 00:00:00 2001
+From 161e7d9bd23916386d77da396a771f8ef160401c Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Wed, 27 Jun 2012 00:28:24 +0200
 Subject: [PATCH] microblaze: Remove wrong define CONFIG_SYS_FLASH_PROTECTION

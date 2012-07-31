@@ -1,7 +1,7 @@
-From 99cee242f88e290c925a9e305923fdee2c6d6239 Mon Sep 17 00:00:00 2001
+From 26dc9b5b7fef75bd05c0816236b6b4706bfae6b1 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
-Date: Sat, 28 Jul 2012 22:38:44 +0200
-Subject: [PATCH] Prepare v2012.07-rc3-mbref-20120728
+Date: Tue, 31 Jul 2012 21:07:57 +0200
+Subject: [PATCH] Prepare v2012.07-mbref
 
 Signed-off-by: Stephan Linz <linz@li-pro.net>
 ---
@@ -10,15 +10,15 @@ Signed-off-by: Stephan Linz <linz@li-pro.net>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 17448d8..5796c66 100644
+index a5a1db0..5ae574c 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -24,7 +24,7 @@
  VERSION = 2012
  PATCHLEVEL = 07
  SUBLEVEL =
--EXTRAVERSION = -rc3
-+EXTRAVERSION = -rc3-mbref
+-EXTRAVERSION =
++EXTRAVERSION = -mbref
  ifneq "$(SUBLEVEL)" ""
  U_BOOT_VERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
  else
