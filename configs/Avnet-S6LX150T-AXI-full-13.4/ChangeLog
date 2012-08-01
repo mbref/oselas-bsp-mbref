@@ -1,3 +1,7 @@
+2012-07-31	Stephan Linz <linz@li-pro.net>
+
+	* platform: upgrade to u-boot-2012.07
+
 2012-07-29	Stephan Linz <linz@li-pro.net>
 
 	* xlbsp: upgrade to lates exports from ISE 13.4
