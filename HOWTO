@@ -495,6 +495,19 @@ sf probe
 sf erase F80000 +60000
 sf write 0x80900000 F80000 $filesize
 
+Shortcut: write Linux kernel into Flash:
+----------------------------------------
+dhcp 0x80900000 /s6lx9/linuximage.ub
+
+sf probe
+sf erase 200000 +d80000
+sf write 0x80900000 200000 $filesize
+
+sf probe
+sf read 0x80900000 200000 d80000
+imi 0x80900000
+bootm 0x80900000
+
 
 ______________________________________________________________________________
 Shortcuts: Avnet-S6LX150T-MMU
