@@ -1,3 +1,7 @@
+2012-08-06	Stephan Linz <linz@li-pro.net>
+
+	* xlbsp: upgrade to lates exports from ISE
+
 2012-05-20      Stephan Linz <linz@li-pro.net>
 
 	* xlbsp: upgrade to lates exports from ISE 13.2 (IRQs and UBIFS)
