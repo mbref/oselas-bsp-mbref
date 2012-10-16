@@ -1,3 +1,7 @@
+2012-10-14	Stephan Linz <linz@li-pro.net>
+
+	* ptxconfig: upgarde to busybox-1.20.1
+
 2012-08-01	Stephan Linz <linz@li-pro.net>
 
 	* common: HOWTO: add kernel shortcut for Avnet-S6LX9-AXI-tiny-13.2

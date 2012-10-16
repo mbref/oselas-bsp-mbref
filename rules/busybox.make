@@ -16,8 +16,8 @@ PACKAGES-$(PTXCONF_BUSYBOX) += busybox
 #
 # Paths and names
 #
-BUSYBOX_VERSION	:= 1.18.5
-BUSYBOX_MD5	:= 96dd43cc7cee4017a6bf31b7da82a1f5
+BUSYBOX_VERSION	:= 1.20.1
+BUSYBOX_MD5	:= af2fededb6dca804544c05684636e574
 BUSYBOX		:= busybox-$(BUSYBOX_VERSION)
 BUSYBOX_SUFFIX	:= tar.bz2
 BUSYBOX_URL	:= http://www.busybox.net/downloads/$(BUSYBOX).$(BUSYBOX_SUFFIX)
@@ -48,14 +48,19 @@ $(STATEDIR)/busybox.prepare:
 	@$(call touch)
 
 BUSYBOX_MAKE_OPT := \
+	V=$(PTXDIST_VERBOSE) \
 	ARCH=$(PTXCONF_ARCH_STRING) \
+	SUBARCH=$(PTXCONF_ARCH_STRING) \
 	CROSS_COMPILE=$(COMPILER_PREFIX) \
-	HOSTCC=$(HOSTCC) \
+	HOSTCC=$(HOSTCC)
+
+BUSYBOX_MAKE_ENV := \
+	$(CROSS_ENV) \
+	CFLAGS="$(CROSS_CFLAGS) -I$(KERNEL_HEADERS_INCLUDE_DIR)" \
 	SKIP_STRIP=y
 
-ifdef PTXCONF_BUSYBOX_RFKILL
-BUSYBOX_MAKE_OPT += CFLAGS="-I$(KERNEL_HEADERS_INCLUDE_DIR)"
-endif
+BUSYBOX_INSTALL_ENV := \
+	$(BUSYBOX_MAKE_ENV)
 
 BUSYBOX_INSTALL_OPT := \
 	$(BUSYBOX_MAKE_OPT) \
@@ -176,7 +181,27 @@ ifneq ($(call remove_quotes, $(PTXCONF_BUSYBOX_MDEV_BBINIT_LINK)),)
 		/etc/rc.d/$(PTXCONF_BUSYBOX_MDEV_BBINIT_LINK))
 endif
 endif
+
+ifdef PTXCONF_BUSYBOX_BB_SYSCTL_STARTSCRIPT
+	@$(call install_alternative, busybox, 0, 0, 0755, /etc/init.d/sysctl)
+
+ifneq ($(call remove_quotes,$(PTXCONF_BUSYBOX_BB_SYSCTL_BBINIT_LINK)),)
+	@$(call install_link, busybox, \
+		../init.d/sysctl, \
+		/etc/rc.d/$(PTXCONF_BUSYBOX_BB_SYSCTL_BBINIT_LINK))
+endif
+endif
+
 endif # PTXCONF_INITMETHOD_BBINIT
+
+ifdef PTXCONF_BUSYBOX_TELNETD_SYSTEMD_UNIT
+	@$(call install_alternative, busybox, 0, 0, 0644, \
+		/lib/systemd/system/telnetd.socket)
+	@$(call install_alternative, busybox, 0, 0, 0644, \
+		/lib/systemd/system/telnetd@.service)
+	@$(call install_link, busybox, ../telnetd.socket, \
+		/lib/systemd/system/sockets.target.wants/telnetd.socket)
+endif
 
 #	#
 #	# config files
@@ -194,6 +219,10 @@ endif
 ifdef PTXCONF_BUSYBOX_CROND
 	@$(call install_copy, busybox, 0, 0, 0755, /etc/cron)
 	@$(call install_copy, busybox, 0, 0, 0755, /var/spool/cron/crontabs/)
+endif
+
+ifdef PTXCONF_BUSYBOX_BB_SYSCTL
+	@$(call install_alternative, busybox, 0, 0, 0755, /etc/sysctl.conf)
 endif
 
 	@$(call install_finish, busybox)

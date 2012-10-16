@@ -74,6 +74,20 @@ config BUSYBOX_MDEV_STARTSCRIPT
 	default y
 	prompt "install /etc/init.d/mdev"
 
+config BUSYBOX_BB_SYSCTL_STARTSCRIPT
+	bool
+	depends on BUSYBOX_BB_SYSCTL
+	default y
+	prompt "Install /etc/init.d/sysctl"
+
+comment "---"
+
+config BUSYBOX_TELNETD_SYSTEMD_UNIT
+	bool
+	default y
+	depends on BUSYBOX_TELNETD && SYSTEMD
+	prompt "telnetd systemd service files"
+
 comment "---"
 
 source "config/busybox/Config.in"

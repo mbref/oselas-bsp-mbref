@@ -36,3 +36,8 @@ config BUSYBOX_MDEV_BBINIT_LINK
 	prompt "mdev"
 	default "S00mdev"
 
+config BUSYBOX_BB_SYSCTL_BBINIT_LINK
+	string
+	depends on BUSYBOX_BB_SYSCTL_STARTSCRIPT
+	prompt "sysctl"
+	default "S17sysctl"
