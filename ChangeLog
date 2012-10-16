@@ -1,5 +1,6 @@
 2012-10-14	Stephan Linz <linz@li-pro.net>
 
+	* ptxconfig: migrate to ptxdist-2012.10.0
 	* ptxconfig: upgarde to busybox-1.20.1
 	* common: dbus: make epoll configurable
 

@@ -14,7 +14,7 @@ XILINX		:= false
 #
 
 SHELL		:= /bin/bash
-PTXDIST		:= /usr/bin/ptxdist-2012.05.0
+PTXDIST		:= /usr/bin/ptxdist-2012.10.0
 
 BUILDDATE	:= $(shell date +%y%m%d-%H%M)
 VERSION		:= $(shell ./scripts/setlocalversion ./.tarball-version)
