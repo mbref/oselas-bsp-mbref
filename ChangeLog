@@ -1,6 +1,7 @@
 2012-10-19	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: busybox: disable Unix98 PTYs
+	* ptxconfig: add write support for ftpd (put)
 	* ptxconfig: add ldd for the target
 
 2012-10-14	Stephan Linz <linz@li-pro.net>
