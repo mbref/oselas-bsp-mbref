@@ -1,3 +1,7 @@
+2012-10-19	Stephan Linz <linz@li-pro.net>
+
+	* ptxconfig: busybox: disable Unix98 PTYs
+
 2012-10-14	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: migrate to ptxdist-2012.10.0
