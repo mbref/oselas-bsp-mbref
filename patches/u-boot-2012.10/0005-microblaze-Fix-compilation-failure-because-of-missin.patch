@@ -1,0 +1,33 @@
+From 0892573456e145ffa3963be964bdf9c593aa5d7a Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 26 Sep 2012 14:24:05 +0200
+Subject: [PATCH] microblaze: Fix compilation failure because of missing libdts
+
+Microblaze platform can use CONFIG_OF_EMBED option
+but also it is necessary to support boards
+which don't want to use this option.
+U-Boot doesn't compile dts/libdts.o for #undef CONFIG_OF_EMBED
+case that's why it should be guarded by ifdef.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/cpu/u-boot.lds |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/arch/microblaze/cpu/u-boot.lds b/arch/microblaze/cpu/u-boot.lds
+index d033a28..349d36a 100644
+--- a/arch/microblaze/cpu/u-boot.lds
++++ b/arch/microblaze/cpu/u-boot.lds
+@@ -45,7 +45,9 @@ SECTIONS
+ 	.data ALIGN(0x4):
+ 	{
+ 		__data_start = .;
++#ifdef CONFIG_OF_EMBED
+ 		dts/libdts.o (.data)
++#endif
+ 		*(.data)
+ 		__data_end = .;
+ 	}
+-- 
+1.7.0.4
+

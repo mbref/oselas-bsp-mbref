@@ -1,0 +1,32 @@
+From 70d684490082a084088fd21facf015db5afb0d4f Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sun, 2 Dec 2012 11:09:14 +0100
+Subject: [PATCH] microblaze: Disable dts configuration
+
+revert "microblaze: Wire up dts configuration" (sha1:920c358):
+    - disable OF control and embedded OF
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h |    5 -----
+ 1 files changed, 0 insertions(+), 5 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index ebc93de..a1e494e 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -31,11 +31,6 @@
+ #define	CONFIG_MICROBLAZE	1
+ #define	MICROBLAZE_V5		1
+ 
+-/* Open Firmware DTS */
+-#define CONFIG_OF_CONTROL	1
+-#define CONFIG_OF_EMBED		1
+-#define CONFIG_DEFAULT_DEVICE_TREE microblaze
+-
+ /* linear and spi flash memory */
+ #ifdef XILINX_FLASH_START
+ #define	FLASH
+-- 
+1.7.0.4
+

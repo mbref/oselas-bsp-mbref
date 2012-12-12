@@ -1,0 +1,40 @@
+From fd940d6e48a65395ab8ca1f8f4ed181dc43e2b3e Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sat, 1 Dec 2012 23:51:20 +0100
+Subject: [PATCH] Prepare v2012.10-mbref
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ Makefile                             |    2 +-
+ include/configs/microblaze-generic.h |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 6cd4fa7..508f699 100644
+--- a/Makefile
++++ b/Makefile
+@@ -24,7 +24,7 @@
+ VERSION = 2012
+ PATCHLEVEL = 10
+ SUBLEVEL =
+-EXTRAVERSION =
++EXTRAVERSION = -mbref
+ ifneq "$(SUBLEVEL)" ""
+ U_BOOT_VERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
+ else
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index a1e494e..6de9a2d 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -384,7 +384,7 @@
+ #endif
+ 
+ /* Miscellaneous configurable options */
+-#define	CONFIG_SYS_PROMPT	"U-Boot-mONStR> "
++#define	CONFIG_SYS_PROMPT	"U-Boot-mbref> "
+ /* size of console buffer */
+ #define	CONFIG_SYS_CBSIZE	512
+  /* print buffer size */
+-- 
+1.7.0.4
+

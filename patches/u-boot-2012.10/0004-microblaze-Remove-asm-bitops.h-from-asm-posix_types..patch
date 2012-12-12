@@ -1,0 +1,50 @@
+From d8f0d646ea65048744c083cf4b6d7684265a7d76 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 7 Nov 2012 15:25:39 +0100
+Subject: [PATCH] microblaze: Remove asm/bitops.h from asm/posix_types.h
+
+The patch
+"include/linux/byteorder: import latest endian definitions from linux"
+(sha1: eef1cf2d5cf1cae5fb76713e912263dedf110aeb)
+
+Introduced a lot of compilation failures with unknow types.
+include/linux/byteorder/big_endian.h:45:1: error: unknown type name '__le64'
+include/linux/byteorder/big_endian.h: In function '__cpu_to_le64p':
+include/linux/byteorder/big_endian.h:47:18: error: '__le64' undeclared (first use in this function)
+include/linux/byteorder/big_endian.h:47:18: note: each undeclared identifier is reported only once for each function it appears in
+include/linux/byteorder/big_endian.h:47:25: error: expected ';' before '__swab64p'
+include/linux/byteorder/big_endian.h: At top level:
+include/linux/byteorder/big_endian.h:49:1: error: unknown type name '__le64'
+include/linux/byteorder/big_endian.h:53:1: error: unknown type name '__le32'
+include/linux/byteorder/big_endian.h: In function '__cpu_to_le32p':
+include/linux/byteorder/big_endian.h:55:18: error: '__le32' undeclared (first use in this function)
+include/linux/byteorder/big_endian.h:55:25: error: expected ';' before '__swab32p'
+include/linux/byteorder/big_endian.h: At top level:
+include/linux/byteorder/big_endian.h:57:1: error: unknown type name '__le32'
+include/linux/byteorder/big_endian.h:61:1: error: unknown type name '__le16'
+...
+
+Removing asm/bitops.h solved this problem.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ arch/microblaze/include/asm/posix_types.h |    3 ---
+ 1 files changed, 0 insertions(+), 3 deletions(-)
+
+diff --git a/arch/microblaze/include/asm/posix_types.h b/arch/microblaze/include/asm/posix_types.h
+index 9a2cc66..38dc5aa 100644
+--- a/arch/microblaze/include/asm/posix_types.h
++++ b/arch/microblaze/include/asm/posix_types.h
+@@ -16,9 +16,6 @@
+ #ifndef __MICROBLAZE_POSIX_TYPES_H__
+ #define __MICROBLAZE_POSIX_TYPES_H__
+ 
+-#include <asm/bitops.h>
+-
+-
+ typedef unsigned int	__kernel_dev_t;
+ typedef unsigned long	__kernel_ino_t;
+ typedef unsigned long long __kernel_ino64_t;
+-- 
+1.7.0.4
+

@@ -1,0 +1,86 @@
+From dbe11a08b3af4853e518aee0def3b7ab0ec3d6d8 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Tue, 25 Sep 2012 10:13:35 +0200
+Subject: [PATCH] microblaze: Flush caches before enabling them
+
+Flushing caches is necessary because of soft reset
+which doesn't clear caches.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+Reviewed-by: Marek Vasut <marex@denx.de>
+---
+ arch/microblaze/cpu/cache.c          |    5 -----
+ arch/microblaze/cpu/start.S          |    6 ++++++
+ arch/microblaze/lib/bootm.c          |    5 -----
+ include/configs/microblaze-generic.h |    4 ++++
+ 4 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/arch/microblaze/cpu/cache.c b/arch/microblaze/cpu/cache.c
+index d258a69..ce066b9 100644
+--- a/arch/microblaze/cpu/cache.c
++++ b/arch/microblaze/cpu/cache.c
+@@ -61,12 +61,7 @@ void	dcache_enable (void) {
+ 
+ void	dcache_disable(void) {
+ #ifdef XILINX_USE_DCACHE
+-#ifdef XILINX_DCACHE_BYTE_SIZE
+ 	flush_cache(0, XILINX_DCACHE_BYTE_SIZE);
+-#else
+-#warning please rebuild BSPs and update configuration
+-	flush_cache(0, 32768);
+-#endif
+ #endif
+ 	MSRCLR(0x80);
+ }
+diff --git a/arch/microblaze/cpu/start.S b/arch/microblaze/cpu/start.S
+index 8564c4e..3da711d 100644
+--- a/arch/microblaze/cpu/start.S
++++ b/arch/microblaze/cpu/start.S
+@@ -132,6 +132,12 @@ _start:
+ 	rsubi	r8, r10, 0x26
+ 	sh	r6, r0, r8
+ 
++	/* Flush cache before enable cache */
++	addik	r5, r0, 0
++	addik	r6, r0, XILINX_DCACHE_BYTE_SIZE
++flush:	bralid r15, flush_cache
++	nop
++
+ 	/* enable instruction and data cache */
+ 	mfs	r12, rmsr
+ 	ori	r12, r12, 0xa0
+diff --git a/arch/microblaze/lib/bootm.c b/arch/microblaze/lib/bootm.c
+index 95cee50..66d21f4 100644
+--- a/arch/microblaze/lib/bootm.c
++++ b/arch/microblaze/lib/bootm.c
+@@ -70,12 +70,7 @@ int do_bootm_linux(int flag, int argc, char * const argv[], bootm_headers_t *ima
+ #endif
+ 
+ #ifdef XILINX_USE_DCACHE
+-#ifdef XILINX_DCACHE_BYTE_SIZE
+ 	flush_cache(0, XILINX_DCACHE_BYTE_SIZE);
+-#else
+-#warning please rebuild BSPs and update configuration
+-	flush_cache(0, 32768);
+-#endif
+ #endif
+ 	/*
+ 	 * Linux Kernel Parameters (passing device tree):
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 721cd90..eed38c1 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -287,6 +287,10 @@
+ # undef CONFIG_DCACHE
+ #endif
+ 
++#ifndef XILINX_DCACHE_BYTE_SIZE
++#define XILINX_DCACHE_BYTE_SIZE	32768
++#endif
++
+ /*
+  * BOOTP options
+  */
+-- 
+1.7.0.4
+
