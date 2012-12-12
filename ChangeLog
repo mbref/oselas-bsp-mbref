@@ -1,3 +1,8 @@
+2012-12-12	Stephan Linz <linz@li-pro.net>
+
+	* common: adapt latest patch sets to linux-3.6
+	* common: adapt latest patch sets to u-boot-2012.10
+
 2012-10-19	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: busybox: disable Unix98 PTYs

@@ -1,0 +1,16 @@
+From 0aaa5a8768f94c72318564b7dba97d4144ba9c1e Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Mon, 8 Oct 2012 15:36:01 +0200
+Subject: [PATCH] powerpc: Chmod for avnet defconfig
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ 0 files changed, 0 insertions(+), 0 deletions(-)
+ mode change 100755 => 100644 arch/powerpc/configs/44x/avnet_v5fx30t_defconfig
+
+diff --git a/arch/powerpc/configs/44x/avnet_v5fx30t_defconfig b/arch/powerpc/configs/44x/avnet_v5fx30t_defconfig
+old mode 100755
+new mode 100644
+-- 
+1.7.0.4
+

@@ -1,0 +1,138 @@
+From 7ae67e2bd67d13a9430e8e3b03589244c431f512 Mon Sep 17 00:00:00 2001
+From: Michal Simek <monstr@monstr.eu>
+Date: Wed, 24 Oct 2012 12:56:42 +0200
+Subject: [PATCH] xilinx: Use proper permission 644 for files
+
+Fix permissions.
+
+Signed-off-by: Michal Simek <monstr@monstr.eu>
+---
+ 0 files changed, 0 insertions(+), 0 deletions(-)
+ mode change 100755 => 100644 arch/arm/boot/dts/zynq-afx.dts
+ mode change 100755 => 100644 arch/arm/boot/dts/zynq-zc702-xylon-snippet.dts
+ mode change 100755 => 100644 arch/arm/boot/dts/zynq-zc770-xm011.dts
+ mode change 100755 => 100644 arch/arm/boot/dts/zynq-zc770-xm012.dts
+ mode change 100755 => 100644 arch/arm/configs/xilinx_qemu_defconfig
+ mode change 100755 => 100644 arch/arm/mach-zynq/include/mach/gpio.h
+ mode change 100755 => 100644 arch/microblaze/boot/dts/sp605_le.dts
+ mode change 100755 => 100644 arch/powerpc/boot/dts/virtex440-avnet-v5fx30t.dts
+ mode change 100755 => 100644 drivers/ata/sata_dwc_460ex.c
+ mode change 100755 => 100644 drivers/char/xilinx_devcfg.c
+ mode change 100755 => 100644 drivers/dma/dmatest.c.cdma_dma
+ mode change 100755 => 100644 drivers/dma/dmatest.c.vdma
+ mode change 100755 => 100644 drivers/i2c/algos/xilinx_iic/xiic_l.c
+ mode change 100755 => 100644 drivers/i2c/algos/xilinx_iic/xiic_stats.c
+ mode change 100755 => 100644 drivers/net/ethernet/xilinx/xilinx_axienet.h
+ mode change 100755 => 100644 drivers/net/ethernet/xilinx/xilinx_axienet_main.c
+ mode change 100755 => 100644 drivers/net/ethernet/xilinx/xilinx_axienet_mdio.c
+ mode change 100755 => 100644 drivers/spi/spi-xilinx-qps.c
+ mode change 100755 => 100644 drivers/staging/usbip/userspace/autogen.sh
+ mode change 100755 => 100644 drivers/staging/usbip/userspace/cleanup.sh
+ mode change 100755 => 100644 drivers/usb/gadget/xilinx_usbps_udc.c
+ mode change 100755 => 100644 drivers/usb/gadget/xilinx_usbps_udc.h
+ mode change 100755 => 100644 drivers/usb/host/ehci-fsl.c
+ mode change 100755 => 100644 drivers/usb/host/ehci-xilinx-usbps.c
+ mode change 100755 => 100644 drivers/usb/host/ehci-xilinx-usbps.h
+ mode change 100755 => 100644 drivers/usb/otg/xilinx_usbps_otg.c
+ mode change 100755 => 100644 drivers/xilinx_common/xenv.h
+ mode change 100755 => 100644 drivers/xilinx_common/xil_assert.c
+ mode change 100755 => 100644 drivers/xilinx_common/xil_assert.h
+ mode change 100755 => 100644 drivers/xilinx_common/xil_io.h
+ mode change 100755 => 100644 drivers/xilinx_common/xil_types.h
+
+diff --git a/arch/arm/boot/dts/zynq-afx.dts b/arch/arm/boot/dts/zynq-afx.dts
+old mode 100755
+new mode 100644
+diff --git a/arch/arm/boot/dts/zynq-zc702-xylon-snippet.dts b/arch/arm/boot/dts/zynq-zc702-xylon-snippet.dts
+old mode 100755
+new mode 100644
+diff --git a/arch/arm/boot/dts/zynq-zc770-xm011.dts b/arch/arm/boot/dts/zynq-zc770-xm011.dts
+old mode 100755
+new mode 100644
+diff --git a/arch/arm/boot/dts/zynq-zc770-xm012.dts b/arch/arm/boot/dts/zynq-zc770-xm012.dts
+old mode 100755
+new mode 100644
+diff --git a/arch/arm/configs/xilinx_qemu_defconfig b/arch/arm/configs/xilinx_qemu_defconfig
+old mode 100755
+new mode 100644
+diff --git a/arch/arm/mach-zynq/include/mach/gpio.h b/arch/arm/mach-zynq/include/mach/gpio.h
+old mode 100755
+new mode 100644
+diff --git a/arch/microblaze/boot/dts/sp605_le.dts b/arch/microblaze/boot/dts/sp605_le.dts
+old mode 100755
+new mode 100644
+diff --git a/arch/powerpc/boot/dts/virtex440-avnet-v5fx30t.dts b/arch/powerpc/boot/dts/virtex440-avnet-v5fx30t.dts
+old mode 100755
+new mode 100644
+diff --git a/drivers/ata/sata_dwc_460ex.c b/drivers/ata/sata_dwc_460ex.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/char/xilinx_devcfg.c b/drivers/char/xilinx_devcfg.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/dma/dmatest.c.cdma_dma b/drivers/dma/dmatest.c.cdma_dma
+old mode 100755
+new mode 100644
+diff --git a/drivers/dma/dmatest.c.vdma b/drivers/dma/dmatest.c.vdma
+old mode 100755
+new mode 100644
+diff --git a/drivers/i2c/algos/xilinx_iic/xiic_l.c b/drivers/i2c/algos/xilinx_iic/xiic_l.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/i2c/algos/xilinx_iic/xiic_stats.c b/drivers/i2c/algos/xilinx_iic/xiic_stats.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/net/ethernet/xilinx/xilinx_axienet.h b/drivers/net/ethernet/xilinx/xilinx_axienet.h
+old mode 100755
+new mode 100644
+diff --git a/drivers/net/ethernet/xilinx/xilinx_axienet_main.c b/drivers/net/ethernet/xilinx/xilinx_axienet_main.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/net/ethernet/xilinx/xilinx_axienet_mdio.c b/drivers/net/ethernet/xilinx/xilinx_axienet_mdio.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/spi/spi-xilinx-qps.c b/drivers/spi/spi-xilinx-qps.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/staging/usbip/userspace/autogen.sh b/drivers/staging/usbip/userspace/autogen.sh
+old mode 100755
+new mode 100644
+diff --git a/drivers/staging/usbip/userspace/cleanup.sh b/drivers/staging/usbip/userspace/cleanup.sh
+old mode 100755
+new mode 100644
+diff --git a/drivers/usb/gadget/xilinx_usbps_udc.c b/drivers/usb/gadget/xilinx_usbps_udc.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/usb/gadget/xilinx_usbps_udc.h b/drivers/usb/gadget/xilinx_usbps_udc.h
+old mode 100755
+new mode 100644
+diff --git a/drivers/usb/host/ehci-fsl.c b/drivers/usb/host/ehci-fsl.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/usb/host/ehci-xilinx-usbps.c b/drivers/usb/host/ehci-xilinx-usbps.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/usb/host/ehci-xilinx-usbps.h b/drivers/usb/host/ehci-xilinx-usbps.h
+old mode 100755
+new mode 100644
+diff --git a/drivers/usb/otg/xilinx_usbps_otg.c b/drivers/usb/otg/xilinx_usbps_otg.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/xilinx_common/xenv.h b/drivers/xilinx_common/xenv.h
+old mode 100755
+new mode 100644
+diff --git a/drivers/xilinx_common/xil_assert.c b/drivers/xilinx_common/xil_assert.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/xilinx_common/xil_assert.h b/drivers/xilinx_common/xil_assert.h
+old mode 100755
+new mode 100644
+diff --git a/drivers/xilinx_common/xil_io.h b/drivers/xilinx_common/xil_io.h
+old mode 100755
+new mode 100644
+diff --git a/drivers/xilinx_common/xil_types.h b/drivers/xilinx_common/xil_types.h
+old mode 100755
+new mode 100644
+-- 
+1.7.0.4
+
