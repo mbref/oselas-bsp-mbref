@@ -389,7 +389,8 @@ linux-xlnx/next/0059-net-ethernet-xilinx-Do-not-show-LL_TEMAC-phy-options.patch
 linux-xlnx/next/0060-zynq-Update-defconfig.patch
 
 #
-# 383136bfbe7640ad0e16b000deeb93e9081fea6d..2e48450e06d5cfe4bd8c95f8f325469fd12df4f7
+# 383136bfbe7640ad0e16b000deeb93e9081fea6d..e7bf36e51f76f9173025f9ff2c97e320695feb94
 #
 mbref/0001-uartlite-Make-the-number-of-UARTs-registered-configu.patch
 mbref/0002-microblaze-enable-debugger-functionality.patch
+mbref/0003-i2c-xiic-merge-in-the-PetaLogix-driver.patch
