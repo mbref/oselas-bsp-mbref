@@ -33,5 +33,5 @@ index cbb0494..3ac2d31 100644
  static u64 dma_mask = 0xFFFFFFF0;
  
 -- 
-1.7.0.4
+1.7.1
 

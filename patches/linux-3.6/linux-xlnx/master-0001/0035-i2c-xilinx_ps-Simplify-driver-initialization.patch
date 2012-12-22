@@ -44,5 +44,5 @@ index acf5c56..ddcb780 100644
  MODULE_AUTHOR("Xilinx, Inc.");
  MODULE_DESCRIPTION("Xilinx PS I2C bus driver");
 -- 
-1.7.0.4
+1.7.1
 

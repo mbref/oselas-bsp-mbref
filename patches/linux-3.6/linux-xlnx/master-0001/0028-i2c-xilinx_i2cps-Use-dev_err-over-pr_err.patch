@@ -40,5 +40,5 @@ index e4df3f5..74f7003 100644
  #else /* ! CONFIG_COMMON_CLK */
  	prop = of_get_property(pdev->dev.of_node, "input-clk", NULL);
 -- 
-1.7.0.4
+1.7.1
 

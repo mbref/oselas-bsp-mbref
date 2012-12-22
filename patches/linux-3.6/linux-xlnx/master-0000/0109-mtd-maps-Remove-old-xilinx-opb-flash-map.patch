@@ -136,5 +136,5 @@ index fc832c3..0000000
 -MODULE_AUTHOR("Xilinx, Inc.");
 -MODULE_DESCRIPTION("MTD map driver for OPB Flash on Xilinx boards");
 -- 
-1.7.0.4
+1.7.1
 

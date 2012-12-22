@@ -143,5 +143,5 @@ index d0d70b9..7ab5a23 100644
  };
  MODULE_DEVICE_TABLE(of, zynq_remoteproc_match);
 -- 
-1.7.0.4
+1.7.1
 

@@ -29,5 +29,5 @@ index 6e9a86b..8850cf6 100644
  	if (of_find_property(dev->dev.of_node, "8-bit", NULL))
  		bus_width = ACE_BUS_WIDTH_8;
 -- 
-1.7.0.4
+1.7.1
 

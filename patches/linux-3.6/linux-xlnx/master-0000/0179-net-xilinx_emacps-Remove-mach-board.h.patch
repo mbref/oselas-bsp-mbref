@@ -32,5 +32,5 @@ index 0e09188..11d15f1 100644
  #include <linux/of_mdio.h>
  #endif
 -- 
-1.7.0.4
+1.7.1
 

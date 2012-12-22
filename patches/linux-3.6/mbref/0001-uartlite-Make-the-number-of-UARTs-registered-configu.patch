@@ -1,4 +1,4 @@
-From 5e4311b6cbd934f837b66b8815648af065689358 Mon Sep 17 00:00:00 2001
+From 0ba05d92617df75e0859087a0b6e239e4557596c Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Wed, 11 Apr 2012 19:28:24 +0200
 Subject: [PATCH] uartlite: Make the number of UARTs registered configurable.

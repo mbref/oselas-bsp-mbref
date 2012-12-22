@@ -174,5 +174,5 @@ index b959ffa..0d79bbf 100644
  		dev_err(&dev->dev, "couldn't determine num-chip-select\n");
  		goto free_irq;
 -- 
-1.7.0.4
+1.7.1
 

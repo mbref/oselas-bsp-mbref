@@ -82,5 +82,5 @@ index 45fea03..e6d9b6b 100644
  	xuartps = kmalloc(sizeof(*xuartps), GFP_KERNEL);
  	if (res2->start == 59)
 -- 
-1.7.0.4
+1.7.1
 

@@ -26,5 +26,5 @@ index 78880e7..fb130c2 100644
  		if ((val & ULITE_STATUS_TXFULL) == 0)
  			break;
 -- 
-1.7.0.4
+1.7.1
 

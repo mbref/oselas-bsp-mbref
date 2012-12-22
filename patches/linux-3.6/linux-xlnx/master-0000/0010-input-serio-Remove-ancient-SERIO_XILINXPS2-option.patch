@@ -42,5 +42,5 @@ index cc4c273..bf2f3b2 100644
  obj-$(CONFIG_SERIO_RAW)		+= serio_raw.o
  obj-$(CONFIG_SERIO_AMS_DELTA)	+= ams_delta_serio.o
 -- 
-1.7.0.4
+1.7.1
 

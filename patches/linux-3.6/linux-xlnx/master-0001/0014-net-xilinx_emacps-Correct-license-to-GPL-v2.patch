@@ -32,5 +32,5 @@ index de4d98e..0888d8e 100644
 -MODULE_LICENSE("GPL");
 +MODULE_LICENSE("GPL v2");
 -- 
-1.7.0.4
+1.7.1
 

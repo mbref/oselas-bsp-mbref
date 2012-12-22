@@ -74,5 +74,5 @@ index 65f0113..d0d70b9 100644
  	/* Module param firmware first */
  	if (firmware)
 -- 
-1.7.0.4
+1.7.1
 

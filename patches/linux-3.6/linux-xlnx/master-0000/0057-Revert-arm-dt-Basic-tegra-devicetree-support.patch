@@ -25,5 +25,5 @@ index 5aa3dc0..e65e837 100644
  	.atag_offset	= 0x100,
  	.fixup		= tegra_harmony_fixup,
 -- 
-1.7.0.4
+1.7.1
 

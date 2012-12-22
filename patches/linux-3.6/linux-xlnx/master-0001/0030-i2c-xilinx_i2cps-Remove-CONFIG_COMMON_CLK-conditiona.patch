@@ -111,5 +111,5 @@ index 9a63112..acf5c56 100644
  	platform_set_drvdata(pdev, NULL);
  
 -- 
-1.7.0.4
+1.7.1
 

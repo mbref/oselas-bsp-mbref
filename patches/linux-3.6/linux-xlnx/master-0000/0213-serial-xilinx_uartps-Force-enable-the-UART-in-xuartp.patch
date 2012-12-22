@@ -48,5 +48,5 @@ index e6d9b6b..984b77e 100644
  	 * in that the interrupt enable register should not need to be
  	 * written based on the data sheet
 -- 
-1.7.0.4
+1.7.1
 

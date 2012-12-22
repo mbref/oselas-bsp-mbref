@@ -58,5 +58,5 @@ index ae1c52e..0305a07 100644
  		/* Write ATDTW bit to 0 */
  		temp = xusbps_readl(&dr_regs->usbcmd);
 -- 
-1.7.0.4
+1.7.1
 

@@ -29,5 +29,5 @@ index e3262f8..1a0ef68 100644
  			dev_err(&pdev->dev, "Unable to init transceiver, probably missing\n");
  			return ENODEV;
 -- 
-1.7.0.4
+1.7.1
 

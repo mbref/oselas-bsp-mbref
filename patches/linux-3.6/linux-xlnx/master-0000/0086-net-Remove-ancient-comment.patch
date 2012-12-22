@@ -23,5 +23,5 @@ index d4b8f98..e3f0fac 100644
  /* Detachable devices ("pocket adaptors") */
  extern struct net_device *de620_probe(int unit);
 -- 
-1.7.0.4
+1.7.1
 

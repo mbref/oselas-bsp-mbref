@@ -31,5 +31,5 @@ index 2c8edb5..a7a5914 100644
  	struct resource *regs;
  	int res;
 -- 
-1.7.0.4
+1.7.1
 

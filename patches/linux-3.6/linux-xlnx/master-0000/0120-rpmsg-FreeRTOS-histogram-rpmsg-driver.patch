@@ -393,5 +393,5 @@ index 0000000..bc82259
 +MODULE_AUTHOR("Michal Simek <monstr@monstr.eu");
 +MODULE_LICENSE("GPL v2");
 -- 
-1.7.0.4
+1.7.1
 

@@ -53,5 +53,5 @@ index ddf2fc8..383a801 100644
  MODULE_AUTHOR("Xilinx, Inc.");
  MODULE_DESCRIPTION("Xilinx Ethernet driver");
 -- 
-1.7.0.4
+1.7.1
 

@@ -33,5 +33,5 @@ index ee73048..bae70c8 100644
   * struct axidma_bd - Axi Dma buffer descriptor layout
   * @next:         MM2S/S2MM Next Descriptor Pointer
 -- 
-1.7.0.4
+1.7.1
 

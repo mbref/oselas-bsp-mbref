@@ -52,5 +52,5 @@ index 9cc9329..6a3a052 100644
  static struct platform_driver xuartps_platform_driver = {
  	.probe   = xuartps_probe,		/* Probe method */
 -- 
-1.7.0.4
+1.7.1
 

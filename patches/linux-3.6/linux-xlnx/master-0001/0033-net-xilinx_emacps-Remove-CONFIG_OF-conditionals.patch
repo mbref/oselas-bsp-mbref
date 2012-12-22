@@ -196,5 +196,5 @@ index b45903c..9cc2f7b 100644
  static struct platform_driver xemacps_driver = {
  	.probe   = xemacps_probe,
 -- 
-1.7.0.4
+1.7.1
 

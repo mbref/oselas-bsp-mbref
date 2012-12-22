@@ -34,5 +34,5 @@ index 0052490..0b148b6 100644
  	/* GRR this is run-once init(), being done every time the HC starts.
  	 * So long as they're part of class devices, we can't do it init()
 -- 
-1.7.0.4
+1.7.1
 

@@ -174,5 +174,5 @@ index 55e2b14..1c0123b 100644
  	chosen {
  		bootargs = "console=ttyPS0,115200 root=/dev/ram rw";
 -- 
-1.7.0.4
+1.7.1
 

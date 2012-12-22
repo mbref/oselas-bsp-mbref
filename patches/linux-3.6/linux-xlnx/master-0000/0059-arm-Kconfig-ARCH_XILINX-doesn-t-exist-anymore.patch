@@ -24,5 +24,5 @@ index 8624cda..101b968 100644
  	select CPU_32v7
  	select CPU_ABRT_EV7
 -- 
-1.7.0.4
+1.7.1
 

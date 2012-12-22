@@ -26,5 +26,5 @@ index d1af3d6..f30ab11 100644
  obj-$(CONFIG_SPI_XILINX_PS_QSPI)	+= spi-xilinx-qps.o
 -
 -- 
-1.7.0.4
+1.7.1
 

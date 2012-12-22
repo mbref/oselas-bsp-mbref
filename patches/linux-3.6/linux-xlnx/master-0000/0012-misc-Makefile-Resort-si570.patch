@@ -22,5 +22,5 @@ index 7e150df..67ccc20 100644
  obj-$(CONFIG_INTEL_MEI)		+= mei/
 +obj-$(CONFIG_SI570)		+= si570.o
 -- 
-1.7.0.4
+1.7.1
 

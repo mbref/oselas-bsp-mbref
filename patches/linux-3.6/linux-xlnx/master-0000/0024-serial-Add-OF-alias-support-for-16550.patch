@@ -61,5 +61,5 @@ index 34e7187..78e765b 100644
  #ifdef CONFIG_SERIAL_8250
  	case PORT_8250 ... PORT_MAX_8250:
 -- 
-1.7.0.4
+1.7.1
 

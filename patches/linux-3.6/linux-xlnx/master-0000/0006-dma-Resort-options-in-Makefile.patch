@@ -25,5 +25,5 @@ index 853d7a4..2be9587 100644
  obj-$(CONFIG_DMA_OMAP) += omap-dma.o
 +obj-$(CONFIG_XILINX_DMA) += xilinx_dma.o
 -- 
-1.7.0.4
+1.7.1
 

@@ -23,5 +23,5 @@ index 42202cd..1f5ec28 100644
  };
  MODULE_DEVICE_TABLE(of, uio_of_genirq_match);
 -- 
-1.7.0.4
+1.7.1
 

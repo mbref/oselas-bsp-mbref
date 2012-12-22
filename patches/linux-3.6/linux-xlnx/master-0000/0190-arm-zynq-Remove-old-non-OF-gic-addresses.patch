@@ -25,5 +25,5 @@ index 6696141..e87a30c 100644
  #define SLCR_BASE_VIRT			0xf8000000
  #define SLCR_BASE_PHYS			0xf8000000
 -- 
-1.7.0.4
+1.7.1
 

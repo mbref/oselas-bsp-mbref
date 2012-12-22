@@ -49,5 +49,5 @@ index cae762c..71bc28d 100644
  MODULE_LICENSE("GPL v2");
  MODULE_DESCRIPTION("Zynq remote processor control driver");
 -- 
-1.7.0.4
+1.7.1
 

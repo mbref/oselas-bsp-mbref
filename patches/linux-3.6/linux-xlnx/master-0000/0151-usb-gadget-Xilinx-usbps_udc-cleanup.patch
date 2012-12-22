@@ -24,5 +24,5 @@ index cb16359..4d3da23 100755
  	unsigned int start, num, i;
  	char line[52], *p;
 -- 
-1.7.0.4
+1.7.1
 

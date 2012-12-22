@@ -55,5 +55,5 @@ index f8cf850..855a8b5 100644
  	__data_loc = ALIGN(4);		/* location in binary */
  	. = PAGE_OFFSET + TEXT_OFFSET;
 -- 
-1.7.0.4
+1.7.1
 

@@ -58,5 +58,5 @@ index 98956af..e4df3f5 100644
  						XI2CPS_XFER_SIZE_OFFSET);
  				if (id->bus_hold_flag == 0)
 -- 
-1.7.0.4
+1.7.1
 

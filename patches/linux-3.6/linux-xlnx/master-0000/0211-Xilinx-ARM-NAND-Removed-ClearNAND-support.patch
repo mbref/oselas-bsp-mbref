@@ -63,5 +63,5 @@ index 4bba115..bd5bc18 100644
  		/* Hardware ECC generates 3 bytes ECC code for each 512 bytes */
  		nand_chip->ecc.mode = NAND_ECC_HW;
 -- 
-1.7.0.4
+1.7.1
 

@@ -83,5 +83,5 @@ index e8b13d3..6696141 100644
   * Mandatory for CONFIG_LL_DEBUG, UART is mapped virtual = physical
   */
 -- 
-1.7.0.4
+1.7.1
 

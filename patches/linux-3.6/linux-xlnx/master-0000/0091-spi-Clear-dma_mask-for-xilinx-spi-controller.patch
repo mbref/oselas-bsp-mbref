@@ -32,5 +32,5 @@ index 28444fd..78774e9 100644
  	master->mode_bits = SPI_CPOL | SPI_CPHA;
  
 -- 
-1.7.0.4
+1.7.1
 

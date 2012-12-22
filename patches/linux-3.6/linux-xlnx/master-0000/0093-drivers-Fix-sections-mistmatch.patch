@@ -56,5 +56,5 @@ index 1a06ab1..97f33cf 100755
  	struct xqspips *xqspi = container_of(work, struct xqspips, work);
  	unsigned long flags;
 -- 
-1.7.0.4
+1.7.1
 

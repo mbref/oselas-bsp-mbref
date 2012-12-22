@@ -21,5 +21,5 @@ index b04322f..eb36e9f 100644
  };
  MODULE_DEVICE_TABLE(of, xwdt_of_match);
 -- 
-1.7.0.4
+1.7.1
 

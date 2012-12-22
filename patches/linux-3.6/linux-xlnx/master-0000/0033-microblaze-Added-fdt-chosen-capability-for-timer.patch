@@ -36,5 +36,5 @@ index 522defa..edd3f83 100644
  
  	timer_baseaddr = be32_to_cpup(of_get_property(timer, "reg", NULL));
 -- 
-1.7.0.4
+1.7.1
 

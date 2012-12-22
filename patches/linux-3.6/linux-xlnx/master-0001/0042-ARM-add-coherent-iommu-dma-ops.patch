@@ -322,5 +322,5 @@ index 7d772c0..5d5a4c4 100644
   * arm_iommu_create_mapping
   * @bus: pointer to the bus holding the client device (for IOMMU calls)
 -- 
-1.7.0.4
+1.7.1
 

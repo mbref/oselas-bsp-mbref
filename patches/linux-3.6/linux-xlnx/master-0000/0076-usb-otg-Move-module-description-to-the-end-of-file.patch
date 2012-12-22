@@ -36,5 +36,5 @@ index e15ac2d..47a9338 100755
 +MODULE_LICENSE("GPL");
 +MODULE_ALIAS("platform:" DRIVER_NAME);
 -- 
-1.7.0.4
+1.7.1
 

@@ -30,5 +30,5 @@ index 9b5ce23..ff19c8d 100644
          tristate "Xilinx PS tri-speed EMAC support"
  	depends on ARCH_ZYNQ
 -- 
-1.7.0.4
+1.7.1
 

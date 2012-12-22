@@ -32,5 +32,5 @@ index f6cf4b0..9634878 100755
  pseries)
      platformo=$object/of.o
 -- 
-1.7.0.4
+1.7.1
 

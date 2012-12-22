@@ -30,5 +30,5 @@ index eabb7d5..decfefe 100644
  obj-$(CONFIG_KEYBOARD_XTKBD)		+= xtkbd.o
  obj-$(CONFIG_KEYBOARD_W90P910)		+= w90p910_keypad.o
 -- 
-1.7.0.4
+1.7.1
 

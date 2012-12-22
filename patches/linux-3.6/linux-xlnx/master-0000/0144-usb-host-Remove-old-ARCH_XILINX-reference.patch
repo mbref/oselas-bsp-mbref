@@ -24,5 +24,5 @@ index 3ae9606..7bd3da8 100644
  	select USB_XUSBPS_DR_OF if OF
  	---help---
 -- 
-1.7.0.4
+1.7.1
 

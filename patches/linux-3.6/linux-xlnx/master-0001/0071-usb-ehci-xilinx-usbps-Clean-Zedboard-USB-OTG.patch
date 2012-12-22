@@ -35,5 +35,5 @@ index 1a0ef68..71417d6 100644
  		pr_info ("%s: OTG now assigned!\n", __func__);
  #endif
 -- 
-1.7.0.4
+1.7.1
 

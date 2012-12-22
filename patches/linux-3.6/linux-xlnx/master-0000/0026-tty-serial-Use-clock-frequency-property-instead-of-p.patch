@@ -27,5 +27,5 @@ index f3a922f..45fea03 100644
  	clk = *((unsigned int *)(pdev->dev.platform_data));
  #endif
 -- 
-1.7.0.4
+1.7.1
 

@@ -26,5 +26,5 @@ index de23df4..0bcfc68 100644
  		.name = DRIVER_NAME,
  		.owner = THIS_MODULE,
 -- 
-1.7.0.4
+1.7.1
 

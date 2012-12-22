@@ -31,5 +31,5 @@ index 70a2f7b..d013343 100644
  	switch (event) {
  	case PRE_RATE_CHANGE:
 -- 
-1.7.0.4
+1.7.1
 

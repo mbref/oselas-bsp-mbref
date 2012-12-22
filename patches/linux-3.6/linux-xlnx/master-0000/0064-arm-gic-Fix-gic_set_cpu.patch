@@ -39,5 +39,5 @@ index 60692ae..2998d9e 100644
  EXPORT_SYMBOL(gic_set_cpu);
  #endif
 -- 
-1.7.0.4
+1.7.1
 

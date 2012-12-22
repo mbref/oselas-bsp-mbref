@@ -196,5 +196,5 @@ index 58cdf95..99fd769 100644
  void smp_send_reschedule(int cpu)
  {
 -- 
-1.7.0.4
+1.7.1
 

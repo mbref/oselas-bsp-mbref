@@ -43,5 +43,5 @@ index 3d51788..b479772 100644
  source "drivers/misc/eeprom/Kconfig"
  source "drivers/misc/cb710/Kconfig"
 -- 
-1.7.0.4
+1.7.1
 

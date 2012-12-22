@@ -47,5 +47,5 @@ index a5fc5cf..c3181ff 100755
  		default:
  			lp->csum_offload_on_tx_path = XAE_NO_CSUM_OFFLOAD;
 -- 
-1.7.0.4
+1.7.1
 

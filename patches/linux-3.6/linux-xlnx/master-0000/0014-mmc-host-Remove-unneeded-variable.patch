@@ -26,5 +26,5 @@ index f13556c..9a11dc3 100644
  	host = (struct sdhci_host*)param;
  
 -- 
-1.7.0.4
+1.7.1
 

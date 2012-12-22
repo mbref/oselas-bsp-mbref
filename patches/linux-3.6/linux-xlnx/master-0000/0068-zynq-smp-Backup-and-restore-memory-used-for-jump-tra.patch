@@ -76,5 +76,5 @@ index 0c6f2f5..9fd9719 100644
  			__raw_writel(0xe1a0f000, zero + 0x4);/* 4:mov pc, r0 */
  			__raw_writel(address, zero + 0x8);/* 8:.word address */
 -- 
-1.7.0.4
+1.7.1
 

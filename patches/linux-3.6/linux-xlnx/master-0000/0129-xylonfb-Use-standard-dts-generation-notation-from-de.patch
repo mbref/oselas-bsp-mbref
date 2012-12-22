@@ -103,5 +103,5 @@ index 1dd86b1..2349df5 100644
  };
  MODULE_DEVICE_TABLE(of, xylonfb_of_match);
 -- 
-1.7.0.4
+1.7.1
 

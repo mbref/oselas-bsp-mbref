@@ -110,5 +110,5 @@ index 74f7003..9a63112 100644
  	.probe  = xi2cps_probe,
  	.remove = __devexit_p(xi2cps_remove),
 -- 
-1.7.0.4
+1.7.1
 

@@ -189,5 +189,5 @@ index 13f555d..7d772c0 100644
  		 void *cpu_addr, dma_addr_t handle, size_t size,
  		 struct dma_attrs *attrs)
 -- 
-1.7.0.4
+1.7.1
 

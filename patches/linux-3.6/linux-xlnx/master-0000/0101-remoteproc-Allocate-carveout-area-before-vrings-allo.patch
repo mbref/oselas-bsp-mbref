@@ -102,5 +102,5 @@ index 131b539..daaa893 100644
  
  #define FW_RSC_ADDR_ANY (0xFFFFFFFFFFFFFFFF)
 -- 
-1.7.0.4
+1.7.1
 

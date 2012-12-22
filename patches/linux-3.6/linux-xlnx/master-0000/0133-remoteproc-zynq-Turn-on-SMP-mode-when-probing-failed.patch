@@ -52,5 +52,5 @@ index d40e65c..108d2ab 100644
  MODULE_LICENSE("GPL v2");
  MODULE_DESCRIPTION("Zynq remote processor control driver");
 -- 
-1.7.0.4
+1.7.1
 

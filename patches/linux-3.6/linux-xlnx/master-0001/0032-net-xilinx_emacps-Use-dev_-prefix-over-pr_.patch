@@ -110,5 +110,5 @@ index db96244..b45903c 100644
  		prop = of_get_property(lp->pdev->dev.of_node,
  					"xlnx,slcr-div0-1000Mbps", NULL);
 -- 
-1.7.0.4
+1.7.1
 

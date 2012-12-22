@@ -43,5 +43,5 @@ index 18fea36..985d2c2 100644
  	/* Prevent double remove */
  	platform_set_drvdata(dev, NULL);
 -- 
-1.7.0.4
+1.7.1
 

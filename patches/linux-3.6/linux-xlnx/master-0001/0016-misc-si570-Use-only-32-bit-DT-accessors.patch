@@ -42,5 +42,5 @@ index 8bafd62..3c40264 100644
  	i2c_set_clientdata(client, data);
  	err = si570_get_defaults(client);
 -- 
-1.7.0.4
+1.7.1
 

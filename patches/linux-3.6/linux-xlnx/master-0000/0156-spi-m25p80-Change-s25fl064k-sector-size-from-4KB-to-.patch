@@ -40,5 +40,5 @@ index 94772a7..0db319d 100644
  	/* SST -- large erase sizes are "overlays", "sectors" are 4K */
  	{ "sst25vf040b", INFO(0xbf258d, 0, 64 * 1024,  8, SECT_4K) },
 -- 
-1.7.0.4
+1.7.1
 

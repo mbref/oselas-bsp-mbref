@@ -44,5 +44,5 @@ index 0888d8e..db96244 100644
  	netif_device_attach(ndev);
  	return 0;
 -- 
-1.7.0.4
+1.7.1
 

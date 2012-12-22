@@ -490,5 +490,5 @@ index 7e2c79e..305b320 100644
 +	.restart	= xilinx_system_reset,
 +MACHINE_END
 -- 
-1.7.0.4
+1.7.1
 

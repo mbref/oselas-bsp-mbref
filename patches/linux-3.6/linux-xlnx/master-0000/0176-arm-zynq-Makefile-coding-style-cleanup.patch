@@ -26,5 +26,5 @@ index 2c2fab7..b5e80d1 100644
  
  obj-$(CONFIG_HOTPLUG_CPU)	+= hotplug.o
 -- 
-1.7.0.4
+1.7.1
 

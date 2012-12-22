@@ -51,5 +51,5 @@ index 0305a07..433fdca 100644
  	int ret = -ENODEV;
  	unsigned int i;
 -- 
-1.7.0.4
+1.7.1
 

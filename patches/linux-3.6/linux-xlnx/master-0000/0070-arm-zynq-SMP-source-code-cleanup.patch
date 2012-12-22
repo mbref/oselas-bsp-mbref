@@ -38,5 +38,5 @@ index eb05a17..6c12ff3 100644
  		__raw_writel(0x0, slcr + 0x244); /* enable CLK for CPU1 */
  
 -- 
-1.7.0.4
+1.7.1
 

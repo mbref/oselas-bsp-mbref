@@ -34,5 +34,5 @@ index 0b148b6..8207c09 100644
  	temp = readl(non_ehci + 0x164);
  	ehci_writel(ehci, 0x00080000, non_ehci + 0x164);
 -- 
-1.7.0.4
+1.7.1
 

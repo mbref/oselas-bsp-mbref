@@ -22,5 +22,5 @@ index d013343..2ce4b38 100644
 +MODULE_DESCRIPTION("Xilinx Ethernet driver");
  MODULE_LICENSE("GPL");
 -- 
-1.7.0.4
+1.7.1
 

@@ -23,5 +23,5 @@ index ff8ab7b..0a2a177 100644
  /**
   * of_irq_to_resource_table - Fill in resource table with node's IRQ info
 -- 
-1.7.0.4
+1.7.1
 

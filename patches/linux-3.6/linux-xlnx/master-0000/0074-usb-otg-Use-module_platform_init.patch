@@ -31,5 +31,5 @@ index 93fd29e..6df9e3c 100755
 -module_exit(xusbps_otg_cleanup);
 +module_platform_driver(xusbps_otg_driver);
 -- 
-1.7.0.4
+1.7.1
 

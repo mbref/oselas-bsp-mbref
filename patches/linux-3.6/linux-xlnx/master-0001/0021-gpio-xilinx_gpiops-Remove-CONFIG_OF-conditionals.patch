@@ -40,5 +40,5 @@ index eb20c06..ea69506 100644
  	.probe		= xgpiops_probe,
  	.remove		= xgpiops_remove,
 -- 
-1.7.0.4
+1.7.1
 

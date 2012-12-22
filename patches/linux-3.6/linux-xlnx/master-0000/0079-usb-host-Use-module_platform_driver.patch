@@ -34,5 +34,5 @@ index efda09a..712ff8d 100644
  MODULE_DESCRIPTION("XUSBPS DR OF devices driver");
  MODULE_AUTHOR("Xilinx");
 -- 
-1.7.0.4
+1.7.1
 

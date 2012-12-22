@@ -31,5 +31,5 @@ index c051d57..5cd330b 100644
  	struct spi_master *spi_master;
  	struct spi_device *spi_device;
 -- 
-1.7.0.4
+1.7.1
 

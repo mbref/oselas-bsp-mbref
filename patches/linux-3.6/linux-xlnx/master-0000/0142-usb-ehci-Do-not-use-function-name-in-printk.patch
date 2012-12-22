@@ -42,5 +42,5 @@ index 9c96b85..e3262f8 100755
  
  		retval = usb_add_hcd(hcd, irq, IRQF_DISABLED | IRQF_SHARED);
 -- 
-1.7.0.4
+1.7.1
 

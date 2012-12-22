@@ -422,5 +422,5 @@ index be4deff..7201ce4 100644
  extern const struct consw prom_con;	/* SPARC PROM console */
  
 -- 
-1.7.0.4
+1.7.1
 

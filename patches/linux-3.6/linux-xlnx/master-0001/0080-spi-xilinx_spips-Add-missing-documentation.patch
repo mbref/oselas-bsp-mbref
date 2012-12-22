@@ -25,5 +25,5 @@ index 20e096e..d90b6ab 100644
   * @speed_hz:		Current SPI bus clock speed in Hz
   * @trans_queue_lock:	Lock used for accessing transfer queue
 -- 
-1.7.0.4
+1.7.1
 

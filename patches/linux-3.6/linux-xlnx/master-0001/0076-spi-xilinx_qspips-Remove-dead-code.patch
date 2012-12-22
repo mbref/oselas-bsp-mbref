@@ -52,5 +52,5 @@ index 0d79bbf..de23df4 100644
  			return -EINVAL;
  		/* QSPI controller supports only 32 bit transfers whereas higher
 -- 
-1.7.0.4
+1.7.1
 

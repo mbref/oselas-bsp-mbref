@@ -119,5 +119,5 @@ index 5247157..9cc9329 100644
  
  static SIMPLE_DEV_PM_OPS(xuartps_dev_pm_ops, xuartps_suspend, xuartps_resume);
 -- 
-1.7.0.4
+1.7.1
 

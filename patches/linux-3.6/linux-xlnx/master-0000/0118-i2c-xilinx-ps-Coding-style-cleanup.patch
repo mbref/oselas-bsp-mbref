@@ -20,5 +20,5 @@ index 51c3dca..98956af 100644
  MODULE_ALIAS("platform:" DRIVER_NAME);
 -
 -- 
-1.7.0.4
+1.7.1
 

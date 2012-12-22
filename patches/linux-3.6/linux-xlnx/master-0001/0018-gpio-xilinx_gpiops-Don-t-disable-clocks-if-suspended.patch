@@ -40,5 +40,5 @@ index b89739d..5849500 100644
  
  #ifdef CONFIG_PM_RUNTIME
 -- 
-1.7.0.4
+1.7.1
 

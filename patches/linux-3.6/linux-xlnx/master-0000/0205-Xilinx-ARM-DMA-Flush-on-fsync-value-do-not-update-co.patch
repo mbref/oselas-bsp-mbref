@@ -51,5 +51,5 @@ index 681026b..7d9cf22 100644
  		dma_cap_set(DMA_PRIVATE, xdev->common.cap_mask);
  		xdev->common.device_prep_slave_sg = xilinx_vdma_prep_slave_sg;
 -- 
-1.7.0.4
+1.7.1
 

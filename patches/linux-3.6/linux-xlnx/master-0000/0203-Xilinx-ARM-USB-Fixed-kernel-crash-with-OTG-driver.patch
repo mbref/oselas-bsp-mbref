@@ -27,5 +27,5 @@ index f5a41de..92330ce 100644
  	xotg->irq = pdata->irq;
  	if (!xotg->base || !xotg->irq) {
 -- 
-1.7.0.4
+1.7.1
 

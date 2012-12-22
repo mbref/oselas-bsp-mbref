@@ -1,4 +1,4 @@
-From 2e48450e06d5cfe4bd8c95f8f325469fd12df4f7 Mon Sep 17 00:00:00 2001
+From 4dcb7e3467527297826e58473345c5676b3ba3bd Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Wed, 11 Apr 2012 23:30:51 +0200
 Subject: [PATCH] microblaze: enable debugger functionality

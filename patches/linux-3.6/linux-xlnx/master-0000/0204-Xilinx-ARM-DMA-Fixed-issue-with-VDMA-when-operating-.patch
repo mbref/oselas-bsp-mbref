@@ -35,5 +35,5 @@ index e218b69..681026b 100644
  		chan->config.coalesc = cfg->coalesc;
  		chan->config.delay = cfg->delay;
 -- 
-1.7.0.4
+1.7.1
 

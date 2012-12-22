@@ -25,5 +25,5 @@ index 85748e5..92dd654 100644
  		dev_err(&pdev->dev, "Can't power on cpu1 %d\n", ret);
  
 -- 
-1.7.0.4
+1.7.1
 

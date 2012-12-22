@@ -26,5 +26,5 @@ index 9dac09b..c2ed1dd 100644
  	default y if ARCH_MMP
  	default y if MACH_LOONGSON1
 -- 
-1.7.0.4
+1.7.1
 

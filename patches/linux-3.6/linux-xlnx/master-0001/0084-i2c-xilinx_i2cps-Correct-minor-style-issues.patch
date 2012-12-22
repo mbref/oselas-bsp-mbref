@@ -154,5 +154,5 @@ index d465d04..32cff5a 100644
  		dev_err(&pdev->dev, "couldn't determine bus-id\n");
  		goto err_unmap ;
 -- 
-1.7.0.4
+1.7.1
 

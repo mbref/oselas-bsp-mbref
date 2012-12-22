@@ -67,5 +67,5 @@ index d85ef5d..e44d33e 100644
  obj-$(CONFIG_USB_MV_OTG)	+= mv_otg.o
 +obj-$(CONFIG_USB_XUSBPS_OTG)	+= xilinx_usbps_otg.o
 -- 
-1.7.0.4
+1.7.1
 

@@ -55,5 +55,5 @@ index 92dd654..65f0113 100644
  		gic_set_cpu(1, tmp->irq);
  		list_add(&(tmp->list), &(local->mylist.list));
 -- 
-1.7.0.4
+1.7.1
 

@@ -86,5 +86,5 @@ index fb920d4..185aae7 100644
  /* FB driver flags */
  #define FB_DMA_BUFFER        0x01
 -- 
-1.7.0.4
+1.7.1
 

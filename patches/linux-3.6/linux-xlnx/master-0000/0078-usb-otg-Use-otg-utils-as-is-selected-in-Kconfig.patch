@@ -83,5 +83,5 @@ index 21e931b..f5a41de 100755
  		xotg->hsm.a_bus_suspend,
  		xotg->hsm.a_conn,
 -- 
-1.7.0.4
+1.7.1
 

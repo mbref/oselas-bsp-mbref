@@ -369,5 +369,5 @@ index 05ac465..0000000
 -EXPORT_SYMBOL_GPL(cpu_clock);
 -EXPORT_SYMBOL_GPL(local_clock);
 -- 
-1.7.0.4
+1.7.1
 

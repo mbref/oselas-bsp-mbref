@@ -24,5 +24,5 @@ index 09f0bd0..dfbdce3 100644
  	help
  	  Say Y here if you want to use the Xilinx uartlite serial controller.
 -- 
-1.7.0.4
+1.7.1
 

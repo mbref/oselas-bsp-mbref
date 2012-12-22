@@ -24,5 +24,5 @@ index 6c12ff3..4ea0892 100644
  	if (!zero) {
  		printk(KERN_WARNING
 -- 
-1.7.0.4
+1.7.1
 

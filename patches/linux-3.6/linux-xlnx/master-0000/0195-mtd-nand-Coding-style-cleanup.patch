@@ -33,5 +33,5 @@ index d8bc174..4bba115 100644
  /* Match table for device tree binding */
  static const struct of_device_id __devinitconst xnandpss_of_match[] = {
 -- 
-1.7.0.4
+1.7.1
 

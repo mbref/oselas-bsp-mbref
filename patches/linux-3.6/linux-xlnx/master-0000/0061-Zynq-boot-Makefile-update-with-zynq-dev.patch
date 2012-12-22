@@ -95,5 +95,5 @@ index 5d7b93e..3125e58 100644
 +
 +clean-files += *.dtb simpleImage.* linux.bin.ub
 -- 
-1.7.0.4
+1.7.1
 

@@ -19559,5 +19559,5 @@ index 840ea3d..0000000
 -	memset(&InstancePtr->Stats, 0, sizeof(XTemac_SoftStats));
 -}
 -- 
-1.7.0.4
+1.7.1
 

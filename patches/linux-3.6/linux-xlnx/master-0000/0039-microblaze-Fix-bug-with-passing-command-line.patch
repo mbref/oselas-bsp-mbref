@@ -86,5 +86,5 @@ index 4da971d..9dbc9ec 100644
  
  /* initialize device tree for usage in early_printk */
 -- 
-1.7.0.4
+1.7.1
 

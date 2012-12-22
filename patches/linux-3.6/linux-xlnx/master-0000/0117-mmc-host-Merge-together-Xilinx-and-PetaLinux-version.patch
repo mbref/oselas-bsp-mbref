@@ -69,5 +69,5 @@ index 59865f0..10793b6 100644
 +MODULE_AUTHOR("Michal Simek <monstr@monstr.eu>, Vlad Lungu <vlad.lungu@windriver.com>");
  MODULE_LICENSE("GPL v2");
 -- 
-1.7.0.4
+1.7.1
 

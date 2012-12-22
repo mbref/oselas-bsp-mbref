@@ -33,5 +33,5 @@ index b76a4f5..bddb20a 100644
  	 * Clock init needs to be done before timer init, so the timer can use
  	 * COMMON_CLK. All __initcall types are called after time_init().
 -- 
-1.7.0.4
+1.7.1
 

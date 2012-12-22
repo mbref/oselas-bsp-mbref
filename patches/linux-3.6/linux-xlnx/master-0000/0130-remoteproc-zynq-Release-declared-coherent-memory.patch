@@ -25,5 +25,5 @@ index 74bb671..cae762c 100644
  	clear_irq(pdev);
  
 -- 
-1.7.0.4
+1.7.1
 

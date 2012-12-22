@@ -54,5 +54,5 @@ index cdff041..de4d98e 100644
  		 (unsigned long long)res.start);
  	if (of_mdiobus_register(lp->mii_bus, np))
 -- 
-1.7.0.4
+1.7.1
 

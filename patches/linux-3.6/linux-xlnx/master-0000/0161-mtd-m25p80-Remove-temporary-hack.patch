@@ -29,5 +29,5 @@ index 5b9bdf5..642efce 100644
  #define	OPCODE_WREN		0x06	/* Write enable */
  #define	OPCODE_RDSR		0x05	/* Read status register */
 -- 
-1.7.0.4
+1.7.1
 
