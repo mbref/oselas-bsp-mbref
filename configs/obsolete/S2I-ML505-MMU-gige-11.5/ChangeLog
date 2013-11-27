@@ -1,3 +1,7 @@
+2013-11-27	Stephan Linz <linz@li-pro.net>
+
+	* platform: mark as obsolete
+
 2012-10-14	Stephan Linz <linz@li-pro.net>
 
 	* platform: migrate to ptxdist-2012.10.0
