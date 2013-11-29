@@ -1,0 +1,12 @@
+0001-gdb-7_4_50-synchronisation-with-microblaze-branchpoi.patch
+0002-gdb-7_4_50-synchronisation-with-Petalogix-internal-x.patch
+0003-microblaze-add-linux-ptrace.o-to-gdbserver-configure.patch
+0004-microblaze-Fixes-for-microblaze-linux-gnu-toolchain.patch
+0005-frame.c-Fix-debug-message-output-when-register-is-un.patch
+0006-microblaze-Force-reading-of-r0-as-0-prevent-stores.patch
+0007-microblaze-Changed-debug-output-to-comment.patch
+0008-microblaze-initial-port-of-gdb6.5-microblaze-core-re.patch
+0009-microblaze-Added-support-for-reading-notes-in-linux-.patch
+0010-kernel-architecture-microblaze.patch
+0011-microblaze-Add-initial-support-for-native-gdb-on-mic.patch
+0012-microblaze-Follow-PPC-method-of-getting-setting-regi.patch

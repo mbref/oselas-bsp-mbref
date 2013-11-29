@@ -2,6 +2,7 @@
 
 	* common: adapt latest patch sets to linux-3.6
 	* common: adapt latest patch sets to u-boot-2013.04
+	* ptxconfig: upgarde to gdb-7.4.1 (native debugging)
 
 2013-11-28	Stephan Linz <linz@li-pro.net>
 
