@@ -4,6 +4,7 @@
 	* common: adapt latest patch sets to u-boot-2013.04
 	* ptxconfig: upgarde to gdb-7.4.1 (native debugging)
 	* ptxconfig: fix to busybox-1.20.1 (include sys/resource.h)
+	* common: HOWTO: add reference note to the right GNU toolchain
 
 2013-11-28	Stephan Linz <linz@li-pro.net>
 
