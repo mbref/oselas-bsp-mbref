@@ -2,6 +2,7 @@
 
 	* platform: upgrade to u-boot-2013.04
 	* platform: disable ipkg push to repo/indexing
+	* common: change to MicroBlaze Tools v2.2-1051
 
 2012-12-21	Stephan Linz <linz@li-pro.net>
 
