@@ -1,0 +1,51 @@
+From 47a1fe42a570de725e9f9a5eb0c06d0cb05d1855 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Mon, 25 Nov 2013 14:10:44 +0100
+Subject: [PATCH] microblaze: hotfix: disable systemace driver compilation
+
+QnD hack: disable systemace driver compilation with gcc
+          version greater or equal than 4.8
+
+See: http://u-boot.10912.n7.nabble.com/Microblaze-and-Sparc-boards-are-broken-because-of-common-timer-func-tp167457p167486.html
+
+Error is:
+    systemace.c: In function 'ace_readw':
+    systemace.c:83:1: warning: stack usage computation not supported for this target [enabled by default]
+     }
+     ^
+    {standard input}: Assembler messages:
+    {standard input}:2423: Error: operation combines symbols in different segments
+    {standard input}:2424: Error: ...
+    ...
+    make[2]: *** [systemace.o] Error 1
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 68a3baa..a76c907 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -27,6 +27,17 @@
+ 
+ #include "../board/xilinx/microblaze-generic/xparameters.h"
+ 
++/*
++ * http://u-boot.10912.n7.nabble.com/Microblaze-and-Sparc-boards-are-broken-because-of-common-timer-func-tp167457p167486.html
++ *
++ * QnD hack: disable systemace driver compilation with gcc version
++ *           greater or equal than 4.8
++ */
++#if defined(__microblaze__) && ( (__GNUC__ == 4) && (__GNUC_MINOR__ >= 8) )
++#undef XILINX_SYSACE_BASEADDR
++#undef XILINX_SYSACE_MEM_WIDTH
++#endif
++
+ /* MicroBlaze CPU */
+ #define	CONFIG_MICROBLAZE	1
+ #define	MICROBLAZE_V5		1
+-- 
+1.8.3.4
+
