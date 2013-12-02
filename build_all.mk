@@ -34,8 +34,8 @@ TOOLCHAIN_BE	:= /opt/tools-4.1.2-mb-xilinx-v2.0/microblaze-unknown-linux-gnu/bin
 TOOLCHAIN_LE	:= /opt/tools-4.1.2-mb-xilinx-v2.0/microblazeel-unknown-linux-gnu/bin
 else
 # use the Crosstool-NG Microblaze toolchain preperated for ptxdist
-TOOLCHAIN_BE	:= /opt/tools-4.8.1-mb-ctng-v2.2-1051/microblaze-xilinx-linux-gnu/bin
-TOOLCHAIN_LE	:= /opt/tools-4.8.1-mb-ctng-v2.2-1051/microblazeel-xilinx-linux-gnu/bin
+TOOLCHAIN_BE	:= /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+TOOLCHAIN_LE	:= /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
 endif
 endif
 

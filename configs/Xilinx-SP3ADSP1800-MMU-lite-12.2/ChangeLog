@@ -1,3 +1,7 @@
+2013-12-02	Stephan Linz <linz@li-pro.net>
+
+	* common: change to MicroBlaze Tools v2.3
+
 2013-11-30	Stephan Linz <linz@li-pro.net>
 
 	* platform: (re-)enable kernel xblob image
