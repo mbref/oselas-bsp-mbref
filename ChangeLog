@@ -1,6 +1,7 @@
 2013-12-03	Stephan Linz <linz@li-pro.net>
 
 	* common: dbus: (re-)enable default rule for 1.6.4
+	* common: glib: (re-)enable default rule for 2.32.3
 
 2013-12-02	Stephan Linz <linz@li-pro.net>
 
