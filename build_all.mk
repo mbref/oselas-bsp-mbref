@@ -41,6 +41,7 @@ endif
 
 CONFIGDIR	:= configs
 CONFIGFILE	:= $(CONFIGDIR)/ptxconfig
+COLLECFILE	:= $(CONFIGDIR)/startup.collection
 PLATFORMFILES	:= $(wildcard $(CONFIGDIR)/*/platformconfig)
 PLATFORMS	:= $(notdir $(patsubst %/,%,$(dir $(PLATFORMFILES))))
 PLATFORMS_	:= $(subst _,-,$(PLATFORMS))
@@ -121,6 +122,7 @@ $(STATEDIR)/%.build: $(TOOLCHAIN_BE)/ptxconfig $(TOOLCHAIN_LE)/ptxconfig | mkdir
 	@echo "******************************************************************************"
 	@echo
 	$(NICE) $(PTXDIST) images --ptxconfig=$(CONFIGFILE) \
+	  --collectionconfig=$(COLLECFILE) \
 	  --toolchain=$(2TOOLCHAIN_$(*)) \
 	  --platformconfig=$(2PLATFORMFILE_$(*))
 

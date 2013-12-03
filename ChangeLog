@@ -6,6 +6,7 @@
 	* common: upgrade to libffi-3.0.13
 	* ptxconfig: disable ipkg
 	* collection: startup: resort base image content
+	* common: use startup collection in build_all.mk make script
 
 2013-12-02	Stephan Linz <linz@li-pro.net>
 
