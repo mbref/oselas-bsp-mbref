@@ -20,7 +20,6 @@ PTXCONF_COLLECTION_MANUAL=y
 # PTXCONF_GLIBMM is not set
 # PTXCONF_I2C_TOOLS is not set
 # PTXCONF_IPERF is not set
-PTXCONF_IPKG=y
 # PTXCONF_IWATCHER is not set
 # PTXCONF_LDD is not set
 # PTXCONF_LIBFFI is not set
