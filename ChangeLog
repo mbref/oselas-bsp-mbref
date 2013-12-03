@@ -5,6 +5,7 @@
 	* common: glibmm: (re-)enable default rule for 2.30.1
 	* common: upgrade to libffi-3.0.13
 	* ptxconfig: disable ipkg
+	* collection: startup: resort base image content
 
 2013-12-02	Stephan Linz <linz@li-pro.net>
 
