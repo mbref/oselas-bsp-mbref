@@ -3,6 +3,7 @@
 	* common: dbus: (re-)enable default rule for 1.6.4
 	* common: glib: (re-)enable default rule for 2.32.3
 	* common: glibmm: (re-)enable default rule for 2.30.1
+	* common: upgrade to libffi-3.0.13
 
 2013-12-02	Stephan Linz <linz@li-pro.net>
 
