@@ -1,6 +1,7 @@
 2013-12-11	Stephan Linz <linz@li-pro.net>
 
 	* platform: support ethernet phy DP83865 on ll_temac
+	* platform: enable devtmpfs, mount devtmpfs on boot
 
 2013-12-02	Stephan Linz <linz@li-pro.net>
 
