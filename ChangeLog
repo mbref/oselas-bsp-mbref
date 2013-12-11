@@ -1,3 +1,7 @@
+2013-12-11	Stephan Linz <linz@li-pro.net>
+
+	* common: fix util-linux 2.21.2 to build for microblaze
+
 2013-12-03	Stephan Linz <linz@li-pro.net>
 
 	* common: dbus: (re-)enable default rule for 1.6.4
