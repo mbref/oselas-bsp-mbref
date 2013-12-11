@@ -3,6 +3,7 @@
 	* common: fix util-linux 2.21.2 to build for microblaze
 	* common: fix dbus 1.6.4 to build with latest glibc
 		  fix default version from global ptxdist rule set
+	* ptxconfig: adapt latest Kconfig version from ptxdist
 
 2013-12-03	Stephan Linz <linz@li-pro.net>
 
