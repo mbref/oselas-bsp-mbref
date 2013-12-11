@@ -1,3 +1,7 @@
+2013-12-11	Stephan Linz <linz@li-pro.net>
+
+	* platform: support ethernet phy DP83865 on ll_temac
+
 2013-12-02	Stephan Linz <linz@li-pro.net>
 
 	* common: change to MicroBlaze Tools v2.3

@@ -28,11 +28,11 @@ handle gdb exception in sha1:0425609.
 Introduced-by: Billy Huang <billykhuang@gmail.com>
 Signed-off-by: Stephan Linz <linz@li-pro.net>
 ---
- arch/microblaze/include/asm/ptrace.h |   62 +++++++++++--
- arch/microblaze/kernel/asm-offsets.c |    1 +
- arch/microblaze/kernel/exceptions.c  |   10 ++-
- arch/microblaze/kernel/process.c     |    2 +-
- arch/microblaze/kernel/ptrace.c      |  168 +++++++++++++++++++++++++++++++++-
+ arch/microblaze/include/asm/ptrace.h |  62 +++++++++++--
+ arch/microblaze/kernel/asm-offsets.c |   1 +
+ arch/microblaze/kernel/exceptions.c  |  10 ++-
+ arch/microblaze/kernel/process.c     |   2 +-
+ arch/microblaze/kernel/ptrace.c      | 168 ++++++++++++++++++++++++++++++++++-
  5 files changed, 229 insertions(+), 14 deletions(-)
 
 diff --git a/arch/microblaze/include/asm/ptrace.h b/arch/microblaze/include/asm/ptrace.h
@@ -414,5 +414,5 @@ index ab1b9db..b857828 100644
  	return rval;
  }
 -- 
-1.7.1
+1.8.3.4
 

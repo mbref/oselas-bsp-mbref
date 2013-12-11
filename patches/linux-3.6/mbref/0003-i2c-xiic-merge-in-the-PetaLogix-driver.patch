@@ -8,8 +8,8 @@ Subject: [PATCH] i2c-xiic: merge in the PetaLogix driver
 
 Signed-off-by: Stephan Linz <linz@li-pro.net>
 ---
- drivers/i2c/busses/i2c-xiic.c |  200 +++++++++++++++++------------------------
- 1 files changed, 82 insertions(+), 118 deletions(-)
+ drivers/i2c/busses/i2c-xiic.c | 200 +++++++++++++++++-------------------------
+ 1 file changed, 82 insertions(+), 118 deletions(-)
 
 diff --git a/drivers/i2c/busses/i2c-xiic.c b/drivers/i2c/busses/i2c-xiic.c
 index 641d0e5..c964879 100644
@@ -408,5 +408,5 @@ index 641d0e5..c964879 100644
  };
  
 -- 
-1.7.1
+1.8.3.4
 

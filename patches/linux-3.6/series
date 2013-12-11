@@ -674,8 +674,9 @@ linux-xlnx/master-0001/0149-zynq-microblaze-pcie-Modified-to-support-PCIe-node-r
 #linux-xlnx/master-0002/0280-xilinx_emacps-Fixes-bug-in-skb-handling-for-fragment.patch
 
 #
-# 04d9378881401e71f83b8b4fea0abd71d33b4052..372c49ca32ccebb825b88c8fe631a2ca13ef1a4c
+# 04d9378881401e71f83b8b4fea0abd71d33b4052..33c4cccfc96e5c0d8f9b8d26b6359f0f5123e312
 #
 mbref/0001-uartlite-Make-the-number-of-UARTs-registered-configu.patch
 mbref/0002-microblaze-enable-debugger-functionality.patch
 mbref/0003-i2c-xiic-merge-in-the-PetaLogix-driver.patch
+mbref/0004-net-xilinx-ll_temac-access-to-NATIONAL-DP83865-confi.patch

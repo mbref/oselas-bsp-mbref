@@ -17,8 +17,8 @@ So you can avoid related error like:
 
 Signed-off-by: Stephan Linz <linz@li-pro.net>
 ---
- drivers/tty/serial/Kconfig    |   21 +++++++++++++++++++++
- drivers/tty/serial/uartlite.c |   18 ++++++++++++++----
+ drivers/tty/serial/Kconfig    | 21 +++++++++++++++++++++
+ drivers/tty/serial/uartlite.c | 18 ++++++++++++++----
  2 files changed, 35 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/tty/serial/Kconfig b/drivers/tty/serial/Kconfig
@@ -118,5 +118,5 @@ index d76e27c..cfd76b2 100644
 +
 +module_param(nr_uarts, uint, 0644);
 -- 
-1.7.1
+1.8.3.4
 
