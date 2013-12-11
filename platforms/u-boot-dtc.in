@@ -1,0 +1,6 @@
+## SECTION=bootloader
+
+menuconfig U_BOOT
+	bool
+	select HOST_DTC		if !DTC_KERNEL
+	select KERNEL_DTC	if DTC_KERNEL
