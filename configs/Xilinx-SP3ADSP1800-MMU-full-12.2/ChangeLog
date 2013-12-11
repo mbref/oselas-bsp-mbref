@@ -1,3 +1,7 @@
+2013-12-11	Stephan Linz <linz@li-pro.net>
+
+	* platform: upgarde to latest linux-3.6 configuration
+
 2013-12-02	Stephan Linz <linz@li-pro.net>
 
 	* common: change to MicroBlaze Tools v2.3
