@@ -1,5 +1,6 @@
 2013-12-13	Stephan Linz <linz@li-pro.net>
 
+	* common: upgarde patch sets to linux-3.8.11 based on petalinux-v2013.10
 	* platforms: fix cross compile prefix for AXI
 	* platforms: u-boot v2013.04 needs host side dtc
 

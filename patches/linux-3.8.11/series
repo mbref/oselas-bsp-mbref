@@ -1,0 +1,48 @@
+#
+# git tag v3.8.11-petalinux-master-next 114c227
+# git diff v3.8.11..v3.8.11-petalinux-master-next >.../patches/linux-3.8.11/petalinux-v2013.10/0000-Merge-commit-v3.8.11-into-petalinux-master-next.patch
+#
+petalinux-v2013.10/0000-Merge-commit-v3.8.11-into-petalinux-master-next.patch
+
+#
+# git checkout -b devel/petalinux/v2013.10 petalinux-v2013.10-final
+# git track devel/mbref/petalinux/v2013.10 devel/petalinux/v2013.10
+# git format-patch -N -o .../patches/linux-3.8.11/petalinux-v2013.10 v3.8.11-petalinux-master-next..petalinux-v2013.10-final
+#
+petalinux-v2013.10/0001-usb-xilinx-Add-support-for-usb-phy-reset-via-gpio.patch
+petalinux-v2013.10/0002-zynq-DTS-synchronization-with-device-tree-BSP.patch
+petalinux-v2013.10/0003-microblaze-Don-t-mark-arch_kgdb_ops-as-const.patch
+petalinux-v2013.10/0004-ARM-7670-1-fix-the-memset-fix.patch
+petalinux-v2013.10/0005-arm-Move-chained_irq_-enter-exit-to-a-generic-file.patch
+petalinux-v2013.10/0006-lib-devres-Introduce-devm_ioremap_resource.patch
+petalinux-v2013.10/0007-lib-devres-Fix-build-breakage.patch
+petalinux-v2013.10/0008-GPIO-xilinx-Simplify-driver-probe-function.patch
+petalinux-v2013.10/0009-GPIO-xilinx-Synchronization-with-mainline-version.patch
+petalinux-v2013.10/0010-GPIO-xilinx-Use-__raw_readl-__raw_writel-IO-function.patch
+petalinux-v2013.10/0011-GPIO-xilinx-Use-BIT-macro.patch
+petalinux-v2013.10/0012-GPIO-xilinx-Use-standard-coding-style-for-macros.patch
+petalinux-v2013.10/0013-GPIO-xilinx-Fix-kernel-doc-mainline.patch
+petalinux-v2013.10/0014-GPIO-xilinx-Add-irq-support-to-the-driver.patch
+petalinux-v2013.10/0015-GPIO-xilinx-Do-not-allocate-interrupts-for-IPs-witho.patch
+petalinux-v2013.10/0016-GPIO-xilinx-Do-not-use-xgpiops-but-use-only-xgpio.patch
+petalinux-v2013.10/0017-gpio-xilinx-Fix-type-for-irq_base.patch
+petalinux-v2013.10/0018-gpio-xilinx-Fix-minor-coding-style-issue.patch
+petalinux-v2013.10/0019-gpio-xilinx-Use-platform_driver.patch
+petalinux-v2013.10/0020-remoteproc-Do-not-use-of_irq_count-in-xilinx-drivers.patch
+petalinux-v2013.10/0021-remoteproc-mb-Remove-not-used-zynq_cpun_start-extern.patch
+petalinux-v2013.10/0022-remoteproc-Do-not-use-moduleloader.h-in-the-driver.patch
+petalinux-v2013.10/0023-remoteproc-mb-Update-driver-copyrights.patch
+petalinux-v2013.10/0024-remoteproc-mb-Use-devres-group-and-simplify-irq-allo.patch
+petalinux-v2013.10/0025-remoteproc-mb-Fix-error-return-path.patch
+petalinux-v2013.10/0026-remoteproc-mb-Update-driver-to-reflect-the-latest-AM.patch
+petalinux-v2013.10/0027-microblaze-Calculate-kernel-pad-automatically.patch
+
+#
+# git track devel/mbref/petalinux/v3.8.11 devel/mbref/petalinux/v2013.10
+# git checkout devel/mbref/petalinux/v3.8.11
+# git format-patch -N -o .../patches/linux-3.8.11/mbref petalinux-v2013.10-final..
+#
+mbref/0001-uartlite-Make-the-number-of-UARTs-registered-configu.patch
+mbref/0002-i2c-xiic-merge-in-the-PetaLogix-driver.patch
+mbref/0003-net-xilinx-ll_temac-access-to-NATIONAL-DP83865-confi.patch
+mbref/0004-microblaze-fix-simpleimage.-.ub-target.patch
