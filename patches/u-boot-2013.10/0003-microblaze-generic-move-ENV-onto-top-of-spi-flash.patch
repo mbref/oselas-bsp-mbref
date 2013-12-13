@@ -1,0 +1,31 @@
+From 1cf17a0be56820647148777493b52a17203c459c Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sat, 28 Jul 2012 22:29:09 +0200
+Subject: [PATCH] microblaze: generic: move ENV onto top of spi flash
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 9eb660e..de02141 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -238,10 +238,10 @@
+ #  define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
+ #  define CONFIG_ENV_SPI_CS		CONFIG_SF_DEFAULT_CS
+ /* 128K(two sectors) for env */
+-#  define CONFIG_ENV_SECT_SIZE	0x10000
+-#  define CONFIG_ENV_SIZE	(2 * CONFIG_ENV_SECT_SIZE)
++#  define CONFIG_ENV_SECT_SIZE	XILINX_SPI_FLASH_SECTSIZE
++#  define CONFIG_ENV_SIZE 	(2 * CONFIG_ENV_SECT_SIZE)
+ /* Warning: adjust the offset in respect of other flash content and size */
+-#  define CONFIG_ENV_OFFSET	(128 * CONFIG_ENV_SECT_SIZE) /* at 8MB */
++#  define CONFIG_ENV_OFFSET	(XILINX_SPI_FLASH_SIZE - CONFIG_ENV_SIZE)
+ # endif /* SPIFLASH && !RAMBOOT */
+ #else /* !SPIFLASH */
+ 
+-- 
+1.8.3.4
+

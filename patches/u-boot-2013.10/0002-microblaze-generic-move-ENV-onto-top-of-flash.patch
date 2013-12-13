@@ -1,0 +1,26 @@
+From 84e897e967cc9b28fe3975df4f6da6510a1ba012 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Sat, 18 Sep 2010 13:28:49 +0200
+Subject: [PATCH] microblaze: generic: move ENV onto top of flash
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ include/configs/microblaze-generic.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
+index 0b19bda..9eb660e 100644
+--- a/include/configs/microblaze-generic.h
++++ b/include/configs/microblaze-generic.h
+@@ -211,7 +211,7 @@
+ /* 128K(one sector) for env */
+ #  define CONFIG_ENV_SECT_SIZE	0x20000
+ #  define CONFIG_ENV_ADDR \
+-			(CONFIG_SYS_FLASH_BASE + (2 * CONFIG_ENV_SECT_SIZE))
++			(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)
+ #  define CONFIG_ENV_SIZE	0x20000
+ # endif /* FLASH && !RAMBOOT */
+ #else /* !FLASH */
+-- 
+1.8.3.4
+
