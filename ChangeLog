@@ -2,6 +2,7 @@
 
 	* common: upgarde patch sets to linux-3.8.11 based on petalinux-v2013.10
 	* common: upgarde patch sets to u-boot-2013.10
+	* common: change URL in host-dtc to get latest dtc-1.4.0 from dev.gentoo
 	* platforms: fix cross compile prefix for AXI
 	* platforms: u-boot v2013.04 needs host side dtc
 
