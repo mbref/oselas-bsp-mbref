@@ -1,5 +1,6 @@
 2013-12-13	Stephan Linz <linz@li-pro.net>
 
+	* platforms: fix cross compile prefix for AXI
 	* platforms: u-boot v2013.04 needs host side dtc
 
 2013-12-11	Stephan Linz <linz@li-pro.net>
