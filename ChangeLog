@@ -6,7 +6,6 @@
 	* ptxconfig: adapt latest Kconfig version from ptxdist
 	* ptxconfig: disable mdev, enable udev
 	* ptxconfig: set BSP verndor and version number
-	* platforms: u-boot v2013.04 needs host side dtc
 
 2013-12-03	Stephan Linz <linz@li-pro.net>
 
