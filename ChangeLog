@@ -1,3 +1,7 @@
+2013-12-13	Stephan Linz <linz@li-pro.net>
+
+	* platforms: u-boot v2013.04 needs host side dtc
+
 2013-12-11	Stephan Linz <linz@li-pro.net>
 
 	* common: fix util-linux 2.21.2 to build for microblaze
