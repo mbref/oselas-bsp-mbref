@@ -72,7 +72,7 @@
 
 /* SPI controller not defined */
 
-/* GPIO controller is xps_gpio_3 */
+/* GPIO controller is xps_gpio_X */
 #define XILINX_GPIO_BASEADDR                     0x80F00000
 
 /* Sysace CF controller not defined */

@@ -3,6 +3,7 @@
 	* platform: upgrade to dtc-1.4.0
 	* platform: upgarde to latest linux-3.8.11 configuration
 	* platform: upgrade to u-boot-2013.10
+	* xlbsp: hand optimized gpio base address for reset line
 
 2013-12-11	Stephan Linz <linz@li-pro.net>
 

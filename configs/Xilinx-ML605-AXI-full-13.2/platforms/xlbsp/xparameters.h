@@ -80,8 +80,8 @@
 
 /* SPI controller not defined */
 
-/* GPIO controller is axi_gpio_3 */
-#define XILINX_GPIO_BASEADDR                     0x80fc0000
+/* GPIO controller is axi_gpio_0 */
+#define XILINX_GPIO_BASEADDR                     0x80ff0000
 
 /* Sysace CF controller is axi_sysace_0 */
 #define XILINX_SYSACE_BASEADDR                   0x83600000

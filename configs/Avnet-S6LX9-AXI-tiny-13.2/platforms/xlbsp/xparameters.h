@@ -86,8 +86,7 @@
 #define XILINX_SPI_SSBITS                        1
 #define XILINX_SPI_TRANSFERBITS                  8
 
-/* GPIO controller is axi_gpio_3 */
-#define XILINX_GPIO_BASEADDR                     0x40000000
+/* GPIO controller not defined */
 
 /* Sysace CF controller not defined */
 
