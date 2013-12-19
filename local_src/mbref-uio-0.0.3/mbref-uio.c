@@ -31,7 +31,7 @@
 #include <linux/uio_driver.h>
 
 #define DRIVER_NAME "mbref-uio"
-#define DRIVER_VERS "0.0.4"
+#define DRIVER_VERS "0.0.3"
 
 struct mbref_uio_platdata {
 	struct uio_info *uioinfo;
@@ -97,7 +97,7 @@ static int mbref_uio_irqcontrol(struct uio_info *dev_info, s32 irq_on)
 	return 0;
 }
 
-static int mbref_uio_probe(struct platform_device *pdev)
+static int __devinit mbref_uio_probe(struct platform_device *pdev)
 {
 	struct uio_info *uioinfo = pdev->dev.platform_data;
 	struct uio_mem *uiomem;
@@ -226,7 +226,7 @@ err:
 	return ret;
 }
 
-static int mbref_uio_remove(struct platform_device *pdev)
+static int __devexit mbref_uio_remove(struct platform_device *pdev)
 {
 	struct mbref_uio_platdata *priv = platform_get_drvdata(pdev);
 
@@ -268,7 +268,7 @@ static const struct dev_pm_ops mbref_uio_dev_pm_ops = {
 
 #ifdef CONFIG_OF
 /* Match table for of_platform binding */
-static const struct of_device_id mbref_uio_of_match[] = {
+static const struct of_device_id mbref_uio_of_match[] __devinitdata = {
 	{ .compatible = "xlnx,plbv46-mbref-reg-1.00.a", },
 	{ .compatible = "xlnx,plbv46-mbref-mio-1.00.a", },
 	{ /* end of list */ },
@@ -280,7 +280,7 @@ MODULE_DEVICE_TABLE(of, mbref_uio_of_match);
 
 static struct platform_driver mbref_uio_driver = {
 	.probe		= mbref_uio_probe,
-	.remove		= mbref_uio_remove,
+	.remove		= __devexit_p(mbref_uio_remove),
 	.driver		= {
 		.name		= DRIVER_NAME,
 		.owner		= THIS_MODULE,
