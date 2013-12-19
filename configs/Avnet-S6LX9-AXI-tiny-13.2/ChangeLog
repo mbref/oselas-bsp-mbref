@@ -4,6 +4,7 @@
 	* platform: upgarde to latest linux-3.8.11 configuration
 	* xlbsp: hand optimized gpio base address for reset line
 	* xlbsp: hand optimized device tree (LED gpio w/o IRQ)
+	* common: change to MicroBlaze Tools v2.4
 
 2013-12-11	Stephan Linz <linz@li-pro.net>
 

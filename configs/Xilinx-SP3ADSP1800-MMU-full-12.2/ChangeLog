@@ -4,6 +4,7 @@
 	* platform: upgarde to latest linux-3.8.11 configuration
 	* platform: upgrade to u-boot-2013.10
 	* xlbsp: hand optimized gpio base address for reset line
+	* common: change to MicroBlaze Tools v2.4
 
 2013-12-11	Stephan Linz <linz@li-pro.net>
 
