@@ -34,13 +34,13 @@ you have to use the Crosstool-NG based toolchain v1.4 or grater.
 
 In 2013 the mainline eglibc got support for MicroBlaze without any patches.
 End of 2013 this BSP was swapped to the new eglibc based toolchain. You
-have to use the Crosstool-NG based toolchain v2.3 from my home page:
+have to use the Crosstool-NG based toolchain v2.4 from my home page:
 
     http://www.li-pro.de/xilinx_mb/toolchain/start
     alternative: http://store.li-pro.de/toolchains
 
-For 64 bit Linux: tools-4.8.1-mb-ctng-v2.3-x86_64.tar.bz2
-For 32 bit Linux: tools-4.8.1-mb-ctng-v2.3-i686.tar.bz2
+For 64 bit Linux: tools-4.8.1-mb-ctng-v2.4-x86_64.tar.bz2
+For 32 bit Linux: tools-4.8.1-mb-ctng-v2.4-i686.tar.bz2
 
 Extract the archive content to /opt.
 
@@ -66,7 +66,7 @@ t.b.d.
 Image recompilation for Avnet-S6LX9-AXI-tiny-13.2 (!!! ALPHA !!!):
 ------------------------------------------------------------------
 ptxdist platform configs/Avnet-S6LX9-AXI-tiny-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -74,7 +74,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-MMU-full-13.4:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-MMU-full-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -82,7 +82,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-MMU-full-13.3:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-MMU-full-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -90,7 +90,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-MMU-full-13.2:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-MMU-full-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -98,7 +98,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-AXI-full-13.4:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-AXI-full-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -106,7 +106,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-AXI-full-13.3:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-AXI-full-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -114,7 +114,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-AXI-full-13.2:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-AXI-full-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -122,7 +122,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-MMU-lite-13.4:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-MMU-lite-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -130,7 +130,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-MMU-lite-13.3:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-MMU-lite-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -138,7 +138,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-MMU-lite-13.2:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-MMU-lite-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -146,7 +146,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-AXI-lite-13.4:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-AXI-lite-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -154,7 +154,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-AXI-lite-13.3:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-AXI-lite-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -162,7 +162,7 @@ ptxdist images
 Image recompilation for Avnet-S6LX150T-AXI-lite-13.2:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-AXI-lite-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -170,7 +170,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-full-13.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -178,7 +178,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-full-13.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -186,7 +186,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-full-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -194,7 +194,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-AXI-full-13.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-AXI-full-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -202,7 +202,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-AXI-full-13.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-AXI-full-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -210,7 +210,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-AXI-full-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-AXI-full-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -218,7 +218,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-full-12.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-12.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -226,7 +226,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-full-12.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-12.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -234,7 +234,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-full-12.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-full-12.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -242,7 +242,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-lite-13.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -250,7 +250,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-lite-13.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -258,7 +258,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-lite-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -266,7 +266,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-AXI-lite-13.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-AXI-lite-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -274,7 +274,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-AXI-lite-13.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-AXI-lite-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -282,7 +282,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-AXI-lite-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-AXI-lite-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblazeel-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblazeel-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -290,7 +290,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-lite-12.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-12.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -298,7 +298,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-lite-12.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-12.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -306,7 +306,7 @@ ptxdist images
 Image recompilation for Xilinx-ML605-MMU-lite-12.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML605-MMU-lite-12.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -314,7 +314,7 @@ ptxdist images
 Image recompilation for Xilinx-ML505-MMU-full-13.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML505-MMU-full-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -322,7 +322,7 @@ ptxdist images
 Image recompilation for Xilinx-ML505-MMU-full-13.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML505-MMU-full-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -330,7 +330,7 @@ ptxdist images
 Image recompilation for Xilinx-ML505-MMU-full-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML505-MMU-full-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -338,7 +338,7 @@ ptxdist images
 Image recompilation for Xilinx-ML505-MMU-lite-13.4:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML505-MMU-lite-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -346,7 +346,7 @@ ptxdist images
 Image recompilation for Xilinx-ML505-MMU-lite-13.3:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML505-MMU-lite-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -354,7 +354,7 @@ ptxdist images
 Image recompilation for Xilinx-ML505-MMU-lite-13.2:
 ---------------------------------------------------
 ptxdist platform configs/Xilinx-ML505-MMU-lite-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -362,7 +362,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-13.3:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -370,7 +370,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-13.2:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -378,7 +378,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-12.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-12.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -386,7 +386,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-12.3:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-12.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -394,7 +394,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-12.2:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-12.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -402,7 +402,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-full-11.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-full-11.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -410,7 +410,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-13.3:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-13.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -418,7 +418,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-13.2:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-13.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -426,7 +426,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -434,7 +434,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.3:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.3/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -442,7 +442,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-12.2:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-12.2/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -450,7 +450,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-lite-11.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-lite-11.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
@@ -458,7 +458,7 @@ ptxdist images
 Image recompilation for Xilinx-SP3ADSP1800-MMU-qemu-13.4:
 ---------------------------------------------------------
 ptxdist platform configs/Xilinx-SP3ADSP1800-MMU-qemu-13.4/platformconfig
-ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.3/microblaze-xilinx-linux-gnu/bin
+ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
