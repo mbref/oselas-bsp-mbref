@@ -192,8 +192,6 @@
 			#gpio-cells = <2>;
 			compatible = "xlnx,axi-gpio-1.01.a", "xlnx,xps-gpio-1.00.a";
 			gpio-controller ;
-			interrupt-parent = <&axi_intc_0>;
-			interrupts = < 3 2 >;
 			reg = < 0x40000000 0x10000 >;
 			xlnx,all-inputs = <0x0>;
 			xlnx,all-inputs-2 = <0x0>;
