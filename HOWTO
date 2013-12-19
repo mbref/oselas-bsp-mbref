@@ -13,8 +13,26 @@
 BSP State
 =========
 
-	pre-alpha: nothing to talk
+	   ! ! !   P R O O F   O F   C O N C E P T   ! ! !
 
+Known Issues
+------------
+* U-Boot v2013.10 can not write SPI serial flash. Following
+  systems stays on U-Boot v2013.04:
+  - Avnet S6LX150T
+  - Avnet S6LX9
+* Avnet S6LX9 tiny system has an hand optimized device tree. The
+  FPGA hardware design has to fix.
+* Avnet S6LX9 and all Xilinx designs have an hand optimized gpio
+  base address to handle the reset line in U-Boot v2013.10. The
+  FPGA software designs have to fix.
+* Xilinx SP3ADSP1800 qemu system is incomplete an will never start
+  in a qemu system emulation.
+* There are known stack handling problems in the new gcc v4.8.1
+  with following reasons:
+  - Linux kernel can not compile with size optimization (-Os)
+    and hase to compile with optimization level 2 (-O2).
+  - The SYSACE driver in U-Boot have to be disabled.
 
 
 Use the Xilinx Microblaze Reference (mbref)

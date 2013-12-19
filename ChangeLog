@@ -1,6 +1,7 @@
 2013-12-19	Stephan Linz <linz@li-pro.net>
 
 	* common: HOWTO: add reference note to the right GNU toolchain
+	* common: HOWTO: add BSP status: known issues
 	* ptxconfig: prepare mbref-uio-trunk for kernel 3.8
 
 2013-12-17	Stephan Linz <linz@li-pro.net>
