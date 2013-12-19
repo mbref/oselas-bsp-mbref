@@ -1,4 +1,4 @@
-From 783388ade3fafbe05c77fccb3577941a12f0a6c2 Mon Sep 17 00:00:00 2001
+From 4839b36d8c6698091699499309da52ec7138fe50 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Mon, 25 Nov 2013 14:10:44 +0100
 Subject: [PATCH] microblaze: hotfix: disable systemace driver compilation
@@ -25,7 +25,7 @@ Signed-off-by: Stephan Linz <linz@li-pro.net>
  1 file changed, 11 insertions(+)
 
 diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
-index 15d8b6b..fae8590 100644
+index feb2a9e..201ff26 100644
 --- a/include/configs/microblaze-generic.h
 +++ b/include/configs/microblaze-generic.h
 @@ -11,6 +11,17 @@

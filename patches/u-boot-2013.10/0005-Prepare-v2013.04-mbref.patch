@@ -1,4 +1,4 @@
-From fd6b5998594d982a94dc6b6499ccb30436133c5d Mon Sep 17 00:00:00 2001
+From d0084bb991ecd41d6abc8f1756a28f5516655155 Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Fri, 28 Jun 2013 17:52:58 +0200
 Subject: [PATCH] Prepare v2013.04-mbref
@@ -23,10 +23,10 @@ index b98f15c..6784d38 100644
  U_BOOT_VERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
  else
 diff --git a/include/configs/microblaze-generic.h b/include/configs/microblaze-generic.h
-index de02141..15d8b6b 100644
+index bf5b7ca..feb2a9e 100644
 --- a/include/configs/microblaze-generic.h
 +++ b/include/configs/microblaze-generic.h
-@@ -378,7 +378,7 @@
+@@ -381,7 +381,7 @@
  #endif
  
  /* Miscellaneous configurable options */
