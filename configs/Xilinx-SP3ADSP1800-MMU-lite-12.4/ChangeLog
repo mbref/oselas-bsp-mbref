@@ -1,6 +1,7 @@
 2013-12-19	Stephan Linz <linz@li-pro.net>
 
 	* platform: upgrade to dtc-1.4.0
+	* platform: upgarde to latest linux-3.8.11 configuration
 
 2013-12-11	Stephan Linz <linz@li-pro.net>
 
