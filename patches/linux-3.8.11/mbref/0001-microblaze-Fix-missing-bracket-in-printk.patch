@@ -1,0 +1,42 @@
+From 8d12ee6825ee409608a367c97a7acc99d4fb271f Mon Sep 17 00:00:00 2001
+From: Michal Simek <michal.simek@xilinx.com>
+Date: Tue, 19 Nov 2013 14:27:33 +0100
+Subject: [PATCH] microblaze: Fix missing bracket in printk
+
+The error was introduced by the patch
+"microblaze: Fix coding style issues"
+(sha1: 6bd55f0bbaebb79b39e147aa864401fd0c94db82).
+
+Error message:
+arch/microblaze/kernel/setup.c: In function 'machine_early_init':
+arch/microblaze/kernel/setup.c:177:3: error: 'pr_cont'
+  undeclared (first use in this function)
+arch/microblaze/kernel/setup.c:177:3: note: each undeclared
+  identifier is reported only once for each function it appears in
+arch/microblaze/kernel/setup.c:177:10: error: expected ';'
+  before string constant
+arch/microblaze/kernel/setup.c:177:33: error: expected statement
+  before ')' token
+
+Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ arch/microblaze/kernel/setup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/microblaze/kernel/setup.c b/arch/microblaze/kernel/setup.c
+index 0263da7..71ab560 100644
+--- a/arch/microblaze/kernel/setup.c
++++ b/arch/microblaze/kernel/setup.c
+@@ -177,7 +177,7 @@ void __init machine_early_init(const char *cmdline, unsigned int ram,
+ #else
+ 	if (!msr) {
+ 		pr_info("!!!Your kernel not setup MSR instruction but ");
+-		pr_cont"CPU have it %x\n", msr);
++		pr_cont("CPU have it %x\n", msr);
+ 	}
+ #endif
+ 
+-- 
+1.8.3.4
+

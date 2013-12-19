@@ -1,4 +1,4 @@
-From b31df1f6c860ce06bae0cfb3cb137bb7a5fafec7 Mon Sep 17 00:00:00 2001
+From 575ed6fdffed6b55d85f8d3fb4ba46c9d4a6620b Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Fri, 14 Dec 2012 22:00:41 +0100
 Subject: [PATCH] i2c-xiic: merge in the PetaLogix driver

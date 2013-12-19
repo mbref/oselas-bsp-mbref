@@ -1,4 +1,4 @@
-From fa88eed5723526985ae141909ff232a1a4a59fa2 Mon Sep 17 00:00:00 2001
+From 9adac4976a326c0ed24b57047244d39dfc2cac3f Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Sat, 7 Dec 2013 12:49:13 +0100
 Subject: [PATCH] net: xilinx: ll_temac: access to NATIONAL DP83865 config

@@ -1,0 +1,77 @@
+From ff775c001ef6ae8593b60ff44f960964423991b8 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Mon, 16 Dec 2013 19:13:24 +0100
+Subject: [PATCH] gpio: xilinx: Fix integer pointer casting for ngpio.
+
+The integer value chip->mmchip.gc.ngpio is u16 but will cast
+explicitly to u32 integer pointer in of_property_read_u32()
+call. This may ends up in a wrong integer casting dependent
+on target endianess and/or a potential buffer overrun.
+
+On some systems error is:
+
+  gpiochip_add: gpios -1..-2 (/plb@0/gpio@80ff0000) failed to register
+  /plb@0/gpio@80ff0000: GPIO chip registration failed with status -28
+  /plb@0/gpio@80ff0000: error in probe function with status -28
+  xilinx-gpio: probe of 80ff0000.gpio failed with error -28
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ drivers/gpio/gpio-xilinx.c | 18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/gpio/gpio-xilinx.c b/drivers/gpio/gpio-xilinx.c
+index 566a306..1070214 100644
+--- a/drivers/gpio/gpio-xilinx.c
++++ b/drivers/gpio/gpio-xilinx.c
+@@ -53,6 +53,7 @@
+  * @mmchip: OF GPIO chip for memory mapped banks
+  * @gpio_state: GPIO state shadow register
+  * @gpio_dir: GPIO direction shadow register
++ * @gpio_width: GPIO width shadow register
+  * @offset: GPIO channel offset
+  * @irq_base: GPIO channel irq base address
+  * @irq_enable: GPIO irq enable/disable bitfield
+@@ -63,6 +64,7 @@ struct xgpio_instance {
+ 	struct of_mm_gpio_chip mmchip;
+ 	u32 gpio_state;
+ 	u32 gpio_dir;
++	u32 gpio_width;
+ 	u32 offset;
+ 	int irq_base;
+ 	u32 irq_enable;
+@@ -460,11 +462,11 @@ static int xgpio_of_probe(struct platform_device *pdev)
+ 	of_property_read_u32(np, "xlnx,tri-default", &chip->gpio_dir);
+ 
+ 	/* By default assume full GPIO controller */
+-	chip->mmchip.gc.ngpio = 32;
++	chip->gpio_width = 32;
+ 
+-	/* Check device node and parent device node for device width */
+-	of_property_read_u32(np, "xlnx,gpio-width",
+-			      (u32 *)&chip->mmchip.gc.ngpio);
++	/* Check device node for device width */
++	of_property_read_u32(np, "xlnx,gpio-width", &chip->gpio_width);
++	chip->mmchip.gc.ngpio = (u16)chip->gpio_width;
+ 
+ 	spin_lock_init(&chip->gpio_lock);
+ 
+@@ -513,11 +515,11 @@ static int xgpio_of_probe(struct platform_device *pdev)
+ 		of_property_read_u32(np, "xlnx,tri-default-2", &chip->gpio_dir);
+ 
+ 		/* By default assume full GPIO controller */
+-		chip->mmchip.gc.ngpio = 32;
++		chip->gpio_width = 32;
+ 
+-		/* Check device node and parent device node for device width */
+-		of_property_read_u32(np, "xlnx,gpio2-width",
+-				     (u32 *)&chip->mmchip.gc.ngpio);
++		/* Check device node for device width */
++		of_property_read_u32(np, "xlnx,gpio2-width", &chip->gpio_width);
++		chip->mmchip.gc.ngpio = (u16)chip->gpio_width;
+ 
+ 		spin_lock_init(&chip->gpio_lock);
+ 
+-- 
+1.8.3.4
+

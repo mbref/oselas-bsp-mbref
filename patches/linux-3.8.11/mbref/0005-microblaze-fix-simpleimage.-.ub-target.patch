@@ -1,4 +1,4 @@
-From feff26a3abd846d515a3b43c97e08557d136bb7c Mon Sep 17 00:00:00 2001
+From b35105d2ab3fb9b71ed32a12804044459a39600f Mon Sep 17 00:00:00 2001
 From: Stephan Linz <linz@li-pro.net>
 Date: Fri, 13 Dec 2013 12:24:39 +0100
 Subject: [PATCH] microblaze: fix simpleimage.%.ub target

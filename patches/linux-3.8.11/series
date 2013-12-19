@@ -42,7 +42,9 @@ petalinux-v2013.10/0027-microblaze-Calculate-kernel-pad-automatically.patch
 # git checkout devel/mbref/petalinux/v3.8.11
 # git format-patch -N -o .../patches/linux-3.8.11/mbref petalinux-v2013.10-final..
 #
-mbref/0001-uartlite-Make-the-number-of-UARTs-registered-configu.patch
-mbref/0002-i2c-xiic-merge-in-the-PetaLogix-driver.patch
-mbref/0003-net-xilinx-ll_temac-access-to-NATIONAL-DP83865-confi.patch
-mbref/0004-microblaze-fix-simpleimage.-.ub-target.patch
+mbref/0001-microblaze-Fix-missing-bracket-in-printk.patch
+mbref/0002-uartlite-Make-the-number-of-UARTs-registered-configu.patch
+mbref/0003-i2c-xiic-merge-in-the-PetaLogix-driver.patch
+mbref/0004-net-xilinx-ll_temac-access-to-NATIONAL-DP83865-confi.patch
+mbref/0005-microblaze-fix-simpleimage.-.ub-target.patch
+mbref/0006-gpio-xilinx-Fix-integer-pointer-casting-for-ngpio.patch
