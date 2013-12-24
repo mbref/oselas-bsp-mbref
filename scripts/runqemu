@@ -1,0 +1,216 @@
+#!/bin/bash
+
+myself=$0
+
+# empty array of files we have to remove on exit
+declare -a files_to_remove
+
+# default images you want to emulate
+qemu_dtb="xilinx.dtb"
+qemu_kernel="linuximage"
+
+# disable this, if you want to have some graphics output
+qemu_nographic="-nographic"
+
+# disable this, if you want to have reboot simulated
+qemu_noreboot="-no-reboot"
+
+#
+# 'user mode' network related settings
+#
+# platform_ip="10.0.2.7"
+platform_ip=""
+
+# the ports a 'ftpd' would connect to (in the emulated sysem)
+ftp_data_internal_port=20
+ftp_ctrl_internal_port=21
+# port QEMU opens at the host side to give access to the ${ftp_*_internal_port}
+ftp_data_external_port=4440
+ftp_ctrl_external_port=4441
+
+# the port a 'telnetd' would connect to (in the emulated sysem)
+telnet_internal_port=23
+# port QEMU opens at the host side to give access to the ${telnet_internal_port}
+telnet_external_port=4444
+
+# the ports a 'httpd' would connect to (in the emulated sysem)
+http_internal_port=80
+https_internal_port=443
+# port QEMU opens at the host side to give access to the ${http*_internal_port}
+http_external_port=5555
+https_external_port=5556
+
+
+while getopts ":hlu" opt; do
+	case $opt in
+		h)
+			echo "Emulate ptxdist project images in QEMU."
+			echo
+			echo "Usage: $(basename $0) [args...]"
+			echo
+			echo "   -h     show this short help message"
+			echo "   -l     emulate Linux kernel (default)"
+			echo "   -u     emulate U-Boot"
+			echo
+			exit 0
+			;;
+		l)
+			qemu_kernel="linuximage"
+			;;
+		u)
+			qemu_kernel="u-boot.elf"
+			;;
+		\?)
+			echo "$(basename $0) invalid option -$OPTARG" >&2
+			echo "„$(basename $0) -h“ shows more information" >&2
+			exit 1
+			;;
+	esac
+done
+
+ptxd_prompt=${PTXDIST_LOG_PROMPT:-"$(basename $myself): "}
+
+ptxd_info() {
+        echo "${ptxd_prompt}info: $1" >&2
+}
+
+ptxd_error() {
+        echo "${ptxd_prompt}error: $1" >&2
+}
+
+ptxd_wait() {
+        read -p "${ptxd_prompt}wait: ($1 seconds or press Enter to continue)" -st $1 >&2
+	echo >&2
+}
+
+ptxd_onexit() {
+	echo
+	for file in ${files_to_remove[@]}; do
+		ptxd_info "remove ${file}"
+		rm -f ${file}
+	done
+}
+
+#
+# extract board name from platform name
+#
+# ${1}	platform name, format: VENDOR-BOARD-BUS-SYSTYPE-VERS
+#
+ptxd_get_brdname() {
+	local ifsbak
+	local platform
+
+	platform="${1}"
+
+	ifsbak=$IFS
+	IFS=-
+	set - $platform
+
+	echo $2
+	IFS=$ifsbak
+}
+
+# regist signal handler
+trap ptxd_onexit EXIT
+
+if [ -x "$PTXDIST" ]; then
+
+	platform="$(ptxd_get_ptxconf PTXCONF_PLATFORM)"
+	platform_version="$(ptxd_get_ptxconf PTXCONF_PLATFORM_VERSION)"
+
+	ptxd_info
+	ptxd_info "Emulate $platform-$platform_version"
+	ptxd_info
+
+	boardname="$(ptxd_get_brdname ${platform,,})"
+	if [ "x$boardname" == "x" ]; then
+		ptxd_error "Can not extract board name, 2nd part of: ${platform,,}"
+		exit 1
+	fi
+
+	imagedir="$PTXDIST_PLATFORMDIR/images"
+	if [ ! -d "$imagedir" ]; then
+		ptxd_error "Missing platform image directory: ${imagedir##$PTXDIST_WORKSPACE/}"
+		exit 1
+	fi
+
+	board_lnkdir="$imagedir/$boardname"
+	ln -sf "$imagedir" "$board_lnkdir" && files_to_remove+=("$board_lnkdir")
+	if [ ! -L "$board_lnkdir" ]; then
+		ptxd_error "Can not create board directory link: ${board_lnkdir##$PTXDIST_WORKSPACE/}"
+		exit 1
+	fi
+
+	qemu_arch="$(ptxd_get_ptxconf PTXCONF_ARCH_STRING)"
+	case $qemu_arch in
+		microblaze)
+			if [ "x$(ptxd_get_ptxconf PTXCONF_ENDIAN_LITTLE)" != "x" ]; then
+				qemu_arch=${qemu_arch}el
+			fi
+			qemu_machine=microblaze-fdt
+			;;
+		*)
+			ptxd_error "Unsupported architecture: $qemu_arch"
+			exit 1
+			;;
+	esac
+
+	qemu_exec="$(which qemu-system-$qemu_arch)"
+	if [ "x$qemu_exec" == "x" ]; then
+		ptxd_error "Missing QEMU for system architecture: $qemu_arch"
+		exit 1
+	else
+		ptxd_info "Have QEMU for system architecture: $qemu_arch"
+		ptxd_info "Emulator: ${qemu_exec##$PTXDIST_WORKSPACE/}"
+	fi
+
+	qemu_tftpdir="$imagedir"
+	if [ ! -d "$qemu_tftpdir" ]; then
+		ptxd_error "Missing QEMU tftp directory: ${qemu_tftpdir##$PTXDIST_WORKSPACE/}"
+		exit 1
+	else
+		ptxd_info "TFTP dir: ${qemu_tftpdir##$PTXDIST_WORKSPACE/}"
+	fi
+
+	qemu_kernel="$imagedir/$qemu_kernel"
+	if [ ! -r $qemu_kernel -o ! -s $qemu_kernel ]; then
+		ptxd_error "Missing QEMU kernel image: ${qemu_kernel##$PTXDIST_WORKSPACE/}"
+		exit 1
+	else
+		ptxd_info "Kernel:   ${qemu_kernel##$PTXDIST_WORKSPACE/}"
+	fi
+
+	qemu_dtb="$imagedir/$qemu_dtb"
+	if [ ! -r $qemu_dtb -o ! -s $qemu_dtb ]; then
+		ptxd_error "Missing QEMU kernel image: ${qemu_dtb##$PTXDIST_WORKSPACE/}"
+		exit 1
+	else
+		ptxd_info "DTB:      ${qemu_dtb##$PTXDIST_WORKSPACE/}"
+	fi
+
+	ptxd_info
+	ptxd_info "************************************************************"
+	ptxd_info "***    To exit the emulator, press \"Ctrl+A\" then \"X\".    ***"
+	ptxd_info "************************************************************"
+	ptxd_wait 10
+
+	ptxd_eval $qemu_exec -M $qemu_machine $qemu_nographic $qemu_noreboot \
+		-serial mon:stdio \
+		-net nic,vlan=1 \
+		-net user,vlan=1,tftp=$qemu_tftpdir \
+		-redir tcp:${ftp_data_external_port}:${platform_ip}:${ftp_data_internal_port} \
+		-redir tcp:${ftp_ctrl_external_port}:${platform_ip}:${ftp_ctrl_internal_port} \
+		-redir tcp:${telnet_external_port}:${platform_ip}:${telnet_internal_port} \
+		-redir tcp:${http_external_port}:${platform_ip}:${http_internal_port} \
+		-redir tcp:${https_external_port}:${platform_ip}:${https_internal_port} \
+		-dtb $qemu_dtb \
+		-kernel $qemu_kernel
+
+else
+
+	ptxd_info "Start PTXdist environment:"
+	ptxdist bash $myself $*
+
+fi
+
+exit 0

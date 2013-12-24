@@ -89,6 +89,10 @@ ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
 
+optinal you can emulate with:
+./scripts/runqemu -l	# Linux kernel
+./scripts/runqemu -u	# U-Boot
+
 Image recompilation for Avnet-S6LX150T-MMU-full-13.4:
 -----------------------------------------------------
 ptxdist platform configs/Avnet-S6LX150T-MMU-full-13.4/platformconfig
