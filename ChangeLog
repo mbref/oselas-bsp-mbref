@@ -1,6 +1,7 @@
 2013-12-24	Stephan Linz <linz@li-pro.net>
 
 	* common: add basic Qemu support (build and start)
+	* common: HOWTO: add runqemu hint for Xilinx-SP3ADSP1800-MMU-qemu
 
 2013-12-21	Stephan Linz <linz@li-pro.net>
 

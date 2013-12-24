@@ -22,12 +22,10 @@ Known Issues
   - Avnet S6LX150T
   - Avnet S6LX9
 * Avnet S6LX9 tiny system has an hand optimized device tree. The
-  FPGA hardware design has to fix.
+  FPGA hardware design has to fix (remove gpio -> intctrl link).
 * Avnet S6LX9 and all Xilinx designs have an hand optimized gpio
   base address to handle the reset line in U-Boot v2013.10. The
   FPGA software designs have to fix.
-* Xilinx SP3ADSP1800 qemu system is incomplete an will never start
-  in a qemu system emulation.
 * There are known stack handling problems in the new gcc v4.8.1
   with following reasons:
   - Linux kernel can not compile with size optimization (-Os)
@@ -484,6 +482,10 @@ ptxdist toolchain /opt/tools-4.8.1-mb-ctng-v2.4/microblaze-xilinx-linux-gnu/bin
 ptxdist select configs/ptxconfig
 ptxdist collection configs/startup.collection
 ptxdist images
+
+optinal you can emulate with:
+./scripts/runqemu -l	# Linux kernel
+./scripts/runqemu -u	# U-Boot
 
 alternative configuration for PTXdist:
 --------------------------------------
