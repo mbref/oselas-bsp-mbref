@@ -1,0 +1,45 @@
+From 410e01a5ca935053abf2a0d48752b002354c7a88 Mon Sep 17 00:00:00 2001
+From: Stephan Linz <linz@li-pro.net>
+Date: Wed, 8 Jan 2014 15:46:30 +0100
+Subject: [PATCH] microblaze: hotfix: ensure reset line is inactive
+
+Default hardware design rule for proc_sys_reset is
+C_AUX_RESET_HIGH == 1 --> high active reset line
+triggerd by given gpio port.
+
+Signed-off-by: Stephan Linz <linz@li-pro.net>
+---
+ board/xilinx/microblaze-generic/microblaze-generic.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/board/xilinx/microblaze-generic/microblaze-generic.c b/board/xilinx/microblaze-generic/microblaze-generic.c
+index 70f94c1..cc56d7e 100644
+--- a/board/xilinx/microblaze-generic/microblaze-generic.c
++++ b/board/xilinx/microblaze-generic/microblaze-generic.c
+@@ -35,8 +35,9 @@
+ int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ {
+ #ifdef CONFIG_SYS_GPIO_0
++	/* trigger (high active) reset line on given gpio port */
+ 	*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)) =
+-	    ++(*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)));
++	    ~(*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)));
+ #endif
+ #ifdef CONFIG_SYS_RESET_ADDRESS
+ 	puts ("Reseting board\n");
+@@ -48,7 +49,11 @@ int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ int gpio_init (void)
+ {
+ #ifdef CONFIG_SYS_GPIO_0
+-	*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)) = 0xFFFFFFFF;
++	/*
++	 * ensure reset line is inactive (default hardware design rule
++	 * for proc_sys_reset is C_AUX_RESET_HIGH == 1 --> high active)
++	 */
++	*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)) = 0;
+ #endif
+ 	return 0;
+ }
+-- 
+1.8.3.4
+

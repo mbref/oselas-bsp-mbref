@@ -1,6 +1,7 @@
 2014-01-08	Stephan Linz <linz@li-pro.net>
 
 	* ptxconfig: update version to v2014.03
+	* common: adapt latest patch sets to u-boot-2013.04
 
 2013-12-24	Stephan Linz <linz@li-pro.net>
 
