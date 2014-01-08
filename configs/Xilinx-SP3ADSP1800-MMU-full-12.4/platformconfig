@@ -19,7 +19,7 @@ PTXCONF__platformconfig_MAGIC__=y
 # ------------------------------------
 #
 PTXCONF_PLATFORM="Xilinx-SP3ADSP1800-MMU-full-12.4"
-PTXCONF_PLATFORM_VERSION="2013.12"
+PTXCONF_PLATFORM_VERSION="2014.03"
 
 #
 # architecture                  

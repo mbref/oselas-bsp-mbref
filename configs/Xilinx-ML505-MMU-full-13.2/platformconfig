@@ -19,7 +19,7 @@ PTXCONF__platformconfig_MAGIC__=y
 # ------------------------------------
 #
 PTXCONF_PLATFORM="Xilinx-ML505-MMU-full-13.2"
-PTXCONF_PLATFORM_VERSION="2013.12"
+PTXCONF_PLATFORM_VERSION="2014.03"
 
 #
 # architecture                  
