@@ -31,7 +31,7 @@ PTXCONF_MBREF_UIO=m
 #
 PTXCONF_PROJECT_VENDOR="Li-Pro.Net"
 PTXCONF_PROJECT="OSELAS.BSP-Xilinx-Microblaze-Reference"
-PTXCONF_PROJECT_VERSION="-2013.12"
+PTXCONF_PROJECT_VERSION="-2014.03"
 
 #
 # ------------------------------------
